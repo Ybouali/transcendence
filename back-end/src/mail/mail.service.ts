@@ -8,6 +8,7 @@ export class MailService {
     async sendEmailConfirmation(userId: string, name: string, email: string) {
         const url = `http://test.com/${userId}`;
 
+        console.log('Sent email confirmation 1');
         await this.mailerService.sendMail({
             to: email,
             subject: 'Welcome to Nice App! Confirm your Email',
@@ -17,5 +18,6 @@ export class MailService {
                 url
             }
         })
+        console.log('Sent email confirmation 2');
     }
 }

@@ -10,22 +10,28 @@ export class AuthService {
 
     async signupWithEmail (dto: AuthDto) {
 
-        // store the user into db
-        const user = await this.prisma.user.create({
-            data: {
-                username: dto.username,
-                email: dto.email,
-                verifiedEmail: false,
-                password: dto.password,
-                avatarUrl: 'https://pics.freeicons.io/uploads/icons/png/16671574911586787867-512.png',
-                Status: true,
-                twoFactor: false
-            }
-        });
-
         // send the email to validate the email address
         try {
+            // store the user into db
+            const user = await this.prisma.user.create({
+                data: {
+                    username: dto.username,
+                    email: dto.email,
+                    verifiedEmail: false,
+                    password: dto.password,
+                    avatarUrl: 'https://pics.freeicons.io/uploads/icons/png/16671574911586787867-512.png',
+                    Status: true,
+                    twoFactor: false
+                }
+            });
+
+            console.log('hello from 1');
+
             await this.mailService.sendEmailConfirmation(user.id, user.username, user.email);
+            
+            console.log('hello from 2');
+
+            return user;
         } catch (error) {
             console.log(error)
             throw new NotAcceptableException();
@@ -33,7 +39,7 @@ export class AuthService {
 
         
 
-        return user;
+        return 'error';
     }
 
     // signin (dto: AuthDto) {}
