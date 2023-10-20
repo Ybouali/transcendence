@@ -19,7 +19,7 @@ model User {
   verifiedEmail Boolean
   password      String
   avatarUrl     String
-  Status        Boolean
+  Status        Boolean // offline / online
   twoFactor     Boolean
 }
 
