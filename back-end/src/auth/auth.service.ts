@@ -15,10 +15,10 @@ export class AuthService {
         try {
 
             // Hash the password
-            const hash = await argon2.hash(dto.password);
+            const hash: string = await argon2.hash(dto.password);
             
             // generate a name from the email address 
-            const name = dto.email.split('@')[0];
+            let name: string = dto.email.split('@')[0];
 
             // store the user into db
             const user = await this.prisma.user.create({
@@ -65,7 +65,7 @@ export class AuthService {
         }
     }
 
-    signToken(userId: string, email: string, username: string) {
+    async signToken(userId: string, email: string, username: string): Promise < { access_token: string } > {
 
         const payload = {
             sub: userId,
@@ -75,11 +75,11 @@ export class AuthService {
 
         const secret = this.config.get('JWT_SECRET_KEY');
 
-        const token = this.jwt.signAsync(payload, {
-            expiresIn: '60m',
+        const token = await this.jwt.signAsync(payload, {
+            expiresIn: '15m',
             secret
         })
 
-        return { access_token: token, };
+        return { access_token: token };
     }
 }
