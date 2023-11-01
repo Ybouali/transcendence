@@ -1,16 +1,22 @@
+import { User } from '@prisma/client';
 import { UserService } from './user.service';
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { GetUser } from 'src/decorators';
 
+@UseGuards(JwtGuard)
 @Controller('users')
 export class UserController {
 
     constructor(private userService: UserService) { }
 
-    @UseGuards(JwtGuard)
     @Get('/me')
-    async getMe(@Req() req: Request) {
-        return req.user;
+    async getMe(@GetUser() user: User) {
+        return user;
+    }
+
+    @Get('/validate')
+    async getQRcode(@GetUser() user: User) {
+        return this.userService.getQRcode(user);
     }
 }
