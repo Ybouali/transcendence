@@ -11,13 +11,67 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  username  String   @unique
-  email     String   @unique
-  password  String
-  avatarUrl String
-  Status    Boolean
-  twoFactor Boolean
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  username      String   @unique
+  email         String   @unique
+  verifiedEmail Boolean
+  password      String
+  avatarUrl     String
+  Status        Boolean // offline / online
+  twoFactor     Boolean
+
+  historyGames1 HistoryGame[] @relation("user1")
+  historyGames2 HistoryGame[] @relation("user2")
+  winnerGames   HistoryGame[] @relation("winner")
+
+  stats         Stats?
+}
+
+model Stats {
+  statsId       String      @id @default(cuid())
+  wins          Int
+  loses         Int
+  userId        String      @unique
+  User          User        @relation(fields: [userId], references: [id])
+}
+
+model HistoryGame {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  userId1       String
+  userId2       String
+  winnerId      String
+  startTimeGame DateTime
+  endTimeGame   DateTime
+  scoreUser1    Int
+  scoreUser2    Int
+
+  // Define the relation with User
+  user1        User @relation("user1", fields: [userId1], references: [id])
+  user2        User @relation("user2", fields: [userId2], references: [id])
+  winner       User @relation("winner", fields: [winnerId], references: [id])
+}
+
+model blockedUser {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  blockedUser String
+}
+
+model friendShip {
+  id                 String   @id @default(cuid())
+  createdAt          DateTime @default(now())
+  sendFriendshipUser String
+  requestedUser      String
+  status             String
+}
+
+model directMessage {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  sendByUser String
+  sendToUser String
+  message    String
 }
