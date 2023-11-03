@@ -10,6 +10,7 @@ CREATE TABLE "User" (
     "avatarUrl" TEXT NOT NULL,
     "Status" BOOLEAN NOT NULL,
     "twoFactor" BOOLEAN NOT NULL,
+    "pathQrcodeTowFactor" TEXT NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -65,3 +66,6 @@ CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_pathQrcodeTowFactor_key" ON "User"("pathQrcodeTowFactor");

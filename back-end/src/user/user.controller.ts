@@ -14,9 +14,4 @@ export class UserController {
     async getMe(@GetUser() user: User) {
         return user;
     }
-
-    @Get('/validate')
-    async getQRcode(@GetUser() user: User) {
-        return this.userService.getQRcode(user);
-    }
 }

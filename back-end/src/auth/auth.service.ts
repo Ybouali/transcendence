@@ -8,7 +8,11 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class AuthService {
 
-    constructor(private prisma: PrismaService, private jwt: JwtService, private config: ConfigService) {}
+    constructor(
+        private prisma: PrismaService,
+        private jwt: JwtService,
+        private config: ConfigService
+    ) {}
 
     async signup (dto: AuthDto) {
 
@@ -27,9 +31,11 @@ export class AuthService {
                     email: dto.email,
                     verifiedEmail: false,
                     password: hash,
-                    avatarUrl: 'https://pics.freeicons.io/uploads/icons/png/16671574911586787867-512.png',
+                    avatarUrl: 'defaultAvatar.png',
                     Status: true,
-                    twoFactor: false
+                    twoFactor: false,
+                    pathQrcodeTowFactor: '/',
+                    towFactorSecret: '/',
                 }
             });
             

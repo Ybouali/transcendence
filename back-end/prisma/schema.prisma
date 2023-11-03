@@ -22,6 +22,7 @@ model User {
   Status              Boolean // offline / online
   twoFactor           Boolean
   pathQrcodeTowFactor String
+  towFactorSecret     String
 }
 
 model HistoryGame {
