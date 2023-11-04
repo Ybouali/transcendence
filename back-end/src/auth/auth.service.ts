@@ -34,7 +34,7 @@ export class AuthService {
                     avatarUrl: 'defaultAvatar.png',
                     Status: true,
                     twoFactor: false,
-                    pathQrcodeTowFactor: '/',
+                    qrCodeFileName: '/',
                     towFactorSecret: '/',
                 }
             });

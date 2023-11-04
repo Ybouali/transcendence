@@ -1,4 +1,5 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards, Res, Post, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { Response }  from 'express'
 import { User } from '@prisma/client';
 import { GetUser } from 'src/decorators';
 import { TowFactorAuthService } from './tow-factor-auth.service';
@@ -11,7 +12,13 @@ export class TowFactorAuthController {
     constructor(private towFactorAuthService: TowFactorAuthService) { }
 
     @Get('/validated')
-    async validate(@GetUser() user: User) {
-        return this.towFactorAuthService.validate(user);
+    async validate(@GetUser() user: User, @Res() res: Response) {
+        return this.towFactorAuthService.validate(user, res);
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Post('/confirm/:code')
+    async confirm(@GetUser() user: User, @Param('code') code: string) {
+        return this.towFactorAuthService.confirm(user, code);
     }
 }

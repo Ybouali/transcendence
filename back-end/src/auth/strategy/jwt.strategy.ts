@@ -6,6 +6,7 @@ import { Strategy, ExtractJwt } from 'passport-jwt'
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
+    
     constructor(
         private config: ConfigService,
         private prismaService: PrismaService
