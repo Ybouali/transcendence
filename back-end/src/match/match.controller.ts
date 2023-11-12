@@ -19,6 +19,11 @@ export class MatchController {
         return this.matchService.getHistoryAllGames(id);
     }
 
+    @Get('profile/:id')
+    getUserRankingAndWins(@Param('id') id: string) {
+        return this.matchService.getUserRankingAndWins(id);
+    }
+
     @Post()
     @UsePipes(ValidationPipe)
     addHistoryGame(@Body() createMatchDto : CreateMatchDto) {

@@ -1,14 +1,14 @@
 /* eslint-disable prettier/prettier */
 
-import { IsDateString, IsNumber, IsUUID } from "class-validator";
+import { IsDateString, IsNumber } from "class-validator";
 
 
 export class CreateMatchDto {
-    @IsUUID()
+    // @IsUUID()
     userId1: string;
-    @IsUUID()
+    // @IsUUID()
     userId2: string;
-    @IsUUID()
+    // @IsUUID()
     winnerId: string;
     @IsDateString()
     startTimeGame: string;

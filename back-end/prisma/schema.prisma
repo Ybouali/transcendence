@@ -27,6 +27,18 @@ model User {
   winnerGames   HistoryGame[] @relation("winner")
 
   stats         Stats?
+  sentMessages     DirectMessage[] @relation("SentMessages")
+  receivedMessages DirectMessage[] @relation("ReceivedMessages")
+}
+
+model DirectMessage {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  message   String
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiver  User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  senderId  String
+  receiverId String
 }
 
 model Stats {
@@ -68,10 +80,4 @@ model friendShip {
   status             String
 }
 
-model directMessage {
-  id         String   @id @default(cuid())
-  createdAt  DateTime @default(now())
-  sendByUser String
-  sendToUser String
-  message    String
-}
+
