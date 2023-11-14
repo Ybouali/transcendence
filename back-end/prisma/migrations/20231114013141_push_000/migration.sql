@@ -7,10 +7,13 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "verifiedEmail" BOOLEAN NOT NULL,
     "password" TEXT NOT NULL,
-    "avatarUrl" TEXT NOT NULL,
-    "Status" BOOLEAN NOT NULL,
-    "twoFactor" BOOLEAN NOT NULL,
-    "pathQrcodeTowFactor" TEXT NOT NULL,
+    "avatarName" TEXT NOT NULL,
+    "isOnLine" BOOLEAN NOT NULL,
+    "accessToken" TEXT NOT NULL,
+    "refreshToken" TEXT NOT NULL,
+    "twoFactor" BOOLEAN,
+    "qrCodeFileName" TEXT,
+    "towFactorSecret" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -66,6 +69,3 @@ CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_pathQrcodeTowFactor_key" ON "User"("pathQrcodeTowFactor");

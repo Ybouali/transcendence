@@ -3,6 +3,7 @@ import {
   InternalServerErrorException,
   NotAcceptableException,
   NotFoundException,
+  Req,
   Res,
   UploadedFile,
 } from '@nestjs/common';
@@ -81,5 +82,11 @@ export class UserService {
     } catch (error) {
       throw new NotFoundException();
     }
+  }
+
+  async getRefreshToken(@Req() req?: Request): Promise<string> {
+    const refresh_token = req.headers['refresh_token'].trim();
+
+    return refresh_token;
   }
 }

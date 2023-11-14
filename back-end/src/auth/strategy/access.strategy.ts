@@ -4,18 +4,20 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Request } from 'express';
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import { EncryptionService } from 'src/encryption/encryption.service';
 
 @Injectable()
-export class AccessStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class AccessStrategy extends PassportStrategy(Strategy, 'access') {
   constructor(
     private config: ConfigService,
     private prisma: PrismaService,
+    private encrypt: EncryptionService,
   ) {
     const secretOrKey: string = config.get('SECRET_JWT_TOKEN');
     super({
-      jwtFromRequest: ExtractJwt.fromHeader('refresh_token'),
+      jwtFromRequest: ExtractJwt.fromHeader('access_token'),
       secretOrKey,
-      passReqCallback: true,
+      passReqToCallback: true,
     });
   }
 
@@ -36,8 +38,11 @@ export class AccessStrategy extends PassportStrategy(Strategy, 'jwt') {
     // if the user is not found
     if (!user) throw new ForbiddenException('Access denied');
 
-    // make sure the token owned by the user
-    if (user.accessToken !== access_token)
+    // extract the access token from the user
+    const accessToken: string = await this.encrypt.decrypt(user.accessToken);
+
+    // check if the refresh token is matched against the refresh token that comes from request
+    if (accessToken !== access_token)
       throw new ForbiddenException('Access denied');
 
     return user;

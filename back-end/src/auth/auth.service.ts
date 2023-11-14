@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotAcceptableException,
 } from '@nestjs/common';
 import { AuthDto } from './dto';
@@ -8,23 +9,24 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Tokens } from './types';
+import { Tokens } from 'src/types';
 import { GetUser } from 'src/decorators';
 import { User } from '@prisma/client';
+import { EncryptionService } from 'src/encryption/encryption.service';
 
 @Injectable()
 export class AuthService {
+  private logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
+    private encript: EncryptionService,
   ) {}
 
   async signup(dto: AuthDto): Promise<Tokens> {
     try {
-      console.log({
-        dto,
-      });
       // Hash the password
       const hash: string = await argon2.hash(dto.password);
 
@@ -40,28 +42,21 @@ export class AuthService {
           password: hash,
           avatarName: 'defaultAvatar.png',
           isOnLine: true,
-        },
-        select: {
-          id: true,
-          email: true,
+          accessToken: 'token',
+          refreshToken: 'token',
         },
       });
 
+      // generate the tokens and store the email address and username in the jwt token
       const tokens: Tokens = await this.generateTokens(user.id, user.email);
 
-      // ! NOTE: this code dose not work ,
-      // store Or update the user tokens
-      const newUser = await this.prisma.user.update({
-        where: { id: user.id },
-        data: {
-          accessToken: tokens.access_token,
-          refreshToken: tokens.refresh_token,
-        },
-        select: {},
-      });
+      const hashAT: string = await this.encript.encrypt(tokens.access_token);
 
-      console.log({
-        newUser,
+      const hashRT: string = await this.encript.encrypt(tokens.refresh_token);
+
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { accessToken: hashAT, refreshToken: hashRT },
       });
 
       // return the token for a signed up user
@@ -76,36 +71,21 @@ export class AuthService {
 
   async refreshToken(@GetUser() user: User): Promise<{ access_token: string }> {
     const access_token: string = await this.generateJwtToken(
-      user.id,
+      user.username,
       user.email,
       60 * 5,
     );
 
+    const hashAT: string = await this.encript.encrypt(access_token);
+
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { accessToken: access_token },
+      data: { accessToken: hashAT, isOnLine: true },
     });
 
     return {
       access_token,
     };
-  }
-
-  async generateTokens(userId: string, email: string): Promise<Tokens> {
-    try {
-      // generate the tokens for the user
-      const [at, rt] = await Promise.all([
-        this.generateJwtToken(userId, email, 60 * 5),
-        this.generateJwtToken(userId, email, 60 * 60 * 24 * 7),
-      ]);
-
-      return {
-        access_token: at,
-        refresh_token: rt,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
   }
 
   async signin(dto: AuthDto) {
@@ -122,15 +102,54 @@ export class AuthService {
         throw new NotAcceptableException();
       }
 
-      return await this.generateTokens(user.id, user.email);
+      // get tokens for the login user
+      const tokens: Tokens = await this.generateTokens(
+        user.username,
+        user.email,
+      );
+
+      // hash the tokens
+
+      const hashAT: string = await argon2.hash(tokens.access_token);
+
+      const hashRT: string = await argon2.hash(tokens.refresh_token);
+
+      this.logger.log(
+        `A Fin a ba ${user.username}, a mrahba bik a moulay o hawl 3la server rah 3la 9ad lhal HHHHHHHHHHHHH`,
+      );
+
+      // update the user . store the tokens in the database
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { accessToken: hashAT, refreshToken: hashRT },
+      });
+
+      return tokens;
     } catch (error) {
       throw new NotAcceptableException();
     }
   }
 
+  async generateTokens(username: string, email: string): Promise<Tokens> {
+    try {
+      // generate the tokens for the user
+      const [at, rt] = await Promise.all([
+        this.generateJwtToken(username, email, 60 * 5),
+        this.generateJwtToken(username, email, 60 * 60 * 24 * 7),
+      ]);
+
+      return {
+        access_token: at,
+        refresh_token: rt,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
   // generate the JWT token
   async generateJwtToken(
-    userId: string,
+    username: string,
     email: string,
     expiresIn: number,
   ): Promise<string> {
@@ -138,7 +157,7 @@ export class AuthService {
 
     const token = this.jwt.sign(
       {
-        sub: userId,
+        sub: username,
         email,
       },
       {

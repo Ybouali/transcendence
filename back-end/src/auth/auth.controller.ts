@@ -10,11 +10,11 @@ import {
 } from '@nestjs/common';
 import { AuthDto } from './dto';
 import { AuthService } from './auth.service';
-import { Tokens } from './types';
 import { Response } from 'express';
 import { GetUser } from 'src/decorators';
 import { User } from '@prisma/client';
 import { LoginGuard } from './guard';
+import { Tokens } from 'src/types';
 
 @Controller('auth')
 export class AuthController {
@@ -23,11 +23,10 @@ export class AuthController {
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('signup')
   async signup(@Body() dto: AuthDto, @Res() res: Response) {
+    // get the tokens from the auth service
     const tokens: Tokens = await this.authService.signup(dto);
 
-    console.log({
-      tokens,
-    });
+    // set the tokens in the header of the response
 
     res.setHeader('access_token', tokens.access_token);
 
@@ -41,7 +40,11 @@ export class AuthController {
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('signin')
   async signin(@Body() dto: AuthDto, @Res() res: Response) {
+    // get the tokens from the auth service
+
     const tokens: Tokens = await this.authService.signin(dto);
+
+    // set the tokens in the header of the response
 
     res.setHeader('access_token', tokens.access_token);
 

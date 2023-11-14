@@ -1,10 +1,17 @@
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import { PrismaService } from './prisma/prisma.service';
 import { Interval } from '@nestjs/schedule';
+import { EncryptionService } from './encryption/encryption.service';
+import * as jwt from 'jsonwebtoken';
+import { Jwts } from './types';
 
 @Injectable()
 export class AppService {
@@ -14,6 +21,7 @@ export class AppService {
     private config: ConfigService,
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private encrypt: EncryptionService,
   ) {}
 
   init_server(): void {
@@ -52,43 +60,99 @@ export class AppService {
   @Interval(5000)
   async onlineOffLineUsers() {
     // Get all the users
-    let users: User[] = await this.prisma.user.findMany();
+    let users: User[] = await this.getUsers();
 
     if (users) {
       // loop through all the users
       for (let user of users) {
         try {
-          // if the throw exeption so the user is offLine
-          this.jwtService.verify(user.refreshToken);
+          // get the jwt token from the user
+          const tokenToVerify: string = await this.encrypt.decrypt(
+            user.refreshToken,
+          );
+
+          // if the throw exeption so the user should be signed again
+          if (this.verifyJwtToken(tokenToVerify)) {
+            // update the user
+            await this.prisma.user.update({
+              where: { id: user.id },
+              data: {
+                isOnLine: false,
+                accessToken: 'offline',
+                refreshToken: 'logout',
+              },
+            });
+
+            // log the user that the server forced to loged out
+            this.logger.log(`User ${user.email} Is logged out `);
+          }
         } catch (error) {
-          await this.prisma.user.update({
-            where: { id: user.id },
-            data: {
-              isOnLine: false,
-              accessToken: null,
-            },
-          });
+          throw new InternalServerErrorException();
         }
       }
     }
+
+    users = await this.getUsers();
 
     if (users) {
       // loop through all the users
       for (let user of users) {
         try {
-          // if the throw exeption so the user should login again
-          this.jwtService.verify(user.accessToken);
-        } catch (error) {
-          this.logger.log(`User ${user.email} Is logged Out `);
+          // get the jwt token from the user
+          const tokenToVerify: string = await this.encrypt.decrypt(
+            user.accessToken,
+          );
 
-          await this.prisma.user.update({
-            where: { id: user.id },
-            data: {
-              refreshToken: null,
-            },
-          });
+          // if the throw exeption so the user should be signed again
+          if (this.verifyJwtToken(tokenToVerify)) {
+            // update the user
+            await this.prisma.user.update({
+              where: { id: user.id },
+              data: {
+                isOnLine: false,
+                accessToken: 'offline',
+              },
+            });
+
+            // log the user that the server forced to refresh the asscess token
+            this.logger.log(`User ${user.email} Is Off Line `);
+          }
+        } catch (error) {
+          throw new InternalServerErrorException();
         }
       }
     }
+  }
+
+  verifyJwtToken(tokenToVerify: string) {
+    try {
+      // get the secret from the config service
+      const secret = this.config.get('SECRET_JWT_TOKEN');
+
+      // decode the token
+      const tokenDecoded: Jwts = jwt.decode(tokenToVerify, secret) as Jwts;
+
+      // check the expiration date of the token
+
+      // get the current date
+      // divide by 1000 to convert to seconds
+      const dateNow: number = Math.floor(Date.now() / 1000);
+
+      // check expiration
+      if (dateNow > tokenDecoded.exp) return true;
+      return false;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getUsers(): Promise<User[]> {
+    const users: User[] = await this.prisma.user.findMany({
+      where: {
+        NOT: [{ refreshToken: 'logout' }, { accessToken: 'offline' }],
+      },
+    });
+
+    return users;
   }
 }

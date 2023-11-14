@@ -8,6 +8,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { TowFactorAuthModule } from './tow-factor-auth/tow-factor-auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EncryptionService } from './encryption/encryption.service';
+import { EncryptionModule } from './encryption/encryption.module';
 
 @Module({
   imports: [
@@ -19,9 +21,10 @@ import { ScheduleModule } from '@nestjs/schedule';
       isGlobal: true,
     }),
     TowFactorAuthModule,
+    EncryptionModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JwtService],
+  providers: [AppService, JwtService, EncryptionService],
 })
 export class AppModule implements OnApplicationBootstrap {
   constructor(private appService: AppService) {}

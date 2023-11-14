@@ -20,11 +20,11 @@ model User {
   password        String
   avatarName      String
   isOnLine        Boolean
+  accessToken     String
+  refreshToken    String
   twoFactor       Boolean?
   qrCodeFileName  String?
   towFactorSecret String?
-  accessToken     String?
-  refreshToken    String?
 }
 
 model HistoryGame {
