@@ -5,11 +5,13 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { MatchModule } from './match/match.module';
 import { ConfigModule } from '@nestjs/config';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
     PrismaModule,
     MatchModule,
+    ChatModule,
     ConfigModule.forRoot({
       isGlobal: true
     }),
