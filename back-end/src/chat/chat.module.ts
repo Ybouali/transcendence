@@ -4,10 +4,12 @@ import { ChatService } from "./chat.service";
 import { ChatGateway } from "./chat.gateway";
 import { MessagesService } from "./DirectMessages/messages.service";
 import { MessagesModule } from "./DirectMessages/messages.module";
+import { RoomsModule } from "./rooms/rooms.module";
+import { RoomsService } from "./rooms/rooms.service";
 
 
 @Module({
-    imports: [MessagesModule],
-    providers: [ChatService, ChatGateway, MessagesService],
+    imports: [MessagesModule, RoomsModule],
+    providers: [ChatService, ChatGateway, MessagesService, RoomsService],
 })
 export class ChatModule {}

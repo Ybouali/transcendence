@@ -1,12 +1,14 @@
 /* eslint-disable prettier/prettier */
 import { Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
-import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { CreateMessageDto } from './DirectMessages/dto/create-message.dto';
 import { MessagesService } from './DirectMessages/messages.service';
 import { ChatService } from './chat.service';
 import { SharedService } from './shared/shared.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateRoomDto } from './rooms/dto/create-room.dto';
+import { RoomsService } from './rooms/rooms.service';
 
 @WebSocketGateway({
     cors: { origin: '*' },
@@ -19,6 +21,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor (
         private messageService: MessagesService,
         private chatService: ChatService,
+        private roomsService: RoomsService,
         private prisma: PrismaService,
     ) {}
 
@@ -38,26 +41,77 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.logger.debug('onConnection: ', client.id);
     }
 
-    @SubscribeMessage('sendMessage')
+    @SubscribeMessage('sendMESSAGE')
     async createMessage(client: Socket, createMessageDto: CreateMessageDto) {
+        try 
+        {
             // [test]
             const userId = client.handshake.headers.authorization;
 
             if (userId !== createMessageDto.senderId || createMessageDto.message.length > 150) return;
             if (createMessageDto.isRoom === false) {
-                const isBlocked = await this.messageService.isBlocked(createMessageDto.receiverId, createMessageDto.senderId);
-                if (isBlocked) {
-                    this.server.to(client.id).emit('newMessage', { code: 404, message: 'The receiver has blocked you.' });
-                    return;
+                    const isBlocked = await this.messageService.isBlocked(createMessageDto.receiverId, createMessageDto.senderId);
+                    if (isBlocked) {
+                        this.server.to(client.id).emit('newMESSAGE', { code: 404, message: 'The receiver has blocked you.' });
+                        return;
+                    }
+                    await this.messageService.createMessage(createMessageDto);
+                    const recvSockets = SharedService.UsersSockets.get( createMessageDto.receiverId );
+                    let destUserSockets = [ ...SharedService.UsersSockets.get(createMessageDto.senderId), ];
+                    if (recvSockets)
+                        destUserSockets = [...destUserSockets, ...recvSockets];
+                    destUserSockets.forEach((socket) => {
+                    this.server.to(socket).emit('newMESSAGE', { code: 200, ...createMessageDto });
+                });
+            }
+        }
+        catch (error){
+            // [test]
+            this.logger.error('failure in message creation');
+            this.server.to(client.id).emit('newMessage', { code: 500, message: 'server: there is an error.' });
+        }
+    }
+
+    @SubscribeMessage('createROOM')
+    async createRoom ( @ConnectedSocket() client: Socket, @MessageBody() createRoom: CreateRoomDto) {
+            try {            
+                let newRoom;
+                const roomType = (createRoom.roomType === 'Private' ? 'Private' : 'Public');
+                if (createRoom.isProtected){
+                    // hash the Password
+                } else {
+                    newRoom = await this.roomsService.createRoom({...createRoom, roomType});
                 }
-                await this.messageService.createMessage(createMessageDto);
-                const recvSockets = SharedService.UsersSockets.get( createMessageDto.receiverId );
-                let destUserSockets = [ ...SharedService.UsersSockets.get(createMessageDto.senderId), ];
-                if (recvSockets)
-                    destUserSockets = [...destUserSockets, ...recvSockets];
-                destUserSockets.forEach((socket) => {
-                this.server.to(socket).emit('newMessage', { code: 200, ...createMessageDto });
-            });
+                if (newRoom) {
+                    await this.roomsService.addUserToRoom(newRoom.id, createRoom.ownerID);  // Add owner to Members table
+                    await this.roomsService.addUserAsAdmin(newRoom.id, createRoom.ownerID); // Add owner to Admins table
+                    client.join(newRoom.id);
+                    this.server.emit('roomsUPDATED');
+                } else {
+                    client.emit('roomERROR', { message: 'Failed to create room' });
+                }
+            } catch (error) {
+                client.emit('roomERROR', { message: 'Failed to create room' });
+            }
+    }
+
+    @SubscribeMessage('joinROOM')
+    async joinRoom(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() newMember: { userId: string; roomId: string }
+    ) {
+        try {
+            const room = await this.roomsService.findRoomById(newMember.roomId);
+            if (!room) {
+                throw new Error('Room not found');
+            }
+            client.join(newMember.roomId);
+            await this.roomsService.addUserToRoom(newMember.roomId, newMember.userId);
+            const memberSockets = SharedService.UsersSockets.get(newMember.userId);
+            memberSockets?.forEach((socket) => { this.server.to(socket).emit('roomsUPDATED'); });
+        } catch (error) {
+            console.error('Error joining room:', error.message);
+            client.emit('roomERROR', { message: error.message });
         }
     }
 }
