@@ -114,4 +114,34 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             client.emit('roomERROR', { message: error.message });
         }
     }
+
+    @SubscribeMessage('setPASSWORD')
+    async setPassword(
+        @MessageBody() room: { adminId: string; roomId: string; password: string },
+    ) {
+        const findRoom = await this.roomsService.findRoomById(room.roomId);
+        if (findRoom.ownerID === room.adminId) {
+            await this.roomsService.updateRoomPassword(
+                room.roomId,
+                room.password,
+            );
+            this.server.emit('roomsUPDATED');
+        }
+    }
+
+    @SubscribeMessage('removePASSWORD')
+    async removePassword(
+        @MessageBody() room: { adminId: string; roomId: string },
+    ) {
+        const findRoom = await this.roomsService.findRoomById(room.roomId);
+        if (findRoom.ownerID === room.adminId) {
+            const password = null;
+            const updatedFields = {
+                isProtected: false,
+                password: password,
+            };
+            await this.roomsService.updateRoom(room.roomId, updatedFields);
+            this.server.emit('roomsUPDATED');
+        }
+    }
 }

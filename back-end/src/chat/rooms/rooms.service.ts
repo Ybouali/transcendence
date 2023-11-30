@@ -2,6 +2,7 @@
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateRoomDto } from "./dto/create-room.dto";
 import { Injectable } from "@nestjs/common";
+import { ChatRoom } from "@prisma/client";
 
 
 @Injectable()
@@ -72,5 +73,37 @@ export class RoomsService {
             }
         });
         return room;
+    }
+
+    async updateRoomPassword(roomId: string, newPassword: string): Promise<boolean> {
+        try {
+            // hash password
+            const nPass = newPassword;
+            const updatedRoom = await this.prisma.chatRoom.update({
+                where: { id: roomId },
+                data: { password: nPass },
+            });
+    
+            if (updatedRoom) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (error) {
+            console.error('Error updating room password:', error);
+            return false;
+        }
+    }
+
+    async updateRoom(roomId: string, updatedFields: Partial<ChatRoom>) {
+        try {
+            const updatedRoom = await this.prisma.chatRoom.update({
+                where: { id: roomId },
+                data: updatedFields,
+            });
+            return updatedRoom;
+        } catch (error) {
+            throw new Error(`Error updating room: ${error}`);
+        }
     }
 }
