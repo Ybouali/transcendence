@@ -65,6 +65,7 @@ export class MessagesService {
                     email: user.email,
                     username: user.username,
                     avatarUrl: user.avatarUrl,
+                    id: user.id
                 },
             };
         });
