@@ -4,6 +4,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { CreateMessageDto } from "./dto/create-message.dto";
 import { ConversationDto } from "./dto/conversation.dto";
 import { User } from "@prisma/client";
+import { DirectMessageDto } from "./dto/direct-message.dto";
 
 @Injectable()
 export class MessagesService {
@@ -72,4 +73,53 @@ export class MessagesService {
 
         return uniqueUsersConversation;
     }
+
+    async getMessagesBetweenUsers(user1Id: string, user2Id: string): Promise<DirectMessageDto[]> {
+        const messages = await this.prisma.directMessage.findMany({
+            where: {
+                OR: [
+                    { AND: [{ senderId: user1Id }, { receiverId: user2Id }] },
+                    { AND: [{ senderId: user2Id }, { receiverId: user1Id }] },
+                ],
+            },
+            orderBy: {
+                createdAt: 'asc',
+            },
+            include: {
+                sender: {
+                    select: {
+                        id: true,
+                        username: true,
+                        avatarUrl: true,
+                    },
+                },
+                receiver: {
+                    select: {
+                        id: true,
+                        username: true,
+                    },
+                },
+            },
+        });
+    
+        const formattedMessages: DirectMessageDto[] = messages.map((message) => {
+            return {
+                id: message.id,
+                createdAt: message.createdAt,
+                message: message.message,
+                sender: {
+                    id: message.sender.id,
+                    username: message.sender.username,
+                    avatarUrl: message.sender.avatarUrl,
+                },
+                receiver: {
+                    id: message.receiver.id,
+                    username: message.receiver.username,
+                },
+            };
+        });
+    
+        return formattedMessages;
+    }
+    
 }
