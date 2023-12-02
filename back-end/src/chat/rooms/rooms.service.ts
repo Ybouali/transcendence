@@ -3,6 +3,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { CreateRoomDto } from "./dto/create-room.dto";
 import { Injectable } from "@nestjs/common";
 import { ChatRoom } from "@prisma/client";
+import { RoomDto } from "./dto/room-conv.dto";
 
 
 @Injectable()
@@ -106,4 +107,26 @@ export class RoomsService {
             throw new Error(`Error updating room: ${error}`);
         }
     }
+
+    async getRoomsForUser(userId: string): Promise<RoomDto[]> {
+        const userRooms = await this.prisma.member.findMany({
+            where: {
+                userId: userId,
+            },
+            include: {
+                chatRoom: true,
+            },
+        });
+        const rooms: RoomDto[] = userRooms.map((userRoom) => {
+            return {
+                id: userRoom.chatRoom.id,
+                roomName: userRoom.chatRoom.roomName,
+                roomType: userRoom.chatRoom.roomType,
+                image: userRoom.chatRoom.image,
+            };
+        });
+    
+        return rooms;
+    }
+    
 }
