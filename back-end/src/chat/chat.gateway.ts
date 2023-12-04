@@ -9,6 +9,7 @@ import { SharedService } from './shared/shared.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRoomDto } from './rooms/dto/create-room.dto';
 import { RoomsService } from './rooms/rooms.service';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @WebSocketGateway({
     cors: { origin: '*' },
@@ -70,6 +71,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             this.logger.error('failure in message creation');
             this.server.to(client.id).emit('newMessage', { code: 500, message: 'server: there is an error.' });
         }
+    }
+
+    @OnEvent('sendHi')
+    async handleSendHiMessage(createMessageDto: CreateMessageDto) {
+        await this.messageService.createMessage(createMessageDto);
+        const recvSockets = SharedService.UsersSockets.get( createMessageDto.receiverId );
+        let destUserSockets = [ ...SharedService.UsersSockets.get(createMessageDto.senderId), ];
+        if (recvSockets)
+            destUserSockets = [...destUserSockets, ...recvSockets];
+        destUserSockets.forEach((socket) => {
+        this.server.to(socket).emit('newMESSAGE', { code: 200, ...createMessageDto });
+        });
     }
 
     @SubscribeMessage('createROOM')
