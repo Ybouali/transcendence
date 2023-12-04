@@ -4,6 +4,7 @@ import { CreateRoomDto } from "./dto/create-room.dto";
 import { Injectable } from "@nestjs/common";
 import { ChatRoom } from "@prisma/client";
 import { RoomDto } from "./dto/room-conv.dto";
+import { RoomMessageDto } from "./dto/room-message.dto";
 
 
 @Injectable()
@@ -127,6 +128,51 @@ export class RoomsService {
         });
     
         return rooms;
+    }
+    
+
+    async getMessagesForRoom(roomId: string): Promise<RoomMessageDto[]> {
+        const roomMessages = await this.prisma.roomMessage.findMany({
+            where: {
+                roomId: roomId,
+            },
+            include: {
+                sender: {
+                    select: {
+                        id: true,
+                        username: true,
+                        avatarUrl: true,
+                    },
+                },
+                room: {
+                    select: {
+                        id: true,
+                        roomName: true,
+                    },
+                },
+            },
+            orderBy: {
+                createdAt: 'asc',
+            },
+        });
+    
+        const formattedMessages: RoomMessageDto[] = roomMessages.map((message) => {
+            return {
+                roomId: message.roomId,
+                createdAt: message.createdAt,
+                message: message.message,
+                sender: {
+                    id: message.sender.id,
+                    username: message.sender.username,
+                },
+                room: {
+                    id: message.room.id,
+                    roomName: message.room.roomName,
+                },
+            };
+        });
+    
+        return formattedMessages;
     }
     
 }
