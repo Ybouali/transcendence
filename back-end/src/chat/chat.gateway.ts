@@ -29,7 +29,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     handleDisconnect(client: any) {
         // [test]
         const userId = client.handshake.headers.authorization;
-
         this.chatService.removeUserSocket(userId, client.id);
         this.logger.debug('onDisconnect ', client.id);
     }
@@ -157,4 +156,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             this.server.emit('roomsUPDATED');
         }
     }
+
+    @SubscribeMessage('banUSER')
+        async banUser(
+            @ConnectedSocket() client: Socket,
+            @MessageBody()
+            room: { adminId: string; roomId: string; bannedId: string },
+        ) {
+            const result = this.roomsService.banUserInRoom(room.adminId, room.roomId, room.bannedId);
+            if (result) {
+                const userSockets = SharedService.UsersSockets.get(room.bannedId);
+                    userSockets?.forEach((socket) => {
+                        this.server.to(socket).emit('userBANNED');
+                    });
+            }
+        }
 }
