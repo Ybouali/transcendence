@@ -1,0 +1,28 @@
+version: '3.9'
+services:
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    image: nginx:nginx
+    restart: unless-stopped
+    depends_on:
+      - front-end
+    ports:
+      - "443:443"
+    networks:
+      - transcendence
+  front-end:
+    build: ./front-end
+    container_name: front-end
+    image: front-end:front-end
+    restart: unless-stopped
+    # depends_on:
+    #   - front-end
+    ports:
+      - "3000:3000"
+    networks:
+      - transcendence
+
+networks:
+  transcendence:
+    name: transcendence
