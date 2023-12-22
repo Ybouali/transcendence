@@ -2,9 +2,10 @@
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateRoomDto } from "./dto/create-room.dto";
 import { Injectable } from "@nestjs/common";
-import { ChatRoom } from "@prisma/client";
+import { ChatRoom, Member, MutedUsers } from "@prisma/client";
 import { RoomDto } from "./dto/room-conv.dto";
 import { RoomMessageDto } from "./dto/room-message.dto";
+import { CreateMessageDto } from "./dto/create-message.dto";
 
 
 @Injectable()
@@ -222,4 +223,79 @@ export class RoomsService {
         }
         return true;
     }
+
+    async isRoomOwner(userId: string, roomId: string): Promise<boolean> {
+        const room = await this.prisma.chatRoom.findUnique({
+            where: { id: roomId },
+            include: { owner: true },
+        });
+    
+        return room?.owner.id === userId;
+    }
+
+    async addAdminToRoom(ownerId: string, roomId: string, adminId: string): Promise<void> {
+        try {
+            const isOwner = await this.isRoomOwner(ownerId, roomId);
+            if (isOwner) {
+                await this.prisma.admins.create({
+                    data: {
+                        userId: adminId,
+                        roomId: roomId,
+                    },
+                });
+            } else {
+                throw new Error('You are not the owner of this room.');
+            }
+            } catch (error) {
+                console.log('??????');
+            }
+        }
+    
+        async getBanedUsers(roomId: string) {
+            return await this.prisma.banedUsers.findMany({
+                where: {
+                    roomId: roomId,
+                },
+            });
+        }
+
+        async getAllMembersOfRoom(roomId: string): Promise<Member[]> {
+            return this.prisma.member.findMany({
+                where: {
+                    chatRoomId: roomId,
+                },
+            });
+        }
+
+        async checkMutedUser(senderId: string, roomId: string): Promise<MutedUsers | null> {
+            const mutedUser = await this.prisma.mutedUsers.findFirst({
+                where: {
+                    userId: senderId,
+                    roomId: roomId,
+                },
+            });
+    
+            return mutedUser;
+        }
+
+        async isUserBanned(senderId: string, roomId: string) {
+            const bannedUsers = await this.prisma.banedUsers.findMany({
+                where: {
+                    roomId: roomId,
+                    userId: senderId,
+                },
+            });
+        
+            return bannedUsers.length > 0;
+        }
+
+        async createMessage(createMessageDto: CreateMessageDto) {
+            return this.prisma.roomMessage.create({
+                data: {
+                    message: createMessageDto.message,
+                    senderId: createMessageDto.senderId,
+                    roomId: createMessageDto.receiverId,
+                }
+            });
+        }
 }
