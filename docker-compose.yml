@@ -11,13 +11,35 @@ services:
       - "443:443"
     networks:
       - transcendence
+  back-end:
+    build: ./back-end
+    container_name: back-end
+    image: back-end:back-end
+    restart: unless-stopped
+    volumes:
+      - back-end-volume:/app/env/
+    depends_on:
+      - dev-db
+    ports:
+      - "3333:3333"
+    networks:
+      - transcendence
+  dev-db:
+    image: postgres:13
+    ports:
+      - 5434:5432
+    restart: unless-stopped
+    env_file:
+      - /Users/$USER/Desktop/.env_db
+    networks:
+      - transcendence
   front-end:
     build: ./front-end
     container_name: front-end
     image: front-end:front-end
     restart: unless-stopped
-    # depends_on:
-    #   - front-end
+    depends_on:
+      - dev-db
     ports:
       - "3000:3000"
     networks:
@@ -26,3 +48,11 @@ services:
 networks:
   transcendence:
     name: transcendence
+
+volumes:
+  back-end-volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/ybouali/Desktop/env_file_path/
+      o:  bind

@@ -19,6 +19,7 @@ import { EncryptionModule } from './encryption/encryption.module';
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: 'env/.env_back-end'
     }),
     TowFactorAuthModule,
     EncryptionModule,

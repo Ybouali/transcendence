@@ -11,7 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as fs from 'fs';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 @Injectable()
 export class UserService {
@@ -85,7 +85,8 @@ export class UserService {
   }
 
   async getRefreshToken(@Req() req?: Request): Promise<string> {
-    const refresh_token = req.headers['refresh_token'].trim();
+    
+    const refresh_token = (req.headers['refresh_token'] as string).trim();
 
     return refresh_token;
   }
