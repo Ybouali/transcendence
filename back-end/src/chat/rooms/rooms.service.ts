@@ -298,4 +298,70 @@ export class RoomsService {
                 }
             });
         }
+
+        async kickUserfromRoom(adminId: string, roomId: string, userId: string): Promise<boolean> {
+            try {
+                const room = await this.prisma.chatRoom.findUnique({
+                    where: { id: roomId },
+                });
+        
+                if (!room) {
+                    throw new Error('Room does not exist.');
+                }
+        
+                if (room.ownerID === userId) {
+                    throw new Error('Cannot kick the owner of the room.');
+                }
+        
+                const isMember = await this.prisma.member.findFirst({
+                    where: {
+                        userId: userId,
+                        chatRoomId: roomId,
+                    },
+                });
+        
+                if (!isMember) {
+                    throw new Error('User is not a member of this room.');
+                }
+        
+                const isAdmin = await this.prisma.admins.findFirst({
+                    where: {
+                        userId: adminId,
+                        roomId: roomId,
+                    },
+                });
+        
+                if (!isAdmin) {
+                    throw new Error('You are not an admin in this room.');
+                }
+        
+                await this.prisma.member.deleteMany({
+                    where: {
+                        userId: userId,
+                        chatRoomId: roomId,
+                    },
+                });
+
+                const wasAdmin = await this.prisma.admins.findFirst({
+                    where: {
+                        userId: userId,
+                        roomId: roomId,
+                    },
+                });
+
+                if (wasAdmin) {
+                    await this.prisma.admins.delete({
+                        where: {
+                            userId_roomId: {
+                                userId: userId,
+                                roomId: roomId,
+                            },
+                        },
+                    });
+                }
+            } catch (error) {
+                return false;
+            }
+            return true;
+        }
 }

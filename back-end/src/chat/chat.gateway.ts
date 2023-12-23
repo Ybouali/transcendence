@@ -228,4 +228,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 }
             });
     }
+
+    @SubscribeMessage('kickUSER')
+    async kickUser( @MessageBody() room: { adminId: string; roomId: string; userId: string },
+    ) {
+        const result = this.roomsService.kickUserfromRoom(room.adminId, room.roomId, room.userId);
+        if (result) {
+            const kickedUserSockets = SharedService.UsersSockets.get(room.userId);
+            kickedUserSockets?.forEach((socket) => {
+                this.server.to(socket).emit('userKICKED');
+            });
+        }
+    }
 }
