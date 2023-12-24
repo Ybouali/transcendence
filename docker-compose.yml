@@ -52,10 +52,10 @@ networks:
   transcendence:
     name: transcendence
 
-# volumes:
-#   back-end-volume:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       device: /Users/$USER/Desktop/env_file_path/
-#       o:  bind
+volumes:
+  back-end-volume:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/$USER/Desktop/env_file_path/
+      o:  bind

@@ -10,6 +10,7 @@ import { PrismaService } from './prisma/prisma.service';
 import { Interval } from '@nestjs/schedule';
 import { EncryptionService } from './encryption/encryption.service';
 import * as jwt from 'jsonwebtoken';
+import { verify } from 'jsonwebtoken';
 import { Jwts } from './types';
 
 @Injectable()
@@ -128,16 +129,21 @@ export class AppService {
       const secret: string = process.env.SECRET_JWT_TOKEN
 
       // decode the token
-      const tokenDecoded: Jwts = jwt.decode(tokenToVerify, secret) as Jwts;
+      const tokenDecoded: Jwts | null = verify(tokenToVerify, secret) as Jwts;
+      // const tokenDecoded: Jwts = jwt.decode(tokenToVerify, secret) as Jwts;
+    
+      if (tokenDecoded !== null) {
 
-      // check the expiration date of the token
+        // check the expiration date of the token
 
-      // get the current date
-      // divide by 1000 to convert to seconds
-      const dateNow: number = Math.floor(Date.now() / 1000);
+        // get the current date
+        // divide by 1000 to convert to seconds
+        const dateNow: number = Math.floor(Date.now() / 1000);
 
-      // check expiration
-      if (dateNow > tokenDecoded.exp) return true;
+        // check expiration
+        if (dateNow > tokenDecoded.exp) return true;
+      }
+
       return false;
     } catch (error) {
       throw new InternalServerErrorException();
