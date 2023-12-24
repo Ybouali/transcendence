@@ -240,4 +240,35 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             });
         }
     }
+
+    @SubscribeMessage('leaveROOM')
+    async leaveRoom(client: Socket, data: { userId: string, roomId: string }): Promise<void> {
+        const { userId, roomId } = data;
+        const isOwner = await this.roomsService.isRoomOwner(userId, roomId);
+        const isAdmin = await this.roomsService.isUserAdmin(userId, roomId);
+        
+        await this.roomsService.removeUserFromRoom(userId, roomId);
+
+        if (isOwner) {
+            await this.roomsService.assignNewOwner(userId, roomId);
+        }
+        
+        if (isAdmin) {
+            await this.roomsService.removeUserFromAdmins(userId, roomId);
+        }
+
+        await this.roomsService.removeUserFromBannedUsers(userId, roomId);
+        await this.roomsService.removeUserFromMutedUsers(userId, roomId);
+
+        const remainingMembers = await this.roomsService.getRoomMembersCount(roomId);
+
+        if (remainingMembers === 0) {
+            await this.roomsService.deleteRoom(roomId);
+        }
+
+        const leftUserSockets = SharedService.UsersSockets.get(data.userId);
+        leftUserSockets?.forEach((socket) => {
+            this.server.to(socket).emit('youLeftROOM');
+        });
+    }
 }

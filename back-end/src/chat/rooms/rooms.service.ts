@@ -364,4 +364,109 @@ export class RoomsService {
             }
             return true;
         }
+
+        async isUserAdmin(userId: string, roomId: string): Promise<boolean> {
+            const isAdmin = await this.prisma.admins.findFirst({
+                where: {
+                    userId,
+                    roomId,
+                },
+            });
+        
+            return !!isAdmin;
+        }
+
+        async removeUserFromRoom(userId: string, roomId: string): Promise<void> {
+            await this.prisma.member.deleteMany({
+                where: {
+                    userId,
+                    chatRoomId: roomId,
+                },
+            });
+        }
+
+        async assignNewOwner(userId: string, roomId: string): Promise<void> {
+            const oldOwner = await this.prisma.chatRoom.findUnique({
+                where: { id: roomId },
+                select: { ownerID: true },
+            });
+        
+            const newOwner = await this.prisma.member.findFirst({
+                where: {
+                    chatRoomId: roomId,
+                    userId: { not: oldOwner?.ownerID },
+                },
+                orderBy: {
+                    createdAt: 'asc',
+                },
+            });
+            if (oldOwner && oldOwner.ownerID) {
+                if (newOwner) {
+                    await this.prisma.chatRoom.update({
+                        where: { id: roomId },
+                        data: {
+                            ownerID: newOwner.userId,
+                        },
+                    });
+                }
+                    if (newOwner && newOwner.userId) {
+                    const isAdmin = await this.prisma.admins.findFirst({
+                        where: {
+                            userId: newOwner.userId,
+                            roomId,
+                        },
+                    });
+            
+                    if (!isAdmin) {
+                        await this.prisma.admins.create({
+                            data: {
+                                userId: newOwner.userId,
+                                roomId,
+                            },
+                        });
+                    }
+                }
+            }
+        }
+        
+
+        async removeUserFromAdmins(userId: string, roomId: string): Promise<void> {
+            await this.prisma.admins.deleteMany({
+                where: {
+                    userId,
+                    roomId,
+                },
+            });
+        }
+
+        async getRoomMembersCount(roomId: string): Promise<number> {
+            const count = await this.prisma.member.count({
+                where: { chatRoomId: roomId },
+            });
+            return count;
+        }
+
+        async deleteRoom(roomId: string): Promise<void> {
+            await this.prisma.chatRoom.delete({
+                where: { id: roomId },
+            });
+        }
+
+        async removeUserFromBannedUsers(userId: string, roomId: string): Promise<void> {
+            await this.prisma.banedUsers.deleteMany({
+                where: {
+                    userId,
+                    roomId,
+                },
+            });
+        }
+
+        async removeUserFromMutedUsers(userId: string, roomId: string): Promise<void> {
+            await this.prisma.mutedUsers.deleteMany({
+                where: {
+                    userId,
+                    roomId,
+                },
+            });
+        }
 }
