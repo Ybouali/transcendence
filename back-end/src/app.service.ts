@@ -130,7 +130,6 @@ export class AppService {
 
       // decode the token
       const tokenDecoded: Jwts | null = verify(tokenToVerify, secret) as Jwts;
-      // const tokenDecoded: Jwts = jwt.decode(tokenToVerify, secret) as Jwts;
     
       if (tokenDecoded !== null) {
 

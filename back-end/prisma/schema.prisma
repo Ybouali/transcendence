@@ -11,15 +11,16 @@ datasource db {
 }
 
 model User {
-  id              String   @id @default(cuid())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   username        String   @unique
   email           String   @unique
-  verifiedEmail   Boolean
-  password        String
-  avatarName      String
+  fullName        String
+  avatarNameUrl   String
+  avatarupdated   Boolean
+  avatarNamePath  String?
   isOnLine        Boolean
   accessToken     String
   refreshToken    String

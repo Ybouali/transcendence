@@ -17,9 +17,10 @@ services:
     image: back-end:back-end
     restart: unless-stopped
     env_file:
-      - /Users/ybouali/Desktop/data_transcendence/back_end/env/.env
+      - /Users/$USER/Desktop/data_transcendence/env_files/.env_back_end
     volumes:
-      - back-end-volume:/app/data/env/
+      - back-end-volume-avatars:/avatar_users_images/
+      - back-end-volume-qrcodes:/qrcodes_users/
     depends_on:
       - dev-db
     ports:
@@ -33,7 +34,7 @@ services:
       - 5434:5432
     restart: unless-stopped
     env_file:
-      - /Users/$USER/Desktop/.env_db
+      - /Users/$USER/Desktop/data_transcendence/env_files/.env_db
     networks:
       - transcendence
   front-end:
@@ -45,6 +46,8 @@ services:
       - dev-db
     ports:
       - "3000:3000"
+    env_file:
+      - /Users/$USER/Desktop/data_transcendence/env_files/.env_front_end
     networks:
       - transcendence
 
@@ -53,9 +56,15 @@ networks:
     name: transcendence
 
 volumes:
-  back-end-volume:
+  back-end-volume-qrcodes:
     driver: local
     driver_opts:
       type: none
-      device: /Users/$USER/Desktop/env_file_path/
+      device: /Users/$USER/Desktop/data_transcendence/data/images/qrcodes_users/
+      o:  bind
+  back-end-volume-avatars:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/$USER/Desktop/data_transcendence/data/images/avatar_users_images/
       o:  bind
