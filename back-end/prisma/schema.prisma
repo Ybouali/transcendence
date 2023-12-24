@@ -69,6 +69,7 @@ model ChatRoom {
 model Member {
   userId            String
   chatRoomId        String
+  joinedAt          DateTime       @default(now()) // New 'joinedAt' field
   createdAt         DateTime         @default(now())
 
   // Relation with User and chatRoom
