@@ -5,7 +5,6 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import { PrismaService } from './prisma/prisma.service';
 import { Interval } from '@nestjs/schedule';
@@ -18,14 +17,13 @@ export class AppService {
   private logger = new Logger(AppService.name);
 
   constructor(
-    private config: ConfigService,
     private prisma: PrismaService,
     private jwtService: JwtService,
     private encrypt: EncryptionService,
   ) {}
 
   init_server(): void {
-    const path_avatars = this.config.get('PATH_AVATAR_USERS');
+    const path_avatars = process.env.PATH_AVATAR_USERS;
 
     // check for the folder of avatar users is exist
     // if not, create the folder and log a worning
@@ -43,7 +41,7 @@ export class AppService {
       });
     }
 
-    const path_qr_codes = this.config.get('PATH_QR_CODES');
+    const path_qr_codes = process.env.PATH_QR_CODES;
 
     // check if the folder of the qrcodes is exist
     if (!fs.existsSync(path_qr_codes)) {
@@ -127,7 +125,7 @@ export class AppService {
   verifyJwtToken(tokenToVerify: string) {
     try {
       // get the secret from the config service
-      const secret = this.config.get('SECRET_JWT_TOKEN');
+      const secret: string = process.env.SECRET_JWT_TOKEN
 
       // decode the token
       const tokenDecoded: Jwts = jwt.decode(tokenToVerify, secret) as Jwts;

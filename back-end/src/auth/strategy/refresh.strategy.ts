@@ -1,6 +1,5 @@
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Request } from 'express';
 import { ForbiddenException, Injectable } from '@nestjs/common';
@@ -12,11 +11,10 @@ export class RefreshStrategy extends PassportStrategy(
   'refresh_token',
 ) {
   constructor(
-    private config: ConfigService,
     private prisma: PrismaService,
     private encrypt: EncryptionService,
   ) {
-    const secretOrKey: string = config.get('SECRET_JWT_TOKEN');
+    const secretOrKey: string = process.env.SECRET_JWT_TOKEN;
     super({
       jwtFromRequest: ExtractJwt.fromHeader('refresh'),
       secretOrKey,

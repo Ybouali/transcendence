@@ -1,19 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
 @Injectable()
 export class EncryptionService {
-  constructor(private config: ConfigService) {}
+  constructor() {}
 
   // get the secret from the config service
-  private readonly secret = this.config.get('ENCRYPT_SECRET');
+  private readonly secret = process.env.ENCRYPT_SECRET;
 
   // get the salt from the config service
-  private readonly salt: string = this.config.get('SALT_ENCRYPT');
+  private readonly salt: string = process.env.SALT_ENCRYPT;
 
   // get the algorithem from the config service
-  private readonly algo = this.config.get('ALGORITHM_ENCRYPT');
+  private readonly algo = process.env.ALGORITHM_ENCRYPT;
 
   async encrypt(toEncrypt: string): Promise<string> {
     // console.log(

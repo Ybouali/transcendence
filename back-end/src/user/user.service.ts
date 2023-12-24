@@ -7,7 +7,6 @@ import {
   Res,
   UploadedFile,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as fs from 'fs';
@@ -17,7 +16,6 @@ import { Request, Response } from 'express';
 export class UserService {
   constructor(
     private prisma: PrismaService,
-    private config: ConfigService,
   ) {}
 
   async search(username: string) {
@@ -61,7 +59,7 @@ export class UserService {
       }
 
       // path of the avatar file
-      const pathAvatar = this.config.get('PATH_AVATAR_USERS') + user.avatarName;
+      const pathAvatar = process.env.PATH_AVATAR_USERS + user.avatarName;
 
       // store the avatar
       fs.writeFileSync(pathAvatar, file.buffer);
@@ -74,7 +72,7 @@ export class UserService {
 
   async getAvatar(nameAvatar: string, @Res() res?: Response) {
     try {
-      const pathAvatar = this.config.get('PATH_AVATAR_USERS') + nameAvatar;
+      const pathAvatar = process.env.PATH_AVATAR_USERS + nameAvatar;
 
       console.log({ pathAvatar });
 

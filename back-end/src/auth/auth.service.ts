@@ -8,7 +8,6 @@ import { AuthDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { Tokens } from 'src/types';
 import { GetUser } from 'src/decorators';
 import { User } from '@prisma/client';
@@ -21,7 +20,6 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
-    private config: ConfigService,
     private encript: EncryptionService,
   ) {}
 
@@ -153,7 +151,7 @@ export class AuthService {
     email: string,
     expiresIn: number,
   ): Promise<string> {
-    const secret: string = this.config.get('SECRET_JWT_TOKEN');
+    const secret: string = process.env.SECRET_JWT_TOKEN
 
     const token = this.jwt.sign(
       {

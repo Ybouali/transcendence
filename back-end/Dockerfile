@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:latest
 
 WORKDIR /app
 
@@ -10,11 +10,18 @@ RUN npm install
 
 COPY . .
 
-RUN chmod 777 script/script.sh
+RUN npm install argon2
 
-ENTRYPOINT [ "script/script.sh" ]
+RUN npm install prisma --save-dev
 
-# RUN npm run build
+RUN npm install @prisma/client
 
-# ENTRYPOINT ["npm", "run", "start:prod"]
-# ENTRYPOINT ["npm", "start"]
+RUN npx prisma generate
+
+# CMD [ "tail", "-f" ]
+
+ENTRYPOINT [ "npm", "run", "start:prod" ]
+
+# RUN chmod 777 script/script.sh
+
+# ENTRYPOINT ["script/script.sh"]

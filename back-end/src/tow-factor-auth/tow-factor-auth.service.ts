@@ -3,7 +3,6 @@ import { User } from '@prisma/client';
 import { GetUser } from 'src/decorators';
 import * as speakeasy from "speakeasy";
 import * as QRCode from 'qrcode';
-import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Response }  from 'express'
@@ -12,7 +11,6 @@ import { Response }  from 'express'
 export class TowFactorAuthService {
 
     constructor(
-        private config: ConfigService,
         private prisma: PrismaService
     ) { }
 
@@ -39,7 +37,7 @@ export class TowFactorAuthService {
                 fileName = user.id + '_RQCODE.png';
                 
                 // Note: file name based on the user id 
-                const path_file = this.config.get('PATH_QR_CODES') + fileName;
+                const path_file = process.env.PATH_QR_CODES + fileName;
                 
                 fs.writeFile(path_file, data, (err) => {
                     if (err)
@@ -65,7 +63,7 @@ export class TowFactorAuthService {
                 fileName = user.qrCodeFileName;
             }
 
-            const pathFile: string = this.config.get('PATH_QR_CODES') + fileName;
+            const pathFile: string = process.env.PATH_QR_CODES + fileName;
 
             res.sendFile(pathFile);
 

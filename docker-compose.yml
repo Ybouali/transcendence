@@ -8,7 +8,7 @@ services:
     depends_on:
       - front-end
     ports:
-      - "443:443"
+      - "80:80"
     networks:
       - transcendence
   back-end:
@@ -16,8 +16,10 @@ services:
     container_name: back-end
     image: back-end:back-end
     restart: unless-stopped
+    env_file:
+      - /Users/ybouali/Desktop/data_transcendence/back_end/env/.env
     volumes:
-      - back-end-volume:/app/env/
+      - back-end-volume:/app/data/env/
     depends_on:
       - dev-db
     ports:
@@ -25,7 +27,8 @@ services:
     networks:
       - transcendence
   dev-db:
-    image: postgres:13
+    image: postgres:latest
+    container_name: postgres
     ports:
       - 5434:5432
     restart: unless-stopped
@@ -49,10 +52,10 @@ networks:
   transcendence:
     name: transcendence
 
-volumes:
-  back-end-volume:
-    driver: local
-    driver_opts:
-      type: none
-      device: /Users/ybouali/Desktop/env_file_path/
-      o:  bind
+# volumes:
+#   back-end-volume:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       device: /Users/$USER/Desktop/env_file_path/
+#       o:  bind
