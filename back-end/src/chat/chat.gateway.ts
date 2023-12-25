@@ -271,4 +271,65 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             this.server.to(socket).emit('youLeftROOM');
         });
     }
+
+    private async muteUser(userId: string, roomId: string, duration: number): Promise<void> {
+        if (!SharedService.mutedUsers.has(userId)) {
+            SharedService.mutedUsers.set(userId, new Map());
+        }
+
+        const userRooms = SharedService.mutedUsers.get(userId);
+        const userUnmuteTimers = userRooms.get(roomId);
+
+        if (userUnmuteTimers) {
+            clearTimeout(userUnmuteTimers);
+        }
+
+        const unmuteTimer = setTimeout(() => {
+            this.unmuteUser(userId, roomId);
+        }, duration * 60 * 1000);
+
+        userRooms.set(roomId, unmuteTimer);
+    }
+
+    private async unmuteUser(userId: string, roomId: string): Promise<void> {
+        const unMutedUserSockets = SharedService.UsersSockets.get(userId);
+        unMutedUserSockets?.forEach((socket) => {
+            this.server.to(socket).emit('userUnmuted', { message: 'Now you are unmuted.', roomId });
+        });
+        const userRooms = SharedService.mutedUsers.get(userId);
+        if (userRooms && userRooms.has(roomId)) {
+            clearTimeout(userRooms.get(roomId));
+            userRooms.delete(roomId);
+        }
+    }
+
+    @SubscribeMessage('muteUser')
+    async handleMuteUser(client: Socket, data: { userId: string, roomId: string, duration: number, adminId: string }): Promise<void> {
+        const { userId, roomId, duration, adminId } = data;
+
+        const result = await this.roomsService.isUserAdmin(adminId, roomId);
+        if (!result) {
+            client.emit('muteUserError', { message: 'You are not authorized to mute users in this room.' });
+            return;
+        }
+
+        const isOwner = await this.roomsService.isRoomOwner(userId, roomId);
+        if (isOwner) {
+            client.emit('muteUserError', { message: 'You are not authorized to mute the owner of room.' });
+            return;
+        }
+
+        this.muteUser(userId, roomId, duration)
+            .then(() => {
+                const mutedUserSockets = SharedService.UsersSockets.get(userId);
+                mutedUserSockets?.forEach((socket) => {
+                    this.server.to(socket).emit('youMuted', { message: 'Now you are muted.', roomId });
+                });
+                client.emit('userMuted', { message: `User is muted for ${duration} minutes in room ${roomId}.` });
+            })
+            .catch((error) => {
+                console.error('Error muting user:', error.message);
+                client.emit('muteUserError', { message: 'Failed to mute user.' });
+            });
+    }
 }
