@@ -46,6 +46,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return !!mutedUser;
     }
 
+    private isSenderMutedInRoom(senderId: string, roomId: string): boolean {
+        const roomMutes = SharedService.mutedUsers.get(senderId);
+        if (roomMutes && roomMutes.has(roomId)) {
+            return true;
+        }
+        return false;
+    }
 
     @SubscribeMessage('sendMESSAGE')
     async createMessage(client: Socket, createMessageDto: CreateMessageDto) {
@@ -73,6 +80,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 if (!room) {
                     this.server.to(client.id).emit('newMESSAGE', {code: 404, message: `Room with ID ${createMessageDto.receiverId} not found`});
                     return;
+                }
+
+                // check in map not db
+                if (this.isSenderMutedInRoom(createMessageDto.senderId, createMessageDto.receiverId)) {
+                    return ;
                 }
                 const isSenderMuted = await this.isUserMuted(createMessageDto.senderId, createMessageDto.receiverId);
 
