@@ -150,12 +150,21 @@ export class AppService {
   }
 
   async getUsers(): Promise<User[]> {
-    const users: User[] = await this.prisma.user.findMany({
-      where: {
-        NOT: [{ refreshToken: 'logout' }, { accessToken: 'offline' }],
-      },
-    });
+    try {
+      const users: User[] = await this.prisma.user.findMany({
+        where: {
+          NOT: [{ refreshToken: 'logout' }, { accessToken: 'offline' }],
+        },
+      });
 
-    return users;
+      if (users === undefined) {
+        this.logger.warn('obach bghiti ngolhalk ');
+        return [];
+      }
+
+      return users;
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 }

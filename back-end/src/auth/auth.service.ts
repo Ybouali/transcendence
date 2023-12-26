@@ -50,7 +50,7 @@ export class AuthService {
           username: dataIntra.login,
           email: dataIntra.email,
           fullName: dataIntra.fullName,
-          avatarNameUrl: dataIntra.avatarNameUrl,
+          avatarName: dataIntra.avatarNameUrl,
           avatarupdated: false,
           isOnLine: true,
           accessToken: 'token',
