@@ -20,4 +20,20 @@ export class FriendController{
     async addFriend(@Param('userId') userId: string, @Param('friendId') friendId: string) {
         return this.friendService.addFriend(userId, friendId);
     }
+
+    // :userId for test
+    @Post(':userId/block/:friendId')
+    async blockFriend(@Param('userId') userId: string, @Param('friendId') friendId: string) {
+        try {
+            const blocked = await this.friendService.blockFriend(userId, friendId);
+            if (blocked) {
+                return { message: 'User blocked successfully.' };
+            } else {
+                return { error: 'Failed to block the user.' };
+            }
+        } catch (error) {
+                return { error: 'Failed to block the user.' };
+        }
+    }
+
 }

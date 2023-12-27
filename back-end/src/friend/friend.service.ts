@@ -57,4 +57,30 @@ export class FriendService{
         }
     }
 
+    async blockFriend(userId: string, friendId: string): Promise<boolean> {
+        try {
+                const friendship = await this.prisma.friendship.findFirst({
+                    where: {
+                        OR: [
+                            { userOne: userId, userTwo: friendId },
+                            { userOne: friendId, userTwo: userId }, 
+                        ],
+                    },
+                });
+                if (!friendship) {
+                    throw new Error('Friendship not found.');
+                }
+                await this.prisma.friendship.delete({ where: { id: friendship.id } });
+                await this.prisma.blockedUsers.create({
+                    data: {
+                        blockingId: userId,
+                        blockedId: friendId,
+                    },
+                });
+                return true;
+        } catch (error) {
+                console.error('Error blocking user:', error.message);
+                return false;
+        }
+    }
 }
