@@ -316,9 +316,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @SubscribeMessage('muteUser')
-    async handleMuteUser(client: Socket, data: { userId: string, roomId: string, duration: number, adminId: string }): Promise<void> {
-        const { userId, roomId, duration, adminId } = data;
+    async handleMuteUser(client: Socket, data: { userId: string, roomId: string, duration : number, adminId: string }): Promise<void> {
+        // eslint-disable-next-line prefer-const
+        let { userId, roomId, duration, adminId } = data;
 
+        duration = 1;
         const result = await this.roomsService.isUserAdmin(adminId, roomId);
         if (!result) {
             client.emit('muteUserError', { message: 'You are not authorized to mute users in this room.' });

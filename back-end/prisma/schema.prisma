@@ -43,6 +43,10 @@ model User {
 
   // Relation to BlockedUsers as the user who is blocked
   blocked           BlockedUsers[] @relation("Blocked")
+
+  // Relationships
+  friendshipsAsUserOne Friendship[] @relation("UserOneRelation")
+  friendshipsAsUserTwo Friendship[] @relation("UserTwoRelation")
 }
 
 model ChatRoom {
@@ -142,6 +146,18 @@ model DirectMessage {
   senderId  String
   receiverId String
 }
+
+model Friendship {
+  id      String  @id @default(cuid())
+  userOne String
+  userTwo String
+
+  userOneRelation User @relation("UserOneRelation", fields: [userOne], references: [id])
+  userTwoRelation User @relation("UserTwoRelation", fields: [userTwo], references: [id])
+
+  @@unique([userOne, userTwo])
+}
+
 
 model BlockedUsers {
   id                String        @id @default(cuid())
