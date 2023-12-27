@@ -6,9 +6,11 @@ import { PrismaModule } from './prisma/prisma.module';
 import { MatchModule } from './match/match.module';
 import { ConfigModule } from '@nestjs/config';
 import { ChatModule } from './chat/chat.module';
+import { FriendModule } from './friend/friend.module';
 
 @Module({
   imports: [
+    FriendModule,
     PrismaModule,
     MatchModule,
     ChatModule,
