@@ -164,7 +164,7 @@ export class AppService {
 
       return users;
     } catch (error) {
-      this.logger.error(error);
+      this.logger.error(error.message);
     }
   }
 }

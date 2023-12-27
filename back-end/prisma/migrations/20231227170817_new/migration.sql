@@ -34,37 +34,6 @@ CREATE TABLE "HistoryGame" (
     CONSTRAINT "HistoryGame_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "blockedUser" (
-    "id" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "blockedUser" TEXT NOT NULL,
-
-    CONSTRAINT "blockedUser_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "friendShip" (
-    "id" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "sendFriendshipUser" TEXT NOT NULL,
-    "requestedUser" TEXT NOT NULL,
-    "status" TEXT NOT NULL,
-
-    CONSTRAINT "friendShip_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "directMessage" (
-    "id" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "sendByUser" TEXT NOT NULL,
-    "sendToUser" TEXT NOT NULL,
-    "message" TEXT NOT NULL,
-
-    CONSTRAINT "directMessage_pkey" PRIMARY KEY ("id")
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 

@@ -40,25 +40,3 @@ model HistoryGame {
   scoreUser1    Int
   scoreUser2    Int
 }
-
-model blockedUser {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  blockedUser String
-}
-
-model friendShip {
-  id                 String   @id @default(cuid())
-  createdAt          DateTime @default(now())
-  sendFriendshipUser String
-  requestedUser      String
-  status             String
-}
-
-model directMessage {
-  id         String   @id @default(cuid())
-  createdAt  DateTime @default(now())
-  sendByUser String
-  sendToUser String
-  message    String
-}
