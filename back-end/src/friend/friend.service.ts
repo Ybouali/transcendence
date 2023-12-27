@@ -2,6 +2,7 @@
 
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
+import { FriendshipDto } from "./dto/friendship.dto";
 
 
 @Injectable()
@@ -23,17 +24,37 @@ export class FriendService{
 
         const friends = await this.prisma.user.findMany({
             where: {
-            id: {
-                in: friendIds,
-            },
+                id: {
+                    in: friendIds,
+                },
             },
             select: {
-            id: true,
-            username: true,
-            avatarUrl:true
+                id: true,
+                username: true,
+                avatarUrl:true
             },
         });
 
         return friends;
     }
+
+    async addFriend(userId: string, friendId: string): Promise<FriendshipDto | { error: string }> {
+        try {
+            const friendship = await this.prisma.friendship.create({
+                data: {
+                userOne: userId,
+                userTwo: friendId,
+                },
+            });
+        
+            return {
+                id: friendship.id,
+                userOneId: friendship.userOne,
+                userTwoId: friendship.userTwo,
+            };
+        } catch (error) {
+            return { error: error.message };
+        }
+    }
+
 }

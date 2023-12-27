@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 
-import { Controller, Get, Param } from "@nestjs/common";
+import { Controller, Get, Param, Post } from "@nestjs/common";
 import { FriendService } from "./friend.service";
 
 
@@ -13,5 +13,11 @@ export class FriendController{
     @Get('all/:userId')
     async getAllFriends(@Param('userId') userId: string) {
         return await this.friendService.getAllFriends(userId);
+    }
+
+    // :userId for test
+    @Post(':userId/add/:friendId')
+    async addFriend(@Param('userId') userId: string, @Param('friendId') friendId: string) {
+        return this.friendService.addFriend(userId, friendId);
     }
 }
