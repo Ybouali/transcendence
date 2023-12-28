@@ -50,4 +50,11 @@ export class FriendController{
                 return { error: 'Failed to unblock the user.' };
         }
     }
+
+    // :userId for test
+    @Get('blocked/:userId')
+    async getBlockedFriends(@Param('userId') userId: string) {
+        return await this.friendService.getBlockedFriends(userId);
+        
+    }
 }

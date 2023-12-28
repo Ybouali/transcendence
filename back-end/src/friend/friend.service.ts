@@ -92,8 +92,6 @@ export class FriendService{
                         blockedId: friendId,
                     },
                 });
-        
-                // Create a new friendship record
                 await this.prisma.friendship.create({
                     data: {
                     userOne: userId,
@@ -106,5 +104,28 @@ export class FriendService{
                 console.error('Error unblocking friend:', error.message);
                 return false;
             }
+    }
+
+    async getBlockedFriends(userId: string) {
+        try {
+            const blockedUsers = await this.prisma.blockedUsers.findMany({
+                where: {
+                    blockingId: userId,
+                },
+                include: {
+                    blockedUser: {
+                        select: {
+                            id: true,
+                            username: true,
+                            avatarUrl: true,
+                        },
+                    },
+                },
+            });
+
+            return blockedUsers.map(({ blockedUser }) => blockedUser);
+        } catch (error) {
+            return { error: error.message };
+        }
     }
 }
