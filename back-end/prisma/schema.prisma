@@ -28,8 +28,8 @@ model User {
   qrCodeFileName  String?
   towFactorSecret String?
   historyGameId   String?       @unique
-  Players         Players[]
-  HistoryGame     HistoryGame[]
+  // Players         Players[]
+  // HistoryGame     HistoryGame[]
 }
 
 model HistoryGame {
@@ -41,15 +41,15 @@ model HistoryGame {
   scoreUser1    Int
   scoreUser2    Int
 
-  players User[] @relation("Players", references: [id])
+  // players User[] @relation("Players", references: [id])
 }
 
-model Players {
-  historyGameId String
-  userId        String
+// model Players {
+//   historyGameId String
+//   userId        String
 
-  historyGame HistoryGame @relation(fields: [historyGameId], references: [id])
-  user        User        @relation(fields: [userId], references: [id])
+//   historyGame HistoryGame @relation(fields: [historyGameId], references: [id])
+//   user        User        @relation(fields: [userId], references: [id])
 
-  @@id([historyGameId, userId])
-}
+//   @@id([historyGameId, userId])
+// }
