@@ -10,21 +10,8 @@ RUN npm install
 
 COPY . .
 
-RUN npx prisma generate
+RUN chmod 777 script/script.sh
 
-ENTRYPOINT [ "npm", "run", "start:dev" ]
-# ENTRYPOINT [ "tail", "-f" ]
+ENTRYPOINT [ "script/script.sh" ]
 
-# RUN npm install argon2
-
-# RUN npm install prisma --save-dev
-
-# RUN npm install @prisma/client
-
-
-
-
-
-# RUN npm run build
-
-# ENTRYPOINT [ "npm", "run", "start:prod" ]
+# ENTRYPOINT [ "npm", "run", "start:dev" ]

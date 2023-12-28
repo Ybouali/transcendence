@@ -9,7 +9,6 @@ import * as fs from 'fs';
 import { PrismaService } from './prisma/prisma.service';
 import { Interval } from '@nestjs/schedule';
 import { EncryptionService } from './encryption/encryption.service';
-import * as jwt from 'jsonwebtoken';
 import { verify } from 'jsonwebtoken';
 import { Jwts } from './types';
 

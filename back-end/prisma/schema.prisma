@@ -15,8 +15,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  username        String   @unique
-  email           String   @unique
+  username        String        @unique
+  email           String        @unique
   fullName        String
   avatarName      String
   avatarupdated   Boolean
@@ -27,16 +27,29 @@ model User {
   twoFactor       Boolean?
   qrCodeFileName  String?
   towFactorSecret String?
+  historyGameId   String?       @unique
+  Players         Players[]
+  HistoryGame     HistoryGame[]
 }
 
 model HistoryGame {
   id            String   @id @default(cuid())
   createdAt     DateTime @default(now())
-  userId1       String
-  userId2       String
   winnerId      String
   startTimeGame DateTime
   endTimeGame   DateTime
   scoreUser1    Int
   scoreUser2    Int
+
+  players User[] @relation("Players", references: [id])
+}
+
+model Players {
+  historyGameId String
+  userId        String
+
+  historyGame HistoryGame @relation(fields: [historyGameId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+
+  @@id([historyGameId, userId])
 }

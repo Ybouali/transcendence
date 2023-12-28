@@ -9,6 +9,7 @@ import { TowFactorAuthModule } from './tow-factor-auth/tow-factor-auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EncryptionService } from './encryption/encryption.service';
 import { EncryptionModule } from './encryption/encryption.module';
+import { HistoryGameModule } from './history-game/history-game.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { EncryptionModule } from './encryption/encryption.module';
     ScheduleModule.forRoot(),
     TowFactorAuthModule,
     EncryptionModule,
+    HistoryGameModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtService, EncryptionService],

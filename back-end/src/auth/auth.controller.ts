@@ -7,6 +7,7 @@ import {
   Res,
   Get,
   UseGuards,
+  Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
@@ -14,16 +15,32 @@ import { GetUser } from 'src/decorators';
 import { User } from '@prisma/client';
 import { LoginGuard } from './guard';
 import { Tokens } from 'src/types';
-import { AuthIntraDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @HttpCode(HttpStatus.ACCEPTED)
-  @Post('login/intranet')
-  async loginIntra(@Body() dto: AuthIntraDto) {
-    return await this.authService.loginInra(dto.code);
+  @Post('login/intranet/:code')
+  async loginIntra(@Param('code') code: string, @Res() res: Response) {
+
+    const tokens: Tokens = await this.authService.loginInra(code);
+
+    res.setHeader('access_token', tokens.access_token);
+    res.setHeader('refresh_token', tokens.refresh_token);
+
+    res.send('done');
+  }
+
+  @UseGuards(LoginGuard)
+  @HttpCode(HttpStatus.OK)
+  @Get('refresh')
+  async refresh(@Res() res: Response, @GetUser() user: User) {
+    const { access_token } = await this.authService.refreshToken(user);
+
+    res.setHeader('access_token', access_token);
+
+    res.send('done');
   }
 
   // @HttpCode(HttpStatus.ACCEPTED)
@@ -60,15 +77,4 @@ export class AuthController {
   //     message: 'done',
   //   });
   // }
-
-  @UseGuards(LoginGuard)
-  @HttpCode(HttpStatus.OK)
-  @Get('refresh')
-  async refresh(@Res() res: Response, @GetUser() user: User) {
-    const { access_token } = await this.authService.refreshToken(user);
-
-    res.setHeader('access_token', access_token);
-
-    res.send('done');
-  }
 }

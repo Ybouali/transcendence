@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { IntraUserDto } from './dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { Tokens } from 'src/types';
 import { GetUser } from 'src/decorators';
@@ -71,8 +70,6 @@ export class AuthService {
       throw new NotAcceptableException();
     }
   }
-
-  // TODO: implement the logging using google auth
 
   // async signup(dto: AuthDto): Promise<Tokens> {
   //   try {
