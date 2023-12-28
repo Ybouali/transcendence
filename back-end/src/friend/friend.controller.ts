@@ -36,4 +36,18 @@ export class FriendController{
         }
     }
 
+    // :userId for test
+    @Post(':userId/unblock/:friendId')
+    async unblockFriend(@Param('userId') userId: string, @Param('friendId') friendId: string) {
+        try {
+            const unblocked = await this.friendService.unblockFriend(userId, friendId);
+            if (unblocked) {
+                return { message: 'User unblocked successfully.' };
+            } else {
+                return { error: 'Failed to unblock the user.' };
+            }
+        } catch (error) {
+                return { error: 'Failed to unblock the user.' };
+        }
+    }
 }

@@ -83,4 +83,28 @@ export class FriendService{
                 return false;
         }
     }
+
+    async unblockFriend(userId: string, friendId: string): Promise<boolean> {
+            try {
+                await this.prisma.blockedUsers.deleteMany({
+                    where: {
+                        blockingId: userId,
+                        blockedId: friendId,
+                    },
+                });
+        
+                // Create a new friendship record
+                await this.prisma.friendship.create({
+                    data: {
+                    userOne: userId,
+                    userTwo: friendId,
+                    },
+                });
+        
+                return true;
+            } catch (error) {
+                console.error('Error unblocking friend:', error.message);
+                return false;
+            }
+    }
 }
