@@ -8,7 +8,8 @@ import { RoomMessageDto } from "./dto/room-message.dto";
 export class RoomsController {
     constructor(private readonly roomsService: RoomsService) {}
 
-    @Get('conversation/:userId')
+    // userId for test
+    @Get('all/:userId')
     async getRoomsForUser(@Param('userId') userId: string): Promise<RoomDto[]> {
         return this.roomsService.getRoomsForUser(userId);
     }

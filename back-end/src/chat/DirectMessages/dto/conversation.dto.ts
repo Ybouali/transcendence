@@ -6,4 +6,5 @@ export class ConversationDto {
         username: string;
         avatarUrl: string;
     };
+    unreadCount: number;
 }

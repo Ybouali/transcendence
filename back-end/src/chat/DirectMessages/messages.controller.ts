@@ -13,6 +13,7 @@ export class MessagesController {
         ) {}
 
 
+    // userId for test
     @Get('conversation/me/:userId')
     async getConversation(
         @Param('userId') userId: string,
@@ -21,6 +22,7 @@ export class MessagesController {
         return conversation;
     }
 
+    // user1Id for test
     @Get('conversation/:user1Id/:user2Id')
     async getMessagesBetweenUsers(
         @Param('user1Id') user1Id: string,

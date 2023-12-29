@@ -48,6 +48,7 @@ export class MessagesService {
         });
 
         const usersMap = new Map<string, User>();
+        const unreadMessagesCountMap = new Map<string, number>();
 
         conversation.forEach((message) => {
             const senderId = message.senderId;
@@ -58,9 +59,15 @@ export class MessagesService {
             } else if (receiverId !== userId && !usersMap.has(receiverId)) {
                 usersMap.set(receiverId, message.receiver);
             }
+
+            if (receiverId === userId && !message.readed) {
+                const count = unreadMessagesCountMap.get(senderId) || 0;
+                unreadMessagesCountMap.set(senderId, count + 1);
+            }
         });
 
         const uniqueUsersConversation: ConversationDto[] = Array.from(usersMap.values()).map((user) => {
+            const unreadCount = unreadMessagesCountMap.get(user.id) || 0;
             return {
                 user: {
                     email: user.email,
@@ -68,6 +75,7 @@ export class MessagesService {
                     avatarUrl: user.avatarUrl,
                     id: user.id
                 },
+                unreadCount,
             };
         });
 
@@ -101,6 +109,28 @@ export class MessagesService {
                 },
             },
         });
+    
+        const user2ToUser1Messages = messages.filter(
+            (message) => message.senderId === user2Id && message.receiverId === user1Id
+        );
+
+        if (user2ToUser1Messages.length > 0) {
+            const updatedMessages = user2ToUser1Messages.map((message) => ({
+                ...message,
+                readed: true,
+            }));
+
+            await this.prisma.directMessage.updateMany({
+                where: {
+                    id: {
+                        in: updatedMessages.map((msg) => msg.id),
+                    },
+                },
+                data: {
+                    readed: true,
+                },
+            });
+        }
     
         const formattedMessages: DirectMessageDto[] = messages.map((message) => {
             return {
