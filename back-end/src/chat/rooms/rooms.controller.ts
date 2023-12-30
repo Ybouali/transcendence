@@ -20,4 +20,10 @@ export class RoomsController {
     ): Promise<RoomMessageDto[]> {
         return this.roomsService.getMessagesForRoom(roomId);
     }
+
+    @Get(':roomId/members')
+    async getRoomMembers(@Param('roomId') roomId: string): Promise<any> {
+        return this.roomsService.getRoomMembers(roomId);
+    }
+
 }

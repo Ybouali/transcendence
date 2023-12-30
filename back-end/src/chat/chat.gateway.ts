@@ -132,7 +132,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (recvSockets)
             destUserSockets = [...destUserSockets, ...recvSockets];
         destUserSockets.forEach((socket) => {
-        this.server.to(socket).emit('newMESSAGE', { code: 200, ...createMessageDto });
+            this.server.to(socket).emit('newMESSAGE', { ...createMessageDto });
         });
     }
 

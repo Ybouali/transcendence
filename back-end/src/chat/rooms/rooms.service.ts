@@ -469,4 +469,41 @@ export class RoomsService {
                 },
             });
         }
+
+        async getRoomMembers(roomId: string): Promise<any> {
+            const room = await this.prisma.chatRoom.findUnique({
+                where: {
+                    id: roomId,
+                },
+                include: {
+                    members: {
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    username: true,
+                                    email: true,
+                                    avatarUrl: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            if (!room) {
+                return {message: 'Room not found'};
+            }
+
+            const members= room.members.map((member) => {
+                return {
+                    id: member.user.id,
+                    username: member.user.username,
+                    email: member.user.email,
+                    avatarUrl: member.user.avatarUrl,
+                };
+            });
+
+            return members;
+        }
 }
