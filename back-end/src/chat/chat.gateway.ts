@@ -64,7 +64,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             if (createMessageDto.isRoom === false) {
                     const isBlocked = await this.messageService.isBlocked(createMessageDto.receiverId, createMessageDto.senderId);
                     if (isBlocked) {
-                        this.server.to(client.id).emit('newMESSAGE', { code: 404, message: 'The receiver has blocked you.' });
+                        this.server.to(client.id).emit('newMESSAGE_ERROR', { message: 'The receiver has blocked you.' });
                         return;
                     }
                     await this.messageService.createMessage(createMessageDto);
@@ -73,24 +73,28 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     if (recvSockets)
                         destUserSockets = [...destUserSockets, ...recvSockets];
                     destUserSockets.forEach((socket) => {
-                    this.server.to(socket).emit('newMESSAGE', { code: 200, ...createMessageDto });
+                    this.server.to(socket).emit('newMESSAGE', { ...createMessageDto });
                 });
             } else {
                 const room = await this.roomsService.findRoomById(createMessageDto.receiverId);
                 if (!room) {
-                    this.server.to(client.id).emit('newMESSAGE', {code: 404, message: `Room with ID ${createMessageDto.receiverId} not found`});
+                    this.server.to(client.id).emit('newMESSAGE_ERROR', { message: `Room with ID ${createMessageDto.receiverId} not found`});
                     return;
                 }
 
                 // check in map not db
                 if (this.isSenderMutedInRoom(createMessageDto.senderId, createMessageDto.receiverId)) {
-                    return ;
+                    this.server.to(client.id).emit('newMESSAGE_ERROR', { message: `You are muted in this room!`});
+                    return;
                 }
                 const isSenderMuted = await this.isUserMuted(createMessageDto.senderId, createMessageDto.receiverId);
 
                 if (isSenderMuted) return;
                 const isSenderBanned = await this.roomsService.isUserBanned(createMessageDto.senderId, createMessageDto.receiverId);
-                if (isSenderBanned) return;
+                if (isSenderBanned) {
+                        this.server.to(client.id).emit('newMESSAGE_ERROR', { message: `You are Banned in this room!`});
+                        return;
+                }
                 const banedUsers = await this.roomsService.getBanedUsers(createMessageDto.receiverId);
                 const banedUserIds = banedUsers.map((banedUser) => banedUser.userId);
                 const banedUserSockets = [];
@@ -107,7 +111,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     if (!banedUserIds.includes(user.userId)) {
                         const userSockets = SharedService.UsersSockets.get(user.userId);
                         userSockets?.forEach((socket) => {
-                            this.server.to(socket).emit('newMESSAGE', {code: 200, ...createMessageDto });
+                            this.server.to(socket).emit('newMESSAGE', {...createMessageDto });
                         });
                     }
                 });
@@ -116,7 +120,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         catch (error){
             // [test]
             this.logger.error('failure in message creation');
-            this.server.to(client.id).emit('newMessage', { code: 500, message: 'server: there is an error.' });
+            this.server.to(client.id).emit('newMESSAGE_ERROR', { message: 'server: there is an error.' });
         }
     }
 
@@ -315,7 +319,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
     }
 
-    @SubscribeMessage('muteUser')
+    @SubscribeMessage('muteUSER')
     async handleMuteUser(client: Socket, data: { userId: string, roomId: string, duration : number, adminId: string }): Promise<void> {
         // eslint-disable-next-line prefer-const
         let { userId, roomId, duration, adminId } = data;
