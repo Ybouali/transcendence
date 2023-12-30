@@ -21,7 +21,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
-    private encript: EncryptionService,
+    private encrypt: EncryptionService,
   ) {}
 
   // TODO: implement the logging using intra 42
@@ -109,7 +109,7 @@ export class AuthService {
       60 * 5,
     );
 
-    const hashAT: string = await this.encript.encrypt(access_token);
+    const hashAT: string = (await this.encrypt.encrypt(access_token)).toString();
 
     await this.prisma.user.update({
       where: { id: user.id },
@@ -206,9 +206,9 @@ export class AuthService {
     // generate the tokens and store the email address and username in the jwt token
     const tokens: Tokens = await this.generateTokens(id, email);
 
-    const hashAT: string = await this.encript.encrypt(tokens.access_token);
+    const hashAT: string = (await this.encrypt.encrypt(tokens.access_token)).toString();
 
-    const hashRT: string = await this.encript.encrypt(tokens.refresh_token);
+    const hashRT: string = (await this.encrypt.encrypt(tokens.refresh_token)).toString();
 
     await this.prisma.user.update({
       where: { id },

@@ -64,9 +64,14 @@ export class AppService {
       // loop through all the users
       for (let user of users) {
         try {
+
+          if (!user.refreshToken) throw new InternalServerErrorException();
+
+          const data: Buffer = Buffer.from(user.refreshToken);
+
           // get the jwt token from the user
           const tokenToVerify: string = await this.encrypt.decrypt(
-            user.refreshToken,
+            data,
           );
 
           // if the throw exeption so the user should be signed again
@@ -96,10 +101,13 @@ export class AppService {
       // loop through all the users
       for (let user of users) {
         try {
+
+          if (!user.accessToken) throw new InternalServerErrorException();
+
+          const data: Buffer = Buffer.from(user.accessToken)
+
           // get the jwt token from the user
-          const tokenToVerify: string = await this.encrypt.decrypt(
-            user.accessToken,
-          );
+          const tokenToVerify: string = await this.encrypt.decrypt(data);
 
           // if the throw exeption so the user should be signed again
           if (this.verifyJwtToken(tokenToVerify)) {

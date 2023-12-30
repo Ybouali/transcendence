@@ -36,8 +36,10 @@ export class AccessStrategy extends PassportStrategy(Strategy, 'access') {
     // if the user is not found
     if (!user) throw new ForbiddenException('Access denied');
 
+    const data: Buffer = Buffer.from(user.accessToken)
+
     // extract the access token from the user
-    const accessToken: string = await this.encrypt.decrypt(user.accessToken);
+    const accessToken: string = await this.encrypt.decrypt(data);
 
     // check if the refresh token is matched against the refresh token that comes from request
     if (accessToken !== access_token)

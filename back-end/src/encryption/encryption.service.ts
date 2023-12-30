@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import * as crypto from 'crypto';
+import { createDecipheriv, createCipheriv, randomBytes, scrypt } from 'crypto';
+import { promisify } from 'util';
+// import * as crypto from 'crypto';
 
 @Injectable()
 export class EncryptionService {
@@ -14,49 +16,41 @@ export class EncryptionService {
   // get the algorithem from the config service
   private readonly algo = process.env.ALGORITHM_ENCRYPT;
 
-  async encrypt(toEncrypt: string): Promise<string> {
-    // console.log(
-    //   '------------------------- ENCRIPT RUNNING  ------------------------',
-    // );
-    // generate the key
-    const key = crypto.scryptSync(this.secret, this.salt, 32);
+  async encrypt(toEncrypt: string): Promise<Buffer> {
 
-    const iv = crypto.randomBytes(16);
+    // generate key
+    const key = ((await promisify(scrypt)(this.secret, 'salt', 32)) as Buffer);
 
-    const cipher = crypto.createCipheriv(this.algo, key, iv);
+    // generate iv
+    const iv = randomBytes(16);
 
-    let encryptedData = cipher.update(toEncrypt, 'utf-8', 'hex');
+    // generate cipher
+    const cipher = createCipheriv(this.algo, key, iv);
 
-    encryptedData += cipher.final('hex');
+    // encrypt the data
+    const encryptedText = Buffer.concat([
+      cipher.update(toEncrypt),
+      cipher.final(),
+    ]);
 
-    const returnData = `${iv.toString('hex')}:${encryptedData}`;
-
-    // console.log({
-    //   key,
-    //   iv,
-    //   cipher,
-    //   encryptedData,
-    //   returnData,
-    // });
-
-    return returnData;
+    return encryptedText;
   }
 
-  async decrypt(toDecrypt: string): Promise<string> {
-    const [iv, data] = toDecrypt.split(':');
+  async decrypt(toDecrypt: Buffer): Promise<string> {
 
-    const key = crypto.scryptSync(this.secret, this.salt, 32);
+    // generate key
+    const key = ((await promisify(scrypt)(this.secret, 'salt', 32)) as Buffer);
 
-    const decipher = crypto.createDecipheriv(
-      this.algo,
-      key,
-      Buffer.from(iv, 'hex'),
-    );
+    // generate iv
+    const iv = randomBytes(16);
 
-    let decryptedData = decipher.update(data, 'hex', 'utf-8');
+    const decipher = createDecipheriv(this.algo, key, iv);
 
-    decryptedData += decipher.final('utf-8');
+    const decryptedText = Buffer.concat([
+      decipher.update(toDecrypt),
+      decipher.final(),
+    ]);
 
-    return decryptedData;
+    return decryptedText.toString();
   }
 }
