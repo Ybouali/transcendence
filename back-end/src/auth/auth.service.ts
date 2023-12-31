@@ -245,15 +245,42 @@ export class AuthService {
       form.append('client_secret', client_secret);
 
       // append code to header
-      form.append('code', client_secret);
+      form.append('code', code);
 
       // append client secret to header
       form.append('redirect_url', redirect_url);
 
+      console.log("--------------------- para -----------------------")
+      console.log({
+        grantType,
+        client_id,
+        client_secret,
+        code,
+        redirect_url
+      })
+      console.log("---------------------------------------------")
+      
       // make a req to the intra to get the access token
-      const { access_token } = JSON.parse(
-        await axios.post('https://api.intra.42.fr/oauth/token', form),
-      );
+      let access_token: any;
+
+      try {
+        const dataIntra: any = await axios.post('https://api.intra.42.fr/oauth/token/', form)
+        console.log(dataIntra);
+        // access_token = JSON.parse(dataIntra).access_token
+      } catch (error) {
+        console.log("--------------- hello ------------------------------")
+        console.log(error)
+        // console.log(error.data.error_description)
+        console.log("---------------------------------------------")
+      }
+
+      console.log("---------------------------------------------")
+
+      console.log({
+        access_token
+      })
+
+      console.log("---------------------------------------------")
 
       if (access_token === undefined) {
         throw new NotAcceptableException();
@@ -282,7 +309,9 @@ export class AuthService {
 
       return extractData;
     } catch (error) {
+      console.log("))))))))))))))))))))")
       this.logger.error(error.message);
+      console.log("))))))))))))))))))))")
       throw new NotAcceptableException();
     }
   }

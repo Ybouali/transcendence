@@ -13,6 +13,7 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/home/" element={<Home />} />
           <Route Component={NotFound} />
+          <Route path="/notfound" element={<NotFound />} />
         </Routes>
       </Router>
     </div>
