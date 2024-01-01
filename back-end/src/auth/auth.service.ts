@@ -224,63 +224,68 @@ export class AuthService {
       const form = new FormData();
 
       // get grant type
-      const grantType: string = process.env.INTRA_GRANT_TYPE;
+      const grant_type: string = process.env.INTRA_GRANT_TYPE;
 
       // get client id
-      const client_id: string = process.env.INTRA_CLIENT_ID;
+      // const client_id: string = process.env.INTRA_CLIENT_ID;
+      const client_id: string = "u-s4t2ud-7faa4560e0e2334b4575db8d45660e78b20d4d78eed5db29f064df31915b9ac0";
 
       // get client secret
-      const client_secret: string = process.env.INTRA_CLIENT_SECRET;
+      // const client_secret: string = process.env.INTRA_CLIENT_SECRET;
+      const client_secret: string = "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";
 
       // get redirect url
-      const redirect_url: string = process.env.INTRA_REDIRECT_URL;
+      const redirect_uri: string = "http://192.168.1.110/home/";
 
       // append grant type to header
-      form.append('grant_type', grantType);
+      // form.append('grant_type', grant_type);
 
       // append client id to header
-      form.append('client_id', client_id);
+      // form.append('client_id', client_id);
 
       // append client secret to header
-      form.append('client_secret', client_secret);
+      // form.append('client_secret', client_secret);
 
       // append code to header
-      form.append('code', code);
+      // form.append('code', code);
 
       // append client secret to header
-      form.append('redirect_url', redirect_url);
+      // form.append('redirect_uri', redirect_uri);
+      
+      // make a req to the intra to get the access token
 
-      console.log("--------------------- para -----------------------")
+      console.log("------------------------------ HERE WE GO ---------------------------------------")
       console.log({
-        grantType,
+        grant_type,
         client_id,
         client_secret,
         code,
-        redirect_url
-      })
-      console.log("---------------------------------------------")
-      
-      // make a req to the intra to get the access token
-      let access_token: any;
-
-      try {
-        const dataIntra: any = await axios.post('https://api.intra.42.fr/oauth/token/', form)
-        console.log(dataIntra);
-        // access_token = JSON.parse(dataIntra).access_token
-      } catch (error) {
-        console.log("--------------- hello ------------------------------")
-        console.log(error)
-        // console.log(error.data.error_description)
-        console.log("---------------------------------------------")
-      }
-
-      console.log("---------------------------------------------")
-
-      console.log({
-        access_token
+        redirect_uri,
       })
 
-      console.log("---------------------------------------------")
+      await fetch(
+        'https://api.intra.42.fr/oauth/token/',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          body: JSON.stringify({
+            'grant_type': grant_type,
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'code': code,
+            'redirect_uri': redirect_uri
+          }
+        )
+      })
+      .then(response => response.json())
+      .then(data => console.log(data))
+      .catch(error => console.error('Error:', error))
+
+      console.log("-----------------------------------------------------------------------------------")
+
+      const access_token = "data.access_token";
 
       if (access_token === undefined) {
         throw new NotAcceptableException();
@@ -309,9 +314,7 @@ export class AuthService {
 
       return extractData;
     } catch (error) {
-      console.log("))))))))))))))))))))")
       this.logger.error(error.message);
-      console.log("))))))))))))))))))))")
       throw new NotAcceptableException();
     }
   }

@@ -7,8 +7,6 @@ function Home() {
 
     // Get the value of a specific parameter
     const param1Value = urlParams.get('code');
-
-
   return (
     <div>
         <h1>{param1Value}</h1>

@@ -10,6 +10,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EncryptionService } from './encryption/encryption.service';
 import { EncryptionModule } from './encryption/encryption.module';
 import { HistoryGameModule } from './history-game/history-game.module';
+import { AxiosModule } from './axios/axios.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { HistoryGameModule } from './history-game/history-game.module';
     TowFactorAuthModule,
     EncryptionModule,
     HistoryGameModule,
+    AxiosModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtService, EncryptionService],
