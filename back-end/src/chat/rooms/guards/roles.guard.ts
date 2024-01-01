@@ -10,6 +10,7 @@ export class RolesGuard implements CanActivate{
 	
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const req = context.switchToHttp().getRequest();
+		// req.params.userId just for test
 		const roleOfUser = await this.roomsService.getUserRoleInRoom(req.params.userId, req.params.roomId);
 		if (!roleOfUser) { 
 			return false; 
