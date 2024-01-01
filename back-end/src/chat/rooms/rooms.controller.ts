@@ -3,6 +3,9 @@ import { Controller, Get, Param } from "@nestjs/common";
 import { RoomsService } from "./rooms.service";
 import { RoomDto } from "./dto/room-conv.dto";
 import { RoomMessageDto } from "./dto/room-message.dto";
+// import { RolesGuard } from "./guards/roles.guard";
+// import { Role } from "./guards/role.enum";
+// import { Roles } from "./guards/roles";
 
 @Controller('rooms')
 export class RoomsController {
@@ -21,8 +24,10 @@ export class RoomsController {
         return this.roomsService.getMessagesForRoom(roomId);
     }
 
-    @Get(':roomId/members')
-    async getRoomMembers(@Param('roomId') roomId: string): Promise<any> {
+    // @UseGuards(RolesGuard)
+    // @Roles(Role.Member, Role.Admin, Role.Owner)
+    @Get(':userId/:roomId/members')
+    async getRoomMembers(@Param('userId') userId: string, @Param('roomId') roomId: string): Promise<any> {
         return this.roomsService.getRoomMembers(roomId);
     }
 

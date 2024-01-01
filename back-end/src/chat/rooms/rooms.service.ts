@@ -476,34 +476,119 @@ export class RoomsService {
                     id: roomId,
                 },
                 include: {
-                    members: {
-                        include: {
-                            user: {
-                                select: {
-                                    id: true,
-                                    username: true,
-                                    email: true,
-                                    avatarUrl: true,
-                                },
+                    owner: {
+                        select: {
+                            id: true,
+                            username: true,
+                            email: true,
+                            avatarUrl: true,
+                        },
+                    },
+                    AdminUsers: {
+                    select: {
+                        user: {
+                            select: {
+                                id: true,
+                                username: true,
+                                email: true,
+                                avatarUrl: true,
                             },
                         },
                     },
+                    },
+                    members: {
+                    select: {
+                        user: {
+                            select: {
+                                id: true,
+                                username: true,
+                                email: true,
+                                avatarUrl: true,
+                            },
+                        },
+                    },
+                    },
+                },
+                });
+            
+                if (!room) {
+                    return { message: 'Room not found' };
+                }
+            
+                const members = {
+                    Owner: [],
+                    Admin: [],
+                    Member: [],
+                };
+            
+                if (room.owner) {
+                    members.Owner.push({
+                        id: room.owner.id,
+                        username: room.owner.username,
+                        email: room.owner.email,
+                        avatarUrl: room.owner.avatarUrl,
+                    });
+                }
+            
+                room.AdminUsers.forEach((admin) => {
+                if (room.owner?.id !== admin.user.id) {
+                        members.Admin.push({
+                        id: admin.user.id,
+                        username: admin.user.username,
+                        email: admin.user.email,
+                        avatarUrl: admin.user.avatarUrl,
+                    });
+                }
+                });
+            
+                room.members.forEach((member) => {
+                    const isAdmin = room.AdminUsers.some(
+                        (admin) => admin.user.id === member.user.id
+                    );
+                    if (!isAdmin) {
+                        members.Member.push({
+                        id: member.user.id,
+                        username: member.user.username,
+                        email: member.user.email,
+                        avatarUrl: member.user.avatarUrl,
+                        });
+                    }
+                });
+            
+                return members;
+            }
+            
+        async  getUserRoleInRoom(userId: string, roomId: string): Promise<string | boolean> {
+            const room = await this.prisma.chatRoom.findUnique({
+                where: { id: roomId },
+                include: {
+                    owner: true,
+                    members: {
+                        where: { userId: userId },
+                    },
+                    AdminUsers: {
+                        where: { userId: userId },
+                    },
                 },
             });
-
+        
             if (!room) {
-                return {message: 'Room not found'};
+                return false;
             }
-
-            const members= room.members.map((member) => {
-                return {
-                    id: member.user.id,
-                    username: member.user.username,
-                    email: member.user.email,
-                    avatarUrl: member.user.avatarUrl,
-                };
-            });
-
-            return members;
+        
+            if (room.ownerID === userId) {
+                return 'Owner';
+            }
+        
+            if (room.AdminUsers.length > 0) {
+                return 'Admin';
+            }
+        
+            if (room.members.length > 0) {
+                return 'Member';
+            }
+        
+            return false;
         }
+        
 }
