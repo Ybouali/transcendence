@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateRoomDto } from "./dto/create-room.dto";
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ChatRoom, Member, MutedUsers } from "@prisma/client";
 import { RoomDto } from "./dto/room-conv.dto";
 import { RoomMessageDto } from "./dto/room-message.dto";
@@ -591,4 +591,110 @@ export class RoomsService {
             return false;
         }
         
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        async kickUserfromRoomHTTP(adminId: string, roomId: string, userId: string): Promise<any> {
+                const room = await this.prisma.chatRoom.findUnique({
+                    where: { id: roomId },
+                });
+        
+                if (!room) {
+                    throw new NotFoundException('Room does not exist.');
+                }
+        
+                if (room.ownerID === userId) {
+                    throw new BadRequestException('Cannot kick the owner of the room.');
+                }
+        
+                const isMember = await this.prisma.member.findFirst({
+                    where: {
+                        userId: userId,
+                        chatRoomId: roomId,
+                    },
+                });
+        
+                if (!isMember) {
+                    throw new BadRequestException('User is not a member of this room.');
+                }
+        
+                const isAdmin = await this.prisma.admins.findFirst({
+                    where: {
+                        userId: adminId,
+                        roomId: roomId,
+                    },
+                });
+        
+                if (!isAdmin) {
+                    throw new BadRequestException('You are not an admin in this room.');
+                }
+        
+                await this.prisma.member.deleteMany({
+                    where: {
+                        userId: userId,
+                        chatRoomId: roomId,
+                    },
+                });
+
+                const wasAdmin = await this.prisma.admins.findFirst({
+                    where: {
+                        userId: userId,
+                        roomId: roomId,
+                    },
+                });
+
+                if (wasAdmin) {
+                    await this.prisma.admins.delete({
+                        where: {
+                            userId_roomId: {
+                                userId: userId,
+                                roomId: roomId,
+                            },
+                        },
+                    });
+                }
+        }
+
+
+        async banUserInRoomHTTP(adminId: string, roomId: string, bannedId: string): Promise<any> {
+                const room = await this.prisma.chatRoom.findUnique({
+                    where: { id: roomId },
+                });
+        
+                if (!room) {
+                    throw new NotFoundException('Room does not exist.');
+                }
+        
+                if (room.ownerID === bannedId) {
+                    throw new BadRequestException('Cannot ban the owner of the room.');
+                }
+        
+                const isMember = await this.prisma.member.findFirst({
+                    where: {
+                        userId: bannedId,
+                        chatRoomId: roomId,
+                    },
+                });
+        
+                if (!isMember) {
+                    throw new BadRequestException('User is not a member of this room.');
+                }
+        
+                const isAdmin = await this.prisma.admins.findFirst({
+                    where: {
+                        userId: adminId,
+                        roomId: roomId,
+                    },
+                });
+        
+                if (!isAdmin) {
+                    throw new BadRequestException('You are not an admin in this room.');
+                }
+        
+                await this.prisma.banedUsers.create({
+                    data: {
+                        userId: bannedId,
+                        roomId: roomId,
+                    },
+                });
+        }
 }

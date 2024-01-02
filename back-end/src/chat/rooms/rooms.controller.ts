@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, InternalServerErrorException, NotFoundException, Param, Post, UseGuards} from "@nestjs/common";
+import { Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, Post, UseGuards} from "@nestjs/common";
 import { RoomsService } from "./rooms.service";
 import { RoomDto } from "./dto/room-conv.dto";
 import { RoomMessageDto } from "./dto/room-message.dto";
@@ -46,6 +46,30 @@ export class RoomsController {
                 throw error;
             }
             throw new InternalServerErrorException('Internal server error');
+        }
+    }
+
+    @UseGuards(RolesGuard)
+    @Roles(Role.Admin, Role.Owner)
+    @Post(':userId/:roomId/kick')
+    async kickMember(@Param('userId') userId: string ,@Body() room1: { adminId: string; roomId: string; userId: string })
+    {
+        try {
+            await this.roomsService.kickUserfromRoomHTTP(room1.adminId, room1.roomId, room1.userId);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    @UseGuards(RolesGuard)
+    @Roles(Role.Admin, Role.Owner)
+    @Post(':userId/:roomId/ban')
+    async banMember(@Param('userId') userId: string ,@Body() room1: { adminId: string; roomId: string; bannedId: string })
+    {
+        try {
+            await  this.roomsService.banUserInRoomHTTP(room1.adminId, room1.roomId, room1.bannedId);
+        } catch (error) {
+            throw error;
         }
     }
 }
