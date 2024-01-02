@@ -74,11 +74,22 @@ export class RoomsController {
     }
 
     @UseGuards(RolesGuard)
-    @Roles(Role.Admin, Role.Owner)
+    @Roles(Role.Owner)
     @Post(':userId/:roomId/setAdmin')
 	async setAdminToRoom(@Body() room: { adminId: string; roomId: string; newAdmin: string }) {
         try {
             await this.roomsService.addAdminToRoomHTTP(room.adminId, room.roomId, room.newAdmin);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    @UseGuards(RolesGuard)
+    @Roles(Role.Owner, Role.Admin, Role.Member)
+    @Post(':userId/:roomId/leaveROOM')
+    async leaveRoom(@Body() data: { userId: string, roomId: string }): Promise<void> {
+        try {
+            await this.roomsService.leaveRoomHTTP(data);
         } catch (error) {
             throw error;
         }

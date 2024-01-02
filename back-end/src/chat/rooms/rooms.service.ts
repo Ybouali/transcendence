@@ -447,6 +447,9 @@ export class RoomsService {
         }
 
         async deleteRoom(roomId: string): Promise<void> {
+            await this.prisma.roomMessage.deleteMany({
+                where: { roomId: roomId },
+            });
             await this.prisma.chatRoom.delete({
                 where: { id: roomId },
             });
@@ -728,5 +731,30 @@ export class RoomsService {
                     roomId: roomId,
                 },
             });
+        }
+
+        async leaveRoomHTTP(data: { userId: string, roomId: string }): Promise<void> {
+            const { userId, roomId } = data;
+            const isOwner = await this.isRoomOwner(userId, roomId);
+            const isAdmin = await this.isUserAdmin(userId, roomId);
+            
+            await this.removeUserFromRoom(userId, roomId);
+    
+            if (isOwner) {
+                await this.assignNewOwner(userId, roomId);
+            }
+            
+            if (isAdmin) {
+                await this.removeUserFromAdmins(userId, roomId);
+            }
+    
+            await this.removeUserFromBannedUsers(userId, roomId);
+            await this.removeUserFromMutedUsers(userId, roomId);
+    
+            const remainingMembers = await this.getRoomMembersCount(roomId);
+    
+            if (remainingMembers === 0) {
+                await this.deleteRoom(roomId);
+            }
         }
 }
