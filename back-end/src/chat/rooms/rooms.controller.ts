@@ -72,4 +72,15 @@ export class RoomsController {
             throw error;
         }
     }
+
+    @UseGuards(RolesGuard)
+    @Roles(Role.Admin, Role.Owner)
+    @Post(':userId/:roomId/setAdmin')
+	async setAdminToRoom(@Body() room: { adminId: string; roomId: string; newAdmin: string }) {
+        try {
+            await this.roomsService.addAdminToRoomHTTP(room.adminId, room.roomId, room.newAdmin);
+        } catch (error) {
+            throw error;
+        }
+    }
 }

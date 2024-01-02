@@ -697,4 +697,36 @@ export class RoomsService {
                     },
                 });
         }
+
+
+        async addAdminToRoomHTTP(ownerId: string, roomId: string, adminId: string): Promise<void> {
+            const existingAdmin = await this.prisma.admins.findFirst({
+                where: {
+                    userId: adminId,
+                    roomId: roomId,
+                },
+            });
+        
+            if (existingAdmin) {
+                throw new BadRequestException('User is already an admin in this room');
+            }        
+
+            const isMember = await this.prisma.member.findFirst({
+                where: {
+                    userId: adminId,
+                    chatRoomId: roomId,
+                },
+            });
+        
+            if (!isMember) {
+                throw new BadRequestException('User is not a member of this room');
+            }
+
+            await this.prisma.admins.create({
+                data: {
+                    userId: adminId,
+                    roomId: roomId,
+                },
+            });
+        }
 }
