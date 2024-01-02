@@ -94,4 +94,13 @@ export class RoomsController {
             throw error;
         }
     }
+
+    @Get('/getAllPublicRooms')
+    async getAllPublicRooms(): Promise<any> {
+        try {
+            return this.roomsService.getAllPublicRooms();
+        } catch (error) {
+            throw error;
+        }
+    }
 }

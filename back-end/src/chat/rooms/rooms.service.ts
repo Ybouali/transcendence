@@ -757,4 +757,21 @@ export class RoomsService {
                 await this.deleteRoom(roomId);
             }
         }
+
+        async getAllPublicRooms(): Promise<any[]> {
+            const publicRooms = await this.prisma.chatRoom.findMany({
+                where: {
+                    roomType: 'Public',
+                },
+                select: {
+                    roomName: true,
+                    ownerID: true,
+                    isProtected: true,
+                    roomType: true,
+                    image: true,
+                },
+            });
+        
+            return publicRooms;
+        }
 }
