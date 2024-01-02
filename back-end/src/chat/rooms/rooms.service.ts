@@ -774,4 +774,28 @@ export class RoomsService {
         
             return publicRooms;
         }
+
+        async joinRoomHTTP(newMember: { userId: string, roomId: string, password: string }) {
+                const room = await this.findRoomById(newMember.roomId);
+                if (!room) {
+                    throw new NotFoundException('Room not found');
+                }
+                if (room.roomType !== 'Public') {
+                    throw new BadRequestException('This room is Private.');
+                }
+                const memberCount = await this.prisma.member.count({
+                    where: {
+                        userId: newMember.userId,
+                        chatRoomId: newMember.roomId,
+                    },
+                });
+                if (memberCount > 0){
+                    throw new BadRequestException('User is already a member of this room');
+                }
+                if (room.isProtected === false){
+                    await this.addUserToRoom(newMember.roomId, newMember.userId);
+                } else {
+                    // later
+                }
+        }
 }

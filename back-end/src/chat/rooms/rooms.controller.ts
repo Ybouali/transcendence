@@ -103,4 +103,13 @@ export class RoomsController {
             throw error;
         }
     }
+
+    @Post('/joinROOM')
+    async joinRoom(@Body() data: { userId: string, roomId: string, password: string }): Promise<void> {
+        try {
+            await this.roomsService.joinRoomHTTP(data);
+        } catch (error) {
+            throw error;
+        }
+    }
 }
