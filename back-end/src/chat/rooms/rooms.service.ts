@@ -835,4 +835,32 @@ export class RoomsService {
             await this.addUserToRoom(newRoom.id, createRoom.ownerID);
             await this.addUserAsAdmin(newRoom.id, createRoom.ownerID);
         }
+
+
+        async updateRoomHTTP(roomId: string, updateRoom: {roomName: string, password: string, roomType: string}): Promise<ChatRoom | null> {
+            let room: any;
+            if (updateRoom.roomType === 'Protected') {
+                const hashedPassword = await this.hashPassword(updateRoom.password);
+                room = await this.prisma.chatRoom.update({
+                where: { id: roomId },
+                    data: {
+                        roomName: updateRoom.roomName,
+                        isProtected: true,
+                        password: hashedPassword,
+                    },
+                });
+
+            } else {
+                room = await this.prisma.chatRoom.update({
+                    where: { id: roomId },
+                        data: {
+                            roomName: updateRoom.roomName,
+                            roomType: updateRoom.roomType,
+                        },
+                    });
+            }
+            delete room.password;
+            return room;
+        }
+
 }

@@ -122,4 +122,15 @@ export class RoomsController {
             throw error;
         }
 	}
+
+    @UseGuards(RolesGuard)
+    @Roles(Role.Owner)
+    @Post(':userId/:roomId/updateRoom')
+    async updateRoom(@Param('roomId') roomId: string,@Body() updateRoom: {roomName: string, password: string, roomType: string}) {
+        try {
+            return await this.roomsService.updateRoomHTTP(roomId, updateRoom);
+        } catch (error) {
+            throw error;
+        }
+	}
 }
