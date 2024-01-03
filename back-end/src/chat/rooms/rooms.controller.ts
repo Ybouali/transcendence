@@ -7,6 +7,7 @@ import { RoomMessageDto } from "./dto/room-message.dto";
 import { RolesGuard } from "./guards/roles.guard";
 import { Role } from "./guards/role.enum";
 import { Roles } from "./guards/roles";
+import { CreateRoomDto } from "./dto/create-room.dto";
 
 @Controller('rooms')
 export class RoomsController {
@@ -104,7 +105,7 @@ export class RoomsController {
         }
     }
 
-    @Post('/joinROOM')
+    @Post('/joinRoom')
     async joinRoom(@Body() data: { userId: string, roomId: string, password: string }): Promise<void> {
         try {
             await this.roomsService.joinRoomHTTP(data);
@@ -112,4 +113,13 @@ export class RoomsController {
             throw error;
         }
     }
+
+    @Post('/createRoom')
+    async createRoom(@Body() createRoomDto: CreateRoomDto) {
+        try {
+            await this.roomsService.createRoomHTTP(createRoomDto);
+        } catch (error) {
+            throw error;
+        }
+	}
 }

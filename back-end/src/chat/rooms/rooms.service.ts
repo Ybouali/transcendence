@@ -1,11 +1,12 @@
 /* eslint-disable prettier/prettier */
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateRoomDto } from "./dto/create-room.dto";
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { ChatRoom, Member, MutedUsers } from "@prisma/client";
 import { RoomDto } from "./dto/room-conv.dto";
 import { RoomMessageDto } from "./dto/room-message.dto";
 import { CreateMessageDto } from "./dto/create-message.dto";
+import * as bcrypt from 'bcrypt';
 
 
 @Injectable()
@@ -795,7 +796,43 @@ export class RoomsService {
                 if (room.isProtected === false){
                     await this.addUserToRoom(newMember.roomId, newMember.userId);
                 } else {
-                    // later
+                    const isPasswordMatch = await this.compareRoomPassword(room, newMember.password);
+                    if (isPasswordMatch) {
+                        await this.addUserToRoom(newMember.roomId, newMember.userId);
+                    } else {
+                        throw new BadRequestException('Incorrect room password');
+                    }
                 }
+        }
+
+        async compareRoomPassword(room: ChatRoom, enteredPassword: string): Promise<boolean> {
+            try {
+                return await bcrypt.compare(enteredPassword, room.password || '');
+            } catch (error) {
+                throw new InternalServerErrorException('Error comparing room password');
+            }
+        }
+
+        async hashPassword(password: string): Promise<string> {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            return hashedPassword;
+        }
+
+        async createRoomHTTP (createRoom: CreateRoomDto) {
+            let newRoom;
+            const roomType = (createRoom.roomType === 'Private' ? 'Private' : 'Public');
+            if (createRoom.isProtected){
+                const hashedPassword = await this.hashPassword(createRoom.password);;
+				newRoom = await this.createRoom({...createRoom, roomType, password:hashedPassword});
+            } else {
+                newRoom = await this.createRoom({...createRoom, roomType});
+                if (createRoom.users && createRoom.users.length > 0) {
+                    for (const userId of createRoom.users) {
+                        await this.addUserToRoom(newRoom.id, userId);
+                    }
+                }
+            }
+            await this.addUserToRoom(newRoom.id, createRoom.ownerID);
+            await this.addUserAsAdmin(newRoom.id, createRoom.ownerID);
         }
 }

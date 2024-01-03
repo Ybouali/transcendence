@@ -7,4 +7,5 @@ export class CreateRoomDto {
     isProtected:    boolean;
     ownerID:        string;
     image?:         string;
+    users?:         string[];
 }
