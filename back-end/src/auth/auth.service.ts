@@ -27,11 +27,17 @@ export class AuthService {
   // TODO: implement the logging using intra 42
   async loginInra(code: string): Promise<Tokens> {
     try {
-      const dataIntra: IntraUserDto = await this.fetchDataUserFromIntra(code);
+
+      // get the user data from intra 42 api's
+      const dataIntra: IntraUserDto = await this.fetchDataUserFromIntra(code);      
 
       if (dataIntra === undefined) {
         throw new NotAcceptableException();
       }
+
+      console.log("{ dataIntra }")
+      console.log({ dataIntra })
+      console.log("{ dataIntra }")
 
       // check if the user is already in the database by fetching the user by email address
 
@@ -227,94 +233,76 @@ export class AuthService {
       const grant_type: string = process.env.INTRA_GRANT_TYPE;
 
       // get client id
-      // const client_id: string = process.env.INTRA_CLIENT_ID;
-      const client_id: string = "u-s4t2ud-7faa4560e0e2334b4575db8d45660e78b20d4d78eed5db29f064df31915b9ac0";
+      const client_id: string = process.env.INTRA_CLIENT_ID;
 
       // get client secret
-      // const client_secret: string = process.env.INTRA_CLIENT_SECRET;
-      const client_secret: string = "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";
+      const client_secret: string = process.env.INTRA_CLIENT_SECRET;
 
       // get redirect url
-      const redirect_uri: string = "http://192.168.1.110/home/";
+      const redirect_uri: string = "http://192.168.98.123/home";
 
       // append grant type to header
-      // form.append('grant_type', grant_type);
+      form.append('grant_type', grant_type);
 
       // append client id to header
-      // form.append('client_id', client_id);
+      form.append('client_id', client_id);
 
       // append client secret to header
-      // form.append('client_secret', client_secret);
+      form.append('client_secret', client_secret);
 
       // append code to header
-      // form.append('code', code);
+      form.append('code', code);
 
       // append client secret to header
-      // form.append('redirect_uri', redirect_uri);
+      form.append('redirect_uri', redirect_uri);
       
       // make a req to the intra to get the access token
+      const res = await axios.post('https://api.intra.42.fr/oauth/token/', form)
 
-      console.log("------------------------------ HERE WE GO ---------------------------------------")
-      console.log({
-        grant_type,
-        client_id,
-        client_secret,
-        code,
-        redirect_uri,
-      })
+      // get the access_token from data of intra 42
+      const { access_token } = res.data;
 
-      await fetch(
-        'https://api.intra.42.fr/oauth/token/',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-          body: JSON.stringify({
-            'grant_type': grant_type,
-            'client_id': client_id,
-            'client_secret': client_secret,
-            'code': code,
-            'redirect_uri': redirect_uri
-          }
-        )
-      })
-      .then(response => response.json())
-      .then(data => console.log(data))
-      .catch(error => console.error('Error:', error))
-
-      console.log("-----------------------------------------------------------------------------------")
-
-      const access_token = "data.access_token";
-
+      // check if the access token is here
       if (access_token === undefined) {
         throw new NotAcceptableException();
       }
 
       // add the bearer string to the access token
-      const hreaderAccessToken = 'Bearer ' + access_token;
+      const headerAccessToken = 'Bearer ' + access_token;
 
-      const dataInra = JSON.parse(
-        await axios.get('https://api.intra.42.fr/v2/me', {
-          headers: {
-            Authorization: hreaderAccessToken,
-          },
-        }),
-      );
+      // get info of the user with his access token
+      const dataInra = await axios.get('https://api.intra.42.fr/v2/me', {
+        headers: {
+          Authorization: headerAccessToken
+        }
+      });
 
-      let extractData: IntraUserDto;
+      // extract data from dataIntra
+      const { usual_full_name, login, email } = dataInra.data;
 
-      // init the data 
-      extractData.email = dataInra.email;
-      extractData.login = dataInra.login;
-      extractData.fullName = dataInra.usual_full_name;
-      extractData.avatarNameUrl = dataInra.image.link;
+      const { link } = dataInra.data.image;
 
-      console.log({ extractData });
+      let extractedData: IntraUserDto = new IntraUserDto();
 
-      return extractData;
+      // store the data 
+      extractedData.login = login;
+      extractedData.fullName = usual_full_name;
+      extractedData.avatarNameUrl = link;
+      extractedData.email = email;
+
+      // check if the data is here
+      if (
+        extractedData.email === undefined ||
+        extractedData.avatarNameUrl === undefined ||
+        extractedData.fullName === undefined ||
+        extractedData.login === undefined
+      ) {
+        throw new NotAcceptableException();
+      }
+
+      return extractedData;
     } catch (error) {
-      this.logger.error(error.message);
+      this.logger.error(error);
       throw new NotAcceptableException();
     }
   }

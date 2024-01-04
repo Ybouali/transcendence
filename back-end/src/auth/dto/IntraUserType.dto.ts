@@ -1,6 +1,6 @@
 export class IntraUserDto {
-  login: string;
-  email: string;
-  fullName: string;
-  avatarNameUrl: string;
+  login: string | undefined;
+  email: string | undefined;
+  fullName: string | undefined;
+  avatarNameUrl: string | undefined;
 }
