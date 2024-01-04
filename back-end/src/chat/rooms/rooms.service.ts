@@ -7,6 +7,7 @@ import { RoomDto } from "./dto/room-conv.dto";
 import { RoomMessageDto } from "./dto/room-message.dto";
 import { CreateMessageDto } from "./dto/create-message.dto";
 import * as bcrypt from 'bcrypt';
+import { SharedService } from "../shared/shared.service";
 
 
 @Injectable()
@@ -861,6 +862,41 @@ export class RoomsService {
             }
             delete room.password;
             return room;
+        }
+
+
+        private async muteUser(userId: string, roomId: string, duration: number): Promise<void> {
+            if (!SharedService.mutedUsers.has(userId)) {
+                SharedService.mutedUsers.set(userId, new Map());
+            }
+    
+            const userRooms = SharedService.mutedUsers.get(userId);
+            const userUnmuteTimers = userRooms.get(roomId);
+    
+            if (userUnmuteTimers) {
+                clearTimeout(userUnmuteTimers);
+            }
+    
+            const unmuteTimer = setTimeout(() => {
+                this.unmuteUser(userId, roomId);
+            }, duration * 60 * 1000);
+    
+            userRooms.set(roomId, unmuteTimer);
+        }
+    
+        private async unmuteUser(userId: string, roomId: string): Promise<void> {
+            const userRooms = SharedService.mutedUsers.get(userId);
+            if (userRooms && userRooms.has(roomId)) {
+                clearTimeout(userRooms.get(roomId));
+                userRooms.delete(roomId);
+            }
+        }
+    
+        async handleMuteUser(data: { userId: string, roomId: string, duration : number }): Promise<void> {
+            // eslint-disable-next-line prefer-const
+            let { userId, roomId, duration } = data;
+            duration = 1;
+            this.muteUser(userId, roomId, duration);
         }
 
 }

@@ -133,4 +133,15 @@ export class RoomsController {
             throw error;
         }
 	}
+
+	@UseGuards(RolesGuard)
+	@Roles(Role.Owner, Role.Admin)
+	@Post(':userId/:roomId/mute')
+	muteUser(@Body() data: { userId: string, roomId: string, duration : number }) {
+        try {
+            return this.roomsService.handleMuteUser(data);
+        } catch (error) {
+            throw error;
+        }
+	}
 }
