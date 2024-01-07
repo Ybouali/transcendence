@@ -8,13 +8,14 @@ CREATE TABLE "User" (
     "fullName" TEXT NOT NULL,
     "avatarName" TEXT NOT NULL,
     "avatarupdated" BOOLEAN NOT NULL,
-    "avatarNamePath" TEXT,
+    "avatarNamePath" TEXT NOT NULL,
     "isOnLine" BOOLEAN NOT NULL,
     "accessToken" TEXT NOT NULL,
     "refreshToken" TEXT NOT NULL,
-    "twoFactor" BOOLEAN,
-    "qrCodeFileName" TEXT,
-    "towFactorSecret" TEXT,
+    "twoFactor" BOOLEAN NOT NULL,
+    "qrCodeFileName" TEXT NOT NULL,
+    "towFactorSecret" TEXT NOT NULL,
+    "historyGameId" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -23,8 +24,6 @@ CREATE TABLE "User" (
 CREATE TABLE "HistoryGame" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "userId1" TEXT NOT NULL,
-    "userId2" TEXT NOT NULL,
     "winnerId" TEXT NOT NULL,
     "startTimeGame" TIMESTAMP(3) NOT NULL,
     "endTimeGame" TIMESTAMP(3) NOT NULL,
@@ -39,3 +38,6 @@ CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_historyGameId_key" ON "User"("historyGameId");

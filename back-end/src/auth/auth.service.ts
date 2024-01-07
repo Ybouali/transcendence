@@ -28,16 +28,14 @@ export class AuthService {
   async loginInra(code: string): Promise<Tokens> {
     try {
 
+      
+      
       // get the user data from intra 42 api's
-      const dataIntra: IntraUserDto = await this.fetchDataUserFromIntra(code);      
-
+      const dataIntra: IntraUserDto = await this.fetchDataUserFromIntra(code);
+      
       if (dataIntra === undefined) {
         throw new NotAcceptableException();
       }
-
-      console.log("{ dataIntra }")
-      console.log({ dataIntra })
-      console.log("{ dataIntra }")
 
       // check if the user is already in the database by fetching the user by email address
 
@@ -50,26 +48,35 @@ export class AuthService {
         return await this.returnTokes(user.id, user.email);
       }
 
+      console.log("------------------- here we go -------------------")
+      
       const newUser: User = await this.prisma.user.create({
         data: {
           username: dataIntra.login,
           email: dataIntra.email,
           fullName: dataIntra.fullName,
           avatarName: dataIntra.avatarNameUrl,
+          avatarNamePath: "nothing",
           avatarupdated: false,
           isOnLine: true,
-          accessToken: 'token',
-          refreshToken: 'token',
+          accessToken: 'offline',
+          refreshToken: 'logout',
+          twoFactor: false,
+          qrCodeFileName: "nothing",
+          towFactorSecret: "nothing"
         }
       });
+      console.log("------------------- here we go -------------------")
 
       // make sure the user is created and return tokens
       if (newUser) {
-        return await this.returnTokes(user.id, user.email);
+        return await this.returnTokes(newUser.id, newUser.email);
       }
       else {
         throw new NotAcceptableException();
       }
+
+      
 
     } catch (error) {
       this.logger.error(error.message);
@@ -115,7 +122,7 @@ export class AuthService {
       60 * 5,
     );
 
-    const hashAT: string = (await this.encrypt.encrypt(access_token)).toString();
+    const hashAT: string = (await this.encrypt.encrypt(access_token));
 
     await this.prisma.user.update({
       where: { id: user.id },
@@ -209,17 +216,47 @@ export class AuthService {
   }
 
   private async returnTokes(id: string, email: string): Promise<Tokens> {
+
     // generate the tokens and store the email address and username in the jwt token
     const tokens: Tokens = await this.generateTokens(id, email);
 
-    const hashAT: string = (await this.encrypt.encrypt(tokens.access_token)).toString();
+    console.log("------------------------------ here  --------------------------------------")
 
-    const hashRT: string = (await this.encrypt.encrypt(tokens.refresh_token)).toString();
+    const hashAT: string = (await this.encrypt.encrypt(tokens.access_token));
 
-    await this.prisma.user.update({
-      where: { id },
-      data: { accessToken: hashAT, refreshToken: hashRT },
-    });
+    const hashRT: string = (await this.encrypt.encrypt(tokens.refresh_token));
+
+    console.log("encrypt token")
+    
+    console.log({
+      hashAT,
+      hashRT
+    })
+    console.log("------------------------------- yess here  -------------------------------------")
+
+    const DecriptHashAT = await this.encrypt.decrypt(hashAT);
+
+    const DecriptHashRT = await this.encrypt.decrypt(hashRT);
+
+    console.log("decript token")
+
+    console.log({
+      DecriptHashAT,
+      DecriptHashRT,
+    })
+    console.log("--------------------------------------------------------------------")
+
+    console.log("hello world")
+    
+    // const updateUser = await this.prisma.user.update({
+    //   where: { id: id },
+    //   data: { accessToken: hashAT, refreshToken: hashRT },
+    // });
+
+    throw new NotAcceptableException()
+    // if (!updateUser) {
+    //   throw new NotAcceptableException()
+    // }
 
     return tokens;
   }
@@ -239,7 +276,7 @@ export class AuthService {
       const client_secret: string = process.env.INTRA_CLIENT_SECRET;
 
       // get redirect url
-      const redirect_uri: string = "http://192.168.98.123/home";
+      const redirect_uri: string = process.env.INTRA_REDIRECT_URI;
 
       // append grant type to header
       form.append('grant_type', grant_type);

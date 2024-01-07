@@ -20,16 +20,14 @@ model User {
   fullName        String
   avatarName      String
   avatarupdated   Boolean
-  avatarNamePath  String?
+  avatarNamePath  String
   isOnLine        Boolean
   accessToken     String
   refreshToken    String
-  twoFactor       Boolean?
-  qrCodeFileName  String?
-  towFactorSecret String?
+  twoFactor       Boolean
+  qrCodeFileName  String
+  towFactorSecret String
   historyGameId   String?       @unique
-  // Players         Players[]
-  // HistoryGame     HistoryGame[]
 }
 
 model HistoryGame {
@@ -40,16 +38,5 @@ model HistoryGame {
   endTimeGame   DateTime
   scoreUser1    Int
   scoreUser2    Int
-
-  // players User[] @relation("Players", references: [id])
 }
 
-// model Players {
-//   historyGameId String
-//   userId        String
-
-//   historyGame HistoryGame @relation(fields: [historyGameId], references: [id])
-//   user        User        @relation(fields: [userId], references: [id])
-
-//   @@id([historyGameId, userId])
-// }

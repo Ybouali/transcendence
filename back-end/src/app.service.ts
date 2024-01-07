@@ -67,15 +67,16 @@ export class AppService {
 
           if (!user.refreshToken) throw new InternalServerErrorException();
 
-          const data: Buffer = Buffer.from(user.refreshToken);
+          // const data: Buffer = Buffer.from(user.refreshToken);
 
           // get the jwt token from the user
           const tokenToVerify: string = await this.encrypt.decrypt(
-            data,
+            user.refreshToken
           );
 
           // if the throw exeption so the user should be signed again
-          if (this.verifyJwtToken(tokenToVerify)) {
+
+          if (this.verifyJwtToken(tokenToVerify.toString())) {
             // update the user
             await this.prisma.user.update({
               where: { id: user.id },
@@ -104,10 +105,10 @@ export class AppService {
 
           if (!user.accessToken) throw new InternalServerErrorException();
 
-          const data: Buffer = Buffer.from(user.accessToken)
+          // const data: Buffer = Buffer.from(user.accessToken)
 
           // get the jwt token from the user
-          const tokenToVerify: string = await this.encrypt.decrypt(data);
+          const tokenToVerify: string = (await this.encrypt.decrypt(user.accessToken));
 
           // if the throw exeption so the user should be signed again
           if (this.verifyJwtToken(tokenToVerify)) {
@@ -165,7 +166,7 @@ export class AppService {
       });
 
       if (users === undefined) {
-        this.logger.warn('obach bghiti ngolhalk ');
+        this.logger.warn('obach bghiti ngolhalk');
         return [];
       }
 
