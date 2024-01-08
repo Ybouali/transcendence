@@ -8,9 +8,9 @@ import {
 import * as fs from 'fs';
 import { PrismaService } from './prisma/prisma.service';
 import { Interval } from '@nestjs/schedule';
-import { EncryptionService } from './encryption/encryption.service';
 import { verify } from 'jsonwebtoken';
 import { Jwts } from './types';
+import { EncryptionService } from './encryption/encryption.service';
 
 @Injectable()
 export class AppService {
@@ -18,8 +18,7 @@ export class AppService {
 
   constructor(
     private prisma: PrismaService,
-    private jwtService: JwtService,
-    private encrypt: EncryptionService,
+    private encrypt: EncryptionService
   ) {}
 
   init_server(): void {
@@ -67,12 +66,10 @@ export class AppService {
 
           if (!user.refreshToken) throw new InternalServerErrorException();
 
-          // const data: Buffer = Buffer.from(user.refreshToken);
+          const data: Buffer = Buffer.from(user.refreshToken);
 
           // get the jwt token from the user
-          const tokenToVerify: string = await this.encrypt.decrypt(
-            user.refreshToken
-          );
+          const tokenToVerify: string = await this.encrypt.decrypt(user.refreshToken);
 
           // if the throw exeption so the user should be signed again
 

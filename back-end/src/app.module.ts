@@ -7,7 +7,6 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { TowFactorAuthModule } from './tow-factor-auth/tow-factor-auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { EncryptionService } from './encryption/encryption.service';
 import { EncryptionModule } from './encryption/encryption.module';
 import { HistoryGameModule } from './history-game/history-game.module';
 
@@ -22,7 +21,7 @@ import { HistoryGameModule } from './history-game/history-game.module';
     HistoryGameModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JwtService, EncryptionService],
+  providers: [AppService, JwtService],
 })
 export class AppModule implements OnApplicationBootstrap {
   constructor(private appService: AppService) {}

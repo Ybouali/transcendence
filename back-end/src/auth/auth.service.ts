@@ -24,6 +24,8 @@ export class AuthService {
     private encrypt: EncryptionService,
   ) {}
 
+  private readonly salt: string = process.env.SALT_ENCRYPT;
+
   // TODO: implement the logging using intra 42
   async loginInra(code: string): Promise<Tokens> {
     try {
@@ -45,7 +47,7 @@ export class AuthService {
 
       // if the user exists in the database just return the tokens
       if (user) {
-        return await this.returnTokes(user.id, user.email);
+        return await this.returnTokens(user.id, user.email);
       }
 
       console.log("------------------- here we go -------------------")
@@ -70,14 +72,12 @@ export class AuthService {
 
       // make sure the user is created and return tokens
       if (newUser) {
-        return await this.returnTokes(newUser.id, newUser.email);
+        return await this.returnTokens(newUser.id, newUser.email);
       }
       else {
         throw new NotAcceptableException();
       }
-
       
-
     } catch (error) {
       this.logger.error(error.message);
       throw new NotAcceptableException();
@@ -215,48 +215,33 @@ export class AuthService {
     return token;
   }
 
-  private async returnTokes(id: string, email: string): Promise<Tokens> {
+  private async returnTokens(id: string, email: string): Promise<Tokens> {
 
     // generate the tokens and store the email address and username in the jwt token
     const tokens: Tokens = await this.generateTokens(id, email);
 
-    console.log("------------------------------ here  --------------------------------------")
+    console.log("------------------------------ return tokes --------------------------------------")
 
-    const hashAT: string = (await this.encrypt.encrypt(tokens.access_token));
-
-    const hashRT: string = (await this.encrypt.encrypt(tokens.refresh_token));
-
-    console.log("encrypt token")
+    const hashAT: string = await this.encrypt.encrypt(tokens.access_token);
+    // const hashAT: string = await bcrypt.hash(tokens.access_token, this.salt)
+    
+    const hashRT: string = await this.encrypt.encrypt(tokens.refresh_token);
+    // const hashRT: string = await bcrypt.hash(tokens.refresh_token, this.salt)
     
     console.log({
       hashAT,
       hashRT
     })
     console.log("------------------------------- yess here  -------------------------------------")
-
-    const DecriptHashAT = await this.encrypt.decrypt(hashAT);
-
-    const DecriptHashRT = await this.encrypt.decrypt(hashRT);
-
-    console.log("decript token")
-
-    console.log({
-      DecriptHashAT,
-      DecriptHashRT,
-    })
-    console.log("--------------------------------------------------------------------")
-
-    console.log("hello world")
     
-    // const updateUser = await this.prisma.user.update({
-    //   where: { id: id },
-    //   data: { accessToken: hashAT, refreshToken: hashRT },
-    // });
+    const updateUser = await this.prisma.user.update({
+      where: { id: id },
+      data: { accessToken: hashAT, refreshToken: hashRT },
+    });
 
-    throw new NotAcceptableException()
-    // if (!updateUser) {
-    //   throw new NotAcceptableException()
-    // }
+    if (!updateUser) {
+      throw new NotAcceptableException()
+    }
 
     return tokens;
   }
