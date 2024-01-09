@@ -1,22 +1,24 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState } from 'react';
 import './App.css';
-import Login from './pages/Login';
-import Home from './pages/Home';
-import NotFound from './pages/NotFound';
+import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom';
+import Header from './components/Header/Header';
+import Home from './pages/Home/Home';
+import Footer from './components/Footer/Footer';
+import Chat from './pages/Chat/Chat';
 
 function App() {
+
+  const [logIn, setLogIn] = useState(false);
+
   return (
-    <div className='flex items-center justify-between' >
-      <Router>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/home/" element={<Home />} />
-          <Route Component={NotFound} />
-          <Route path="/notfound" element={<NotFound />} />
-        </Routes>
-      </Router>
-    </div>
+    <BrowserRouter>
+      <Header isConnected={logIn} logInFunc={ () => setLogIn(!logIn)} />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/chat" element={<Chat />} />
+      </Routes>
+      <Footer />
+    </BrowserRouter>
   );
 }
 
