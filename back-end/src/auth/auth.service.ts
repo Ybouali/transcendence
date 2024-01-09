@@ -49,9 +49,8 @@ export class AuthService {
       if (user) {
         return await this.returnTokens(user.id, user.email);
       }
-
-      console.log("------------------- here we go -------------------")
       
+      // store new user in database
       const newUser: User = await this.prisma.user.create({
         data: {
           username: dataIntra.login,
@@ -68,7 +67,6 @@ export class AuthService {
           towFactorSecret: "nothing"
         }
       });
-      console.log("------------------- here we go -------------------")
 
       // make sure the user is created and return tokens
       if (newUser) {
@@ -220,20 +218,13 @@ export class AuthService {
     // generate the tokens and store the email address and username in the jwt token
     const tokens: Tokens = await this.generateTokens(id, email);
 
-    console.log("------------------------------ return tokes --------------------------------------")
-
+    // encrypt the access token
     const hashAT: string = await this.encrypt.encrypt(tokens.access_token);
-    // const hashAT: string = await bcrypt.hash(tokens.access_token, this.salt)
     
+    // encrypt the refresh token
     const hashRT: string = await this.encrypt.encrypt(tokens.refresh_token);
-    // const hashRT: string = await bcrypt.hash(tokens.refresh_token, this.salt)
     
-    console.log({
-      hashAT,
-      hashRT
-    })
-    console.log("------------------------------- yess here  -------------------------------------")
-    
+    // update the user access refresh tokens
     const updateUser = await this.prisma.user.update({
       where: { id: id },
       data: { accessToken: hashAT, refreshToken: hashRT },
