@@ -5,6 +5,8 @@ import { LoginType } from '../../types/LoginTypes';
 
 function Header(props: LoginType) {
 
+  const [openMenu, setOpenMenu] = useState<boolean>(false);
+
   const [justOpened, setJustOpened] = useState(false);
   const dropDownButtonRef = useRef<HTMLButtonElement>(null);
   const dropDownMenuRef = useRef<HTMLButtonElement>(null);
@@ -40,9 +42,11 @@ function Header(props: LoginType) {
     console.log(open);
   }, [open]);
 
+  const isConnected: boolean = props.isConnected;
+
   return (
     <>
-      {props.isConnected && (
+      {isConnected && (
         <header className="primary-header identified" data-status="online">
           <div className="container">
             <div className="primary-header-content">
@@ -104,14 +108,13 @@ function Header(props: LoginType) {
                 />
               </div>
               <button
-                ref={dropDownButtonRef}
+                onClick={() => setOpenMenu(!openMenu)}
                 className="user-image dropdown-button"
               >
                 <img src="/images/avatars/member_3.png" alt="user image" />
               </button>
               <button
-                className={`dropdown-menu ${open ? "open" : ""}`}
-                ref={dropDownMenuRef}
+                className={`dropdown-menu ${openMenu ? "open" : ""}`}
               >
                 <div className="dropdown-menu-content">
                   <ul className="dropdown-list">
@@ -183,7 +186,7 @@ function Header(props: LoginType) {
                         <div className="dropdown-item-icon">
                           <i className="fa-solid fa-right-from-bracket"></i>
                         </div>
-                        <div className="dropdown-item-title">logout</div>
+                        <div className="dropdown-item-title" >logout</div>
                       </a>
                     </li>
                   </ul>
@@ -194,7 +197,7 @@ function Header(props: LoginType) {
         </header>
       )}
 
-      {!props.isConnected && (
+      {!isConnected && (
         <header className="primary-header">
           <div className="container">
             <div className="nav-wrapper">

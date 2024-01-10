@@ -1,9 +1,11 @@
 import React from 'react'
 import "./ShowcaseStyle.css"
+import { LoginType } from '../../../types/LoginTypes'
 
-function Showcase() {
+function Showcase(props: LoginType) {
   return (
     <section className="showcase">
+      <br />
       <div className="container">
         <div className="showcase-content">
           <div className="showcase-text">
@@ -18,7 +20,10 @@ function Showcase() {
             </p>
             <div className="showcase-buttons">
               {/* <Link path="/login">Login with intra</Link> */}
-              <button className="button">Login with intra</button>
+              <button
+                onClick={props.logInFunc}
+                className="button"
+              >Login with intra</button>
             </div>
           </div>
           <div className="showcase-images">
