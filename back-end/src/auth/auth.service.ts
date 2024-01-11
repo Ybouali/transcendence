@@ -29,8 +29,6 @@ export class AuthService {
   // TODO: implement the logging using intra 42
   async loginInra(code: string): Promise<Tokens> {
     try {
-
-      
       
       // get the user data from intra 42 api's
       const dataIntra: IntraUserDto = await this.fetchDataUserFromIntra(code);
@@ -113,23 +111,25 @@ export class AuthService {
   //   }
   // }
 
-  async refreshToken(@GetUser() user: User): Promise<{ access_token: string }> {
-    const access_token: string = await this.generateJwtToken(
-      user.username,
-      user.email,
-      60 * 5,
-    );
+  async refreshToken(@GetUser() user: User): Promise<Tokens> {
 
-    const hashAT: string = (await this.encrypt.encrypt(access_token));
+    return await this.returnTokens(user.id, user.email);
+    // const access_token: string = await this.generateJwtToken(
+    //   user.username,
+    //   user.email,
+    //   60 * 5,
+    // );
 
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { accessToken: hashAT, isOnLine: true },
-    });
+    // const hashAT: string = (await this.encrypt.encrypt(access_token));
 
-    return {
-      access_token,
-    };
+    // await this.prisma.user.update({
+    //   where: { id: user.id },
+    //   data: { accessToken: hashAT, isOnLine: true },
+    // });
+
+    // return {
+    //   access_token,
+    // };
   }
 
   // async signin(dto: AuthDto) {

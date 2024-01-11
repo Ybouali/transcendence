@@ -1,46 +1,28 @@
 import React, { useEffect, useRef, useState } from 'react'
-import useClickOutside from '../../utils/custom-hooks/useClickOutside';
 import "./HeaderStyle.css"
 import { LoginType } from '../../types/LoginTypes';
+import { useNavigate } from 'react-router-dom';
 
 function Header(props: LoginType) {
 
+  const navigate = useNavigate();
+
   const [openMenu, setOpenMenu] = useState<boolean>(false);
 
-  const [justOpened, setJustOpened] = useState(false);
-  const dropDownButtonRef = useRef<HTMLButtonElement>(null);
-  const dropDownMenuRef = useRef<HTMLButtonElement>(null);
-  const [open, setOpen] = useState(false);
-
+  
   useEffect(() => {
-    const dropDownButton = dropDownButtonRef.current;
-    if (dropDownButton) {
-      const clickHandler = () => {
-        setOpen((previousValue) => !previousValue);
-        setJustOpened(true);
-      };
 
-      dropDownButton.addEventListener("click", clickHandler);
+    if (props.isConnected) {
+      
+      console.log({
+        acc: props.access_token,
+        ref: props.refresh_token
+      })
 
-      return () => {
-        // Cleanup the event listener on component unmount
-        dropDownButton.removeEventListener("click", clickHandler);
-      };
     }
-  }, [dropDownButtonRef]);
 
-  // useClickOutside(dropDownMenuRef, () => {
-  //   // CHECK IF THE DROPDOWN JUST OPENED
-  //   if (justOpened) {
-  //     setJustOpened(false);
-  //     return;
-  //   }
-  //   if (open) setOpen(false);
-  // });
+  }, [])
 
-  useEffect(() => {
-    console.log(open);
-  }, [open]);
 
   const isConnected: boolean = props.isConnected;
 

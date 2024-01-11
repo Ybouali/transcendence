@@ -22,25 +22,27 @@ export class AuthController {
 
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('login/intranet/:code')
-  async loginIntra(@Param('code') code: string, @Res() res: Response) {
+  async loginIntra(@Param('code') code: string): Promise<Tokens> {
 
     const tokens: Tokens = await this.authService.loginInra(code);
-
-    res.setHeader('access_token', tokens.access_token);
-    res.setHeader('refresh_token', tokens.refresh_token);
-
-    res.send('done');
+    
+    return tokens;
   }
 
   @UseGuards(LoginGuard)
   @HttpCode(HttpStatus.OK)
   @Get('refresh')
-  async refresh(@Res() res: Response, @GetUser() user: User) {
-    const { access_token } = await this.authService.refreshToken(user);
+  async refresh(@Res() res: Response, @GetUser() user: User): Promise<Tokens> {
 
-    res.setHeader('access_token', access_token);
+    const tokens: Tokens = await this.authService.refreshToken(user);
+    
+    return tokens;
 
-    res.send('done');
+    // const { access_token } = await this.authService.refreshToken(user);
+
+    // res.send({
+    //   message: "done"
+    // });
   }
 
   // @HttpCode(HttpStatus.ACCEPTED)
