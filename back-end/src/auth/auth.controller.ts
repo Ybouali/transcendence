@@ -37,12 +37,6 @@ export class AuthController {
     const tokens: Tokens = await this.authService.refreshToken(user);
     
     return tokens;
-
-    // const { access_token } = await this.authService.refreshToken(user);
-
-    // res.send({
-    //   message: "done"
-    // });
   }
 
   // @HttpCode(HttpStatus.ACCEPTED)

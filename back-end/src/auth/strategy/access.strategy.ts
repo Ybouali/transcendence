@@ -27,8 +27,6 @@ export class AccessStrategy extends PassportStrategy(Strategy, 'access') {
     const user: User = await this.prisma.user.findUnique({
       where: { id: payload.sub }
     });
-    
-    console.log("User data from access strategy", { user })
 
     // if the user is not found
     if (!user) throw new ForbiddenException('Access denied');
