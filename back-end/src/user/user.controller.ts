@@ -13,9 +13,9 @@ import {
 } from '@nestjs/common';
 import { GetUser } from 'src/decorators';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AccessStrategy, RefreshStrategy } from 'src/auth/strategy';
+import { AccessGuard, LoginGuard } from 'src/auth/guard';
 
-@UseGuards(RefreshStrategy, AccessStrategy)
+@UseGuards(LoginGuard, AccessGuard)
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}

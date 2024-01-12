@@ -18,9 +18,6 @@ services:
     restart: unless-stopped
     env_file:
       - /Users/$USER/Desktop/data_transcendence/env_files/.env_back_end
-    # volumes:
-    #   - back-end-volume-avatars:/avatar_users_images/
-    #   - back-end-volume-qrcodes:/qrcodes_users/
     depends_on:
       - dev-db
     ports:
@@ -54,17 +51,3 @@ services:
 networks:
   transcendence:
     name: transcendence
-
-# volumes:
-#   back-end-volume-qrcodes:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       device: /Users/$USER/Desktop/data_transcendence/data/images/qrcodes_users/
-#       o:  bind
-#   back-end-volume-avatars:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       device: /Users/$USER/Desktop/data_transcendence/data/images/avatar_users_images/
-#       o:  bind
