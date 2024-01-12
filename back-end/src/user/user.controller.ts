@@ -22,6 +22,13 @@ export class UserController {
 
   @Get('/me')
   async getMe(@GetUser() user: User) {
+    console.log("yassine 1")
+    
+    console.log({
+      user
+    })
+    console.log("yassine 1")
+
     return user;
   }
 

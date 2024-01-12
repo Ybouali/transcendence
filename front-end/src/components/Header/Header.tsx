@@ -13,16 +13,55 @@ function Header(props: LoginType) {
   useEffect(() => {
 
     if (props.isConnected) {
-      
-      console.log({
-        acc: props.access_token,
-        ref: props.refresh_token
-      })
 
+      const delayedTask = setTimeout(() => {
+        const at: string | null = localStorage.getItem('access_token');
+        const rt: string | null = localStorage.getItem('refresh_token');
+        
+        if (at === null || rt === null) {
+          navigate('/chat');
+          return;
+        }
+        
+        getUserInfo(at, rt);
+
+      }, 2000);
+  
+      // Cleanup function to clear the timeout in case the component unmounts before the delay
+      return () => clearTimeout(delayedTask);
     }
 
   }, [])
 
+
+  const getUserInfo = async (at: string, rt: string) => {
+    const headers = new Headers({
+      'access_token': at,
+      'refresh_token': rt
+    })
+
+    console.log(at, rt)
+
+    console.log({
+      headers
+    })
+    
+    const resData = await fetch('http://localhost:3333/users/me', {
+      method: 'GET',
+      headers: headers,
+    })
+    .then(response => {
+      return response.json();
+    })
+    .catch (err => {
+      console.error(err);
+    })
+
+    console.log({
+       resData
+    })
+
+  }
 
   const isConnected: boolean = props.isConnected;
 
