@@ -1,7 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { FaRegUserCircle } from "react-icons/fa";
+import { FaUsers } from "react-icons/fa";
+import { FaMessage } from "react-icons/fa6";
+import { FaGamepad } from "react-icons/fa";
+import { BsTrophyFill } from "react-icons/bs";
+import { RxGear } from "react-icons/rx";
+import { FaRightFromBracket } from "react-icons/fa6";
+
 import "./HeaderStyle.css"
-import { LoginType } from '../../types/LoginTypes';
-import { useNavigate } from 'react-router-dom';
+
+import { Link, useNavigate } from 'react-router-dom';
+import { LoginType, Tokens, UserType } from '../../types';
+import { getTokensFromLocalStorge } from '../../utils/utils';
 
 function Header(props: LoginType) {
 
@@ -9,21 +19,29 @@ function Header(props: LoginType) {
 
   const [openMenu, setOpenMenu] = useState<boolean>(false);
 
+  const [user, setUser] = useState<UserType>();
+
   
   useEffect(() => {
 
     if (props.isConnected) {
+      
+      // this code will run just if the header shoud be online
+      
+      // set the time to give the chat components time to set the tokens in the local storge
+      const delayedTask = setTimeout( async () => {
 
-      const delayedTask = setTimeout(() => {
-        const at: string | null = localStorage.getItem('access_token');
-        const rt: string | null = localStorage.getItem('refresh_token');
+        const tokens: Tokens = await getTokensFromLocalStorge();
+
+        // const at: string | null = localStorage.getItem('access_token');
+        // const rt: string | null = localStorage.getItem('refresh_token');
         
-        if (at === null || rt === null) {
+        if (tokens.refresh_token === null || tokens.access_token === null) {
           navigate('/chat');
           return;
         }
         
-        getUserInfo(at, rt);
+        getUserInfo(tokens);
 
       }, 2000);
   
@@ -34,21 +52,42 @@ function Header(props: LoginType) {
   }, [])
 
 
-  const getUserInfo = async (at: string, rt: string) => {
-    const headers = new Headers({
-      'access_token': at,
-      'refresh_token': rt
-    })
+  const getUserInfo = async (tokens: Tokens) => {
 
-    console.log(at, rt)
+    if (tokens.refresh_token !== null || tokens.access_token !== null) {
 
-    console.log({
-      headers
-    })
-    
-    const resData = await fetch('http://localhost:3333/users/me', {
+      // send the request
+      const resData = await fetch('http://localhost:3333/users/me', {
+        method: 'GET',
+        headers: {
+          'access_token': tokens.access_token,
+          'refresh_token': tokens.refresh_token
+        },
+      })
+      .then(response => {
+        return response.json();
+      })
+      .catch (err => {
+        console.error(err);
+      })
+
+      // set the user data
+      setUser(resData);
+
+    }
+  }
+
+  const logoutFromServer = async () => {
+
+    // get the tokens
+    const tokens: Tokens = await getTokensFromLocalStorge();
+
+    const resData = await fetch('http://localhost:3333/auth/logout', {
       method: 'GET',
-      headers: headers,
+      headers: {
+        'access_token': tokens.access_token,
+        'refresh_token': tokens.refresh_token
+      },
     })
     .then(response => {
       return response.json();
@@ -57,9 +96,13 @@ function Header(props: LoginType) {
       console.error(err);
     })
 
-    console.log({
-       resData
-    })
+    if (resData.message && resData.message === "done" ) {
+      // remove the tokens from the local storage
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      navigate("/")
+      return ;
+    }
 
   }
 
@@ -132,7 +175,10 @@ function Header(props: LoginType) {
                 onClick={() => setOpenMenu(!openMenu)}
                 className="user-image dropdown-button"
               >
-                <img src="/images/avatars/member_3.png" alt="user image" />
+                <img
+                  src={user?.avatarName}
+                  alt={user?.username}
+                />
               </button>
               <button
                 className={`dropdown-menu ${openMenu ? "open" : ""}`}
@@ -142,73 +188,85 @@ function Header(props: LoginType) {
                     <li className="dropdown-item user-profile-item">
                       <div className="user-image dropdown-item-user-image">
                         <img
-                          src="./images/avatars/member_3.png"
-                          alt="user image"
+                          src={user?.avatarName}
+                          alt={user?.username}
                         />
                       </div>
                       <div className="user-infos">
-                        <div className="username">JohnDoe</div>
-                        <div className="user-status">Online</div>
+                        <div className="username">
+                          {user?.fullName}
+                        </div>
+                        <div className="user-status">{user?.isOnLine ? "On Line" : "Off Line"}</div>
                       </div>
                     </li>
                     <li className="dropdown-item">
-                      <a href="#">
+                      <Link to="/profile">
                         <div className="dropdown-item-icon">
-                          <i className="fa-solid fa-user"></i>
+                          <FaRegUserCircle />
+                          {/* <i className="fa-solid fa-user"></i> */}
                         </div>
                         <div className="dropdown-item-title">profile</div>
-                      </a>
+                      </Link>
                     </li>
                     <li className="dropdown-item">
-                      <a href="#">
+                      <Link to="/friends">
                         <div className="dropdown-item-icon">
-                          <i className="fa-solid fa-user-group"></i>
+                          <FaUsers />
+                          {/* <i className="fa-solid fa-user-group"></i> */}
                         </div>
                         <div className="dropdown-item-title">friends</div>
-                      </a>
+                      </Link>
                     </li>
                     <li className="dropdown-item">
-                      <a href="#">
+                      <Link to="/chat">
                         <div className="dropdown-item-icon">
-                          <i className="fa-solid fa-message"></i>
+                          <FaMessage />
+                          {/* <i className="fa-solid fa-message"></i> */}
                         </div>
                         <div className="dropdown-item-title">chat</div>
-                      </a>
+                      </Link>
                     </li>
                     <li className="dropdown-item">
-                      <a href="#">
+                      <Link to="/game">
                         <div className="dropdown-item-icon">
-                          <i className="fa-solid fa-table-tennis-paddle-ball"></i>
+                          <FaGamepad />
+                          {/* <i className="fa-solid fa-table-tennis-paddle-ball"></i> */}
                         </div>
                         <div className="dropdown-item-title">
-                          play ping-pong
+                          Game
                         </div>
-                      </a>
+                      </Link>
                     </li>
                     <li className="dropdown-item">
-                      <a href="#">
+                      <Link to="/leaderboard" >
                         <div className="dropdown-item-icon">
-                          <i className="fa-solid fa-trophy"></i>
+                          <BsTrophyFill />
+                          {/* <i className="fa-solid fa-trophy"></i> */}
                         </div>
                         <div className="dropdown-item-title">leaderboard</div>
-                      </a>
+                      </Link>
                     </li>
 
                     <li className="dropdown-item">
-                      <a href="#">
+                      <Link to="/settings">
                         <div className="dropdown-item-icon">
-                          <i className="fa-solid fa-gear"></i>
+                        <RxGear />
+                          {/* <i className="fa-solid fa-gear"></i> */}
                         </div>
                         <div className="dropdown-item-title">settings</div>
-                      </a>
+                      </Link>
                     </li>
                     <li className="dropdown-item">
-                      <a href="#">
+                      <div>
                         <div className="dropdown-item-icon">
-                          <i className="fa-solid fa-right-from-bracket"></i>
+                          <FaRightFromBracket />
+                          {/* <i className="fa-solid fa-right-from-bracket"></i> */}
                         </div>
-                        <div className="dropdown-item-title" >logout</div>
-                      </a>
+                        <div
+                          onClick={logoutFromServer}
+                          className="dropdown-item-title" 
+                        >logout</div>
+                      </div>
                     </li>
                   </ul>
                 </div>

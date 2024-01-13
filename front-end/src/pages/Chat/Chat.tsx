@@ -13,23 +13,17 @@ function Chat() {
     const refresh_token: string | null = localStorage.getItem('refresh_token');
     const access_token: string | null = localStorage.getItem('access_token');
 
+    // get the code in the url
+    const url = new URL(window.location.href);
+  
+    const codeParam: string | null = url.searchParams.get('code');
+
     // check if the token already exists in the local storage
     if (refresh_token === undefined || access_token === undefined) {
       console.log("hello chat tokens")
       navigate('/');
       return;
-    } else {
-
-      // get the code in the url
-      const url = new URL(window.location.href);
-  
-      const codeParam: string | null = url.searchParams.get('code');
-  
-      // if the code is not exist the user should provide a code for the intra
-      if (!codeParam) {
-        navigate('/');
-        return ;
-      }
+    } else if (codeParam) {
   
       // login into the server
       loginServer(codeParam);
@@ -78,6 +72,7 @@ function Chat() {
   return (
     <>
       <Header isConnected={true}  />
+      Chat
     </>
   )
 }
