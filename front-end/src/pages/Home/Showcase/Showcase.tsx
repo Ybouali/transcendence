@@ -1,6 +1,7 @@
 import React from 'react'
 import "./ShowcaseStyle.css"
-import { LoginType } from '../../../types/LoginTypes'
+import { LoginType } from '../../../types'
+
 
 function Showcase(props: LoginType) {
   return (

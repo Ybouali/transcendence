@@ -20,6 +20,18 @@ import { Tokens } from 'src/types';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @UseGuards(LoginGuard)
+  @HttpCode(HttpStatus.ACCEPTED)
+  @Get('/logout')
+  async logout(@GetUser() user: User): Promise<{ message: string }> {
+
+    this.authService.logout(user);
+
+    return {
+      message: "done"
+    }
+  }
+
   @HttpCode(HttpStatus.ACCEPTED)
   @Post('login/intranet/:code')
   async loginIntra(@Param('code') code: string): Promise<Tokens> {

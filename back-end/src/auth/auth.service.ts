@@ -26,6 +26,18 @@ export class AuthService {
 
   private readonly salt: string = process.env.SALT_ENCRYPT;
 
+  async logout(user: User) {
+    await this.prisma.user.update(
+      {
+        where: { id: user.id },
+        data: {
+          accessToken: "offline",
+          refreshToken: "logout"
+        }
+      }
+    )
+  }
+
   // TODO: implement the logging using intra 42
   async loginInra(code: string): Promise<Tokens> {
     try {

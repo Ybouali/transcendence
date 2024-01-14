@@ -27,8 +27,16 @@ export class RefreshStrategy extends PassportStrategy(
     const refresh_token = req.get('refresh_token').trim();
 
     // Get the user based on the id that comes from the refresh token
-    const user: User = await this.prisma.user.findUnique({
-      where: { id: payload.sub }
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: {
+        username: true,
+        email: true,
+        fullName: true,
+        avatarName: true,
+        isOnLine: true,
+        refreshToken: true,
+      }
     });
 
     // if the user is not found
