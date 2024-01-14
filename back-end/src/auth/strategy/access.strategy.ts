@@ -27,6 +27,7 @@ export class AccessStrategy extends PassportStrategy(Strategy, 'access') {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
       select: {
+        id: true,
         username: true,
         email: true,
         fullName: true,

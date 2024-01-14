@@ -25,6 +25,11 @@ export class UserController {
     return user;
   }
 
+  @Get('/:userId')
+  async getUser(@Param('userId') userId: string): Promise<User> {
+    return await this.userService.getUser(userId);
+  }
+
   @Get('/:toFind')
   async search(@Param('toFind') toFind: string) {
     return this.userService.search(toFind);

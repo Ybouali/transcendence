@@ -11,7 +11,7 @@ import "./HeaderStyle.css"
 
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginType, Tokens, UserType } from '../../types';
-import { getTokensFromLocalStorge } from '../../utils/utils';
+import { getTokensFromLocalStorge, getUserInfo } from '../../utils/utils';
 
 function Header(props: LoginType) {
 
@@ -32,19 +32,23 @@ function Header(props: LoginType) {
       const delayedTask = setTimeout( async () => {
 
         const tokens: Tokens = await getTokensFromLocalStorge();
-
-        // const at: string | null = localStorage.getItem('access_token');
-        // const rt: string | null = localStorage.getItem('refresh_token');
         
         if (tokens.refresh_token === null || tokens.access_token === null) {
-          navigate('/chat');
-          return;
+          navigate('/');
+          return ;
         }
         
-        getUserInfo(tokens);
+        const userData: UserType | undefined = await getUserInfo(tokens);
 
-      }, 2000);
-  
+        if (userData === undefined) {
+          navigate('/');
+          return;
+        }
+
+        setUser(userData);
+        
+      }, 1000);
+      
       // Cleanup function to clear the timeout in case the component unmounts before the delay
       return () => clearTimeout(delayedTask);
     }
@@ -52,30 +56,7 @@ function Header(props: LoginType) {
   }, [])
 
 
-  const getUserInfo = async (tokens: Tokens) => {
-
-    if (tokens.refresh_token !== null || tokens.access_token !== null) {
-
-      // send the request
-      const resData = await fetch('http://localhost:3333/users/me', {
-        method: 'GET',
-        headers: {
-          'access_token': tokens.access_token,
-          'refresh_token': tokens.refresh_token
-        },
-      })
-      .then(response => {
-        return response.json();
-      })
-      .catch (err => {
-        console.error(err);
-      })
-
-      // set the user data
-      setUser(resData);
-
-    }
-  }
+  
 
   const logoutFromServer = async () => {
 
@@ -98,8 +79,8 @@ function Header(props: LoginType) {
 
     if (resData.message && resData.message === "done" ) {
       // remove the tokens from the local storage
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+      localStorage.setItem('access_token', "");
+      localStorage.setItem('refresh_token', "");
       navigate("/")
       return ;
     }
@@ -194,7 +175,7 @@ function Header(props: LoginType) {
                       </div>
                       <div className="user-infos">
                         <div className="username">
-                          {user?.fullName}
+                          {user?.username}
                         </div>
                         <div className="user-status">{user?.isOnLine ? "On Line" : "Off Line"}</div>
                       </div>
@@ -257,7 +238,7 @@ function Header(props: LoginType) {
                       </Link>
                     </li>
                     <li className="dropdown-item">
-                      <div>
+                      <a>
                         <div className="dropdown-item-icon">
                           <FaRightFromBracket />
                           {/* <i className="fa-solid fa-right-from-bracket"></i> */}
@@ -266,7 +247,7 @@ function Header(props: LoginType) {
                           onClick={logoutFromServer}
                           className="dropdown-item-title" 
                         >logout</div>
-                      </div>
+                      </a>
                     </li>
                   </ul>
                 </div>

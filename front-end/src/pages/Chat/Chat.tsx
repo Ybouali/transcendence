@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import Header from '../../components/Header/Header'
 import { useNavigate } from 'react-router-dom';
+import { Tokens } from '../../types';
+import { getTokensFromLocalStorge } from '../../utils/utils';
 
 
 function Chat() {
@@ -9,9 +11,15 @@ function Chat() {
 
   useEffect(() => {
 
+    logIn();
+    
+  }, [])
+
+  const logIn = async () => {
+
     // get the tokens from the local storage
-    const refresh_token: string | null = localStorage.getItem('refresh_token');
-    const access_token: string | null = localStorage.getItem('access_token');
+    const tokens: Tokens = await getTokensFromLocalStorge();
+    console.log("hello here 1", tokens)
 
     // get the code in the url
     const url = new URL(window.location.href);
@@ -19,8 +27,7 @@ function Chat() {
     const codeParam: string | null = url.searchParams.get('code');
 
     // check if the token already exists in the local storage
-    if (refresh_token === undefined || access_token === undefined) {
-      console.log("hello chat tokens")
+    if (tokens.refresh_token === null || tokens.access_token === null) {
       navigate('/');
       return;
     } else if (codeParam) {
@@ -29,10 +36,7 @@ function Chat() {
       loginServer(codeParam);
 
     }
-    
-
-
-  }, [])
+  }
 
   const loginServer = async (code: string | null) => {
 
