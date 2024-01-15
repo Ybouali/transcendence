@@ -29,7 +29,7 @@ export class AuthService {
   async logout(user: User) {
     await this.prisma.user.update(
       {
-        where: { id: user.id },
+        where: { email: user.email },
         data: {
           accessToken: "offline",
           refreshToken: "logout"
@@ -74,7 +74,8 @@ export class AuthService {
           refreshToken: 'logout',
           twoFactor: false,
           qrCodeFileName: "nothing",
-          towFactorSecret: "nothing"
+          towFactorSecret: "nothing",
+          levelGame: 0
         }
       });
 
@@ -111,6 +112,7 @@ export class AuthService {
   //         isOnLine: true,
   //         accessToken: 'token',
   //         refreshToken: 'token',
+  //          levelGame: 0,
   //       },
   //     });
 

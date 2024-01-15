@@ -1,7 +1,9 @@
 export interface UserType {
-    username: string | undefined;
-    email: string | undefined;
-    fullName: string | undefined;
-    avatarName: string | undefined;
-    isOnLine: boolean | undefined;
+    id: string;
+    username: string;
+    email: string;
+    fullName: string;
+    avatarName: string;
+    isOnLine: boolean;
+    levelGame: number;
 }

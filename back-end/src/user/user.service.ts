@@ -18,6 +18,19 @@ export class UserService {
     private prisma: PrismaService,
   ) {}
 
+  // get user by id
+  async getUser(id: string): Promise<User> {
+
+    const user = await this.prisma.user.findUnique({ where: { id: id }});
+
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return user;
+
+  }
+
   async search(username: string) {
     try {
       const users = await this.prisma.user.findMany({
