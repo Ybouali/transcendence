@@ -34,6 +34,7 @@ export class AccessStrategy extends PassportStrategy(Strategy, 'access') {
         avatarName: true,
         isOnLine: true,
         accessToken: true,
+        levelGame: true,
       }
     });
 

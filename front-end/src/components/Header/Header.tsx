@@ -1,11 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { FaRegUserCircle } from "react-icons/fa";
-import { FaUsers } from "react-icons/fa";
-import { FaMessage } from "react-icons/fa6";
-import { FaGamepad } from "react-icons/fa";
-import { BsTrophyFill } from "react-icons/bs";
-import { RxGear } from "react-icons/rx";
-import { FaRightFromBracket } from "react-icons/fa6";
 
 import "./HeaderStyle.css"
 
@@ -30,8 +23,22 @@ function Header(props: LoginType) {
       
       // set the time to give the chat components time to set the tokens in the local storge
       const delayedTask = setTimeout( async () => {
+        
+        initDataHeader();
+        
+        
+      }, 500);
+      
+      // Cleanup function to clear the timeout in case the component unmounts before the delay
+      return () => clearTimeout(delayedTask);
+    }
 
-        const tokens: Tokens = await getTokensFromLocalStorge();
+  }, [])
+
+
+    const initDataHeader = async () => {
+
+      const tokens: Tokens = await getTokensFromLocalStorge();
         
         if (tokens.refresh_token === null || tokens.access_token === null) {
           navigate('/');
@@ -46,15 +53,8 @@ function Header(props: LoginType) {
         }
 
         setUser(userData);
-        
-      }, 1000);
-      
-      // Cleanup function to clear the timeout in case the component unmounts before the delay
-      return () => clearTimeout(delayedTask);
+
     }
-
-  }, [])
-
 
   
 
@@ -183,8 +183,10 @@ function Header(props: LoginType) {
                     <li className="dropdown-item">
                       <Link to="/profile">
                         <div className="dropdown-item-icon">
-                          <FaRegUserCircle />
-                          {/* <i className="fa-solid fa-user"></i> */}
+                          <svg xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 448 512">
+                            <path opacity="1" fill="#1E3050" d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z" />
+                          </svg>
                         </div>
                         <div className="dropdown-item-title">profile</div>
                       </Link>
@@ -192,8 +194,15 @@ function Header(props: LoginType) {
                     <li className="dropdown-item">
                       <Link to="/friends">
                         <div className="dropdown-item-icon">
-                          <FaUsers />
-                          {/* <i className="fa-solid fa-user-group"></i> */}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 640 512"
+                          >
+                            <path
+                              opacity="1"
+                              d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3zM609.3 512H471.4c5.4-9.4 8.6-20.3 8.6-32v-8c0-60.7-27.1-115.2-69.8-151.8c2.4-.1 4.7-.2 7.1-.2h61.4C567.8 320 640 392.2 640 481.3c0 17-13.8 30.7-30.7 30.7zM432 256c-31 0-59-12.6-79.3-32.9C372.4 196.5 384 163.6 384 128c0-26.8-6.6-52.1-18.3-74.3C384.3 40.1 407.2 32 432 32c61.9 0 112 50.1 112 112s-50.1 112-112 112z"
+                            />
+                          </svg>
                         </div>
                         <div className="dropdown-item-title">friends</div>
                       </Link>
@@ -201,8 +210,15 @@ function Header(props: LoginType) {
                     <li className="dropdown-item">
                       <Link to="/chat">
                         <div className="dropdown-item-icon">
-                          <FaMessage />
-                          {/* <i className="fa-solid fa-message"></i> */}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 512 512"
+                          >
+                            <path
+                              opacity="1"
+                              d="M64 0C28.7 0 0 28.7 0 64V352c0 35.3 28.7 64 64 64h96v80c0 6.1 3.4 11.6 8.8 14.3s11.9 2.1 16.8-1.5L309.3 416H448c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H64z"
+                            />
+                          </svg>
                         </div>
                         <div className="dropdown-item-title">chat</div>
                       </Link>
@@ -210,8 +226,15 @@ function Header(props: LoginType) {
                     <li className="dropdown-item">
                       <Link to="/game">
                         <div className="dropdown-item-icon">
-                          <FaGamepad />
-                          {/* <i className="fa-solid fa-table-tennis-paddle-ball"></i> */}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 640 512"
+                          >
+                            <path
+                              opacity="1"
+                              d="M480 288c-50.1 0-93.6 28.8-114.6 70.8L132.9 126.3l.6-.6 60.1-60.1c87.5-87.5 229.3-87.5 316.8 0c67.1 67.1 82.7 166.3 46.8 248.3C535.8 297.6 509 288 480 288zM113.3 151.9L354.1 392.7c-1.4 7.5-2.1 15.3-2.1 23.3c0 23.2 6.2 44.9 16.9 63.7c-3 .2-6.1 .3-9.2 .3H357c-33.9 0-66.5-13.5-90.5-37.5l-9.8-9.8c-13.1-13.1-34.6-12.4-46.8 1.7L152.2 501c-5.8 6.7-14.2 10.7-23 11s-17.5-3.1-23.8-9.4l-32-32c-6.3-6.3-9.7-14.9-9.4-23.8s4.3-17.2 11-23l66.6-57.7c14-12.2 14.8-33.7 1.7-46.8l-9.8-9.8c-24-24-37.5-56.6-37.5-90.5v-2.7c0-22.8 6.1-44.9 17.3-64.3zM480 320a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"
+                            />
+                          </svg>
                         </div>
                         <div className="dropdown-item-title">
                           Game
@@ -221,8 +244,16 @@ function Header(props: LoginType) {
                     <li className="dropdown-item">
                       <Link to="/leaderboard" >
                         <div className="dropdown-item-icon">
-                          <BsTrophyFill />
-                          {/* <i className="fa-solid fa-trophy"></i> */}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 576 512"
+                          >
+                            <path
+                              opacity="1"
+                              fill="#1E3050"
+                              d="M400 0H176c-26.5 0-48.1 21.8-47.1 48.2c.2 5.3 .4 10.6 .7 15.8H24C10.7 64 0 74.7 0 88c0 92.6 33.5 157 78.5 200.7c44.3 43.1 98.3 64.8 138.1 75.8c23.4 6.5 39.4 26 39.4 45.6c0 20.9-17 37.9-37.9 37.9H192c-17.7 0-32 14.3-32 32s14.3 32 32 32H384c17.7 0 32-14.3 32-32s-14.3-32-32-32H357.9C337 448 320 431 320 410.1c0-19.6 15.9-39.2 39.4-45.6c39.9-11 93.9-32.7 138.2-75.8C542.5 245 576 180.6 576 88c0-13.3-10.7-24-24-24H446.4c.3-5.2 .5-10.4 .7-15.8C448.1 21.8 426.5 0 400 0zM48.9 112h84.4c9.1 90.1 29.2 150.3 51.9 190.6c-24.9-11-50.8-26.5-73.2-48.3c-32-31.1-58-76-63-142.3zM464.1 254.3c-22.4 21.8-48.3 37.3-73.2 48.3c22.7-40.3 42.8-100.5 51.9-190.6h84.4c-5.1 66.3-31.1 111.2-63 142.3z"
+                            />
+                          </svg>
                         </div>
                         <div className="dropdown-item-title">leaderboard</div>
                       </Link>
@@ -231,8 +262,15 @@ function Header(props: LoginType) {
                     <li className="dropdown-item">
                       <Link to="/settings">
                         <div className="dropdown-item-icon">
-                        <RxGear />
-                          {/* <i className="fa-solid fa-gear"></i> */}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 512 512"
+                          >
+                            <path
+                              opacity="1"
+                              d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"
+                            />
+                          </svg>
                         </div>
                         <div className="dropdown-item-title">settings</div>
                       </Link>
@@ -240,8 +278,15 @@ function Header(props: LoginType) {
                     <li className="dropdown-item">
                       <a>
                         <div className="dropdown-item-icon">
-                          <FaRightFromBracket />
-                          {/* <i className="fa-solid fa-right-from-bracket"></i> */}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 512 512"
+                          >
+                            <path
+                              opacity="1"
+                              d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"
+                            />
+                          </svg>
                         </div>
                         <div
                           onClick={logoutFromServer}

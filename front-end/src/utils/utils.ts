@@ -54,6 +54,7 @@ export async function getUserInfo(tokens: Tokens): Promise<UserType | undefined>
         avatarName: resData.avatarName,
         fullName: resData.fullName,
         isOnLine: resData.isOnLine,
+        levelGame: resData.levelGame,
     }
 
     // return the user data
@@ -81,6 +82,10 @@ export async function getUserInfo(tokens: Tokens): Promise<UserType | undefined>
         return undefined;
     }) 
 
+    if (resData.id === undefined) {
+        return undefined;
+    }
+
     const userData: UserType = {
         id: resData.id,
         username: resData.username,
@@ -88,6 +93,7 @@ export async function getUserInfo(tokens: Tokens): Promise<UserType | undefined>
         avatarName: resData.avatarName,
         fullName: resData.fullName,
         isOnLine: resData.isOnLine,
+        levelGame: resData.levelGame,
     }
 
     // return the user data

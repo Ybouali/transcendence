@@ -36,6 +36,7 @@ export class RefreshStrategy extends PassportStrategy(
         avatarName: true,
         isOnLine: true,
         refreshToken: true,
+        levelGame: true,
       }
     });
 

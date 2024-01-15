@@ -15,8 +15,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  username        String        @unique
-  email           String        @unique
+  username        String  @unique
+  email           String  @unique
   fullName        String
   avatarName      String
   avatarupdated   Boolean
@@ -27,16 +27,14 @@ model User {
   twoFactor       Boolean
   qrCodeFileName  String
   towFactorSecret String
-  historyGameId   String?       @unique
+  levelGame       Int
 }
 
 model HistoryGame {
-  id            String   @id @default(cuid())
-  createdAt     DateTime @default(now())
-  winnerId      String
-  startTimeGame DateTime
-  endTimeGame   DateTime
-  scoreUser1    Int
-  scoreUser2    Int
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  winnerId    String
+  loserId     String
+  scoreWinner Int
+  scoreLoser  Int
 }
-

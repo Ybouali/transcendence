@@ -5,4 +5,5 @@ export interface UserType {
     fullName: string;
     avatarName: string;
     isOnLine: boolean;
+    levelGame: number;
 }

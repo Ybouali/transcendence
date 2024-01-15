@@ -35,10 +35,11 @@ function ProfileUserInfos() {
     if (userId) {
       // the will be called because the url contains a user id
       userData = await getUserById(userId, tokens);
-      console.log({
-        userData
-      })
     }
+    
+    console.log({
+      userData
+    })
     
     if (userData === undefined) {
       // this will be called because the url dose not contain a user id
@@ -71,6 +72,7 @@ function ProfileUserInfos() {
 
       <div className="profile-user-stats">
         <div className="stats-infos" id="friends">
+          {/* hadi dyal abdlmoumen   */}
           <div className="stats-number">50</div>
           <p className="stats-title">Friends</p>
         </div>
@@ -79,7 +81,7 @@ function ProfileUserInfos() {
           <p className="stats-title">Played games</p>
         </div>
         <div className="stats-infos" id="level">
-          <div className="stats-number">3</div>
+          <div className="stats-number">{userData?.levelGame}</div>
           <p className="stats-title">Level</p>
         </div>
       </div>

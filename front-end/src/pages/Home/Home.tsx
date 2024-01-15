@@ -12,7 +12,7 @@ function Home() {
     
 
     if (intraUrl) {
-      window.open(intraUrl)
+      window.location.href = intraUrl;
     }
   }
 
