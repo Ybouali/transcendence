@@ -27,7 +27,7 @@ function Header(props: LoginType) {
         initDataHeader();
         
         
-      }, 500);
+      }, 1000);
       
       // Cleanup function to clear the timeout in case the component unmounts before the delay
       return () => clearTimeout(delayedTask);

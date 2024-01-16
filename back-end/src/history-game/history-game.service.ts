@@ -107,7 +107,7 @@ export class HistoryGameService {
 
         const percentageLevelWin = this.getPercentage(gamesWinned);
 
-        const percentageLevelLos = this.getPercentage(gamesWinned);
+        const percentageLevelLos = this.getPercentage(gameslosed);
 
         const levelW = percentageLevelWin * gamesWinned;
 

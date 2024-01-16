@@ -19,7 +19,6 @@ function Chat() {
 
     // get the tokens from the local storage
     const tokens: Tokens = await getTokensFromLocalStorge();
-    console.log("hello here 1", tokens)
 
     // get the code in the url
     const url = new URL(window.location.href);

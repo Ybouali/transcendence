@@ -1,7 +1,10 @@
 import React, { useEffect, useRef } from 'react'
 import "./GamesHistoryStyle.css"
 
-function GamesHistory({ gamesLog }) {
+function GamesHistory() {
+
+  
+
     const tableRef = useRef();
 
     useEffect(() => {

@@ -2,6 +2,8 @@ import React from 'react'
 import Header from '../../components/Header/Header'
 import "./ProfileStyle.css"
 import ProfileUserInfos from './ProfileUserInfos/ProfileUserInfos'
+import ProfileButtonActions from './ProfileButtonActions/ProfileButtonActions'
+import ProfileAchievements from './ProfileAchievements/ProfileAchievements'
 // import ProfileAchievements from './ProfileAchievements/ProfileAchievements'
 // import ProfileButtonActions from './ProfileButtonActions/ProfileButtonActions'
 // import GamesHistory from './GamesHistory/GamesHistory'
@@ -266,9 +268,9 @@ function Profile() {
         <div className="container">
           <div className="profile-content" data-status="online">
             <ProfileUserInfos />
-            {/* <ProfileButtonActions action={"others-account"} />
-            <ProfileAchievements winnedGames="2" />
-            <GamesHistory gamesLog={gamesLog} /> */}
+            <ProfileButtonActions />
+            <ProfileAchievements />
+            {/*<GamesHistory gamesLog={gamesLog} /> */}
           </div>
         </div>
       </section>

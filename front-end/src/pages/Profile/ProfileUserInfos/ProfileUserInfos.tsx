@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import "./ProfileUserInfosStyle.css"
 import { Tokens, UserType } from '../../../types';
-import { getTokensFromLocalStorge, getUserById, getUserInfo } from '../../../utils/utils';
+import { getNumberGamePlayedByUserId, getTokensFromLocalStorge, getUserById, getUserInfo } from '../../../utils/utils';
 import { useNavigate, useParams } from 'react-router-dom';
 
 function ProfileUserInfos() {
@@ -11,6 +11,8 @@ function ProfileUserInfos() {
   const { userId } = useParams();
 
   const [userData, setUserData] = useState<UserType>();
+
+  const [numberGamePlayed, setNumberGamePlayed] = useState<number>();
 
   useEffect(() => {
 
@@ -37,14 +39,19 @@ function ProfileUserInfos() {
       userData = await getUserById(userId, tokens);
     }
     
-    console.log({
-      userData
-    })
-    
     if (userData === undefined) {
       // this will be called because the url dose not contain a user id
       // and this is the default one aka display the user logged in info
       userData = await getUserInfo(tokens);
+    }
+
+    // get the number of game played by the player
+    const numberOfGames: number | undefined = await getNumberGamePlayedByUserId(userData?.id)
+
+    if (numberOfGames === undefined) {
+      setNumberGamePlayed(0);
+    } else {
+      setNumberGamePlayed(numberOfGames);
     }
 
 
@@ -77,7 +84,7 @@ function ProfileUserInfos() {
           <p className="stats-title">Friends</p>
         </div>
         <div className="stats-infos" id="played-games">
-          <div className="stats-number">20</div>
+          <div className="stats-number">{numberGamePlayed}</div>
           <p className="stats-title">Played games</p>
         </div>
         <div className="stats-infos" id="level">
