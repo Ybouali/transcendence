@@ -14,6 +14,7 @@ import {
 import { GetUser } from 'src/decorators';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AccessGuard, LoginGuard } from 'src/auth/guard';
+import { UpdateUserData } from './dto';
 
 @UseGuards(LoginGuard, AccessGuard)
 @Controller('users')
@@ -35,20 +36,27 @@ export class UserController {
     return this.userService.search(toFind);
   }
 
-  @Put('/avatar')
-  @UseInterceptors(FileInterceptor('image'))
-  async updateAvatar(
-    @GetUser() user: User,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.userService.updateAvatar(user, file);
+  @Put('/update')
+  async updateUser(dataUser: UpdateUserData, @GetUser('id') userId: string) {
+    return this.userService.updateUser(dataUser, userId);
   }
 
-  @Get('/avatar/:nameAvatar')
-  async getAvatar(
-    @Param('nameAvatar') nameAvatar: string,
-    @Res() res: Response,
-  ) {
-    return this.userService.getAvatar(nameAvatar, res);
-  }
+  
+
+  // @Put('/avatar')
+  // @UseInterceptors(FileInterceptor('image'))
+  // async updateAvatar(
+  //   @GetUser() user: User,
+  //   @UploadedFile() file: Express.Multer.File,
+  // ) {
+  //   return this.userService.updateAvatar(user, file);
+  // }
+
+  // @Get('/avatar/:nameAvatar')
+  // async getAvatar(
+  //   @Param('nameAvatar') nameAvatar: string,
+  //   @Res() res: Response,
+  // ) {
+  //   return this.userService.getAvatar(nameAvatar, res);
+  // }
 }

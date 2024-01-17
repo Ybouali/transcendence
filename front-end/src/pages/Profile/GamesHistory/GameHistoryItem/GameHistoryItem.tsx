@@ -1,8 +1,9 @@
 import React from 'react'
 import "./GameHistoryItemStyle.css"
+import { HistoryGameReturnedType } from '../../../../types';
 
-function GameHistoryItem({ gameLog }) {
-    const { player1, player2, timestamp } = gameLog;
+function GameHistoryItem(props: HistoryGameReturnedType) {
+    const { player1, player2, timestamp } = props;
     const date = new Date(timestamp);
     const year = date.getFullYear();
     const month = date.getMonth() + 1; // JavaScript months are 0-indexed, so we add 1

@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException, Logger, NotAcceptableExceptio
 import { HistoryGame, User } from '@prisma/client';
 import { GetUser } from 'src/decorators';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { HistoryGameType } from './dto';
+import { HistoryGameReturnedType, HistoryGameType, Player } from './dto';
 
 @Injectable()
 export class HistoryGameService {
@@ -12,10 +12,6 @@ export class HistoryGameService {
     constructor (
         private prisma: PrismaService
     ) {}
-
-
-    
-
 
     async createHistoryGame(dataGame: HistoryGameType) {
 
@@ -63,6 +59,96 @@ export class HistoryGameService {
             throw new InternalServerErrorException();
         }
     }
+
+    async getGamesByIdUser(userId: string): Promise< HistoryGameReturnedType [] > {
+
+
+        try {
+            
+            // get the player by id
+            const userOwner = await this.prisma.user.findFirst({ where: { id: userId } });
+
+            // check if the player exists
+            if (!userOwner) {
+                throw new NotFoundException();    
+            }
+
+            // init the array of history games
+            const hgames: HistoryGameReturnedType [] = [];
+
+            // get the games ( win Or lose ) one
+            const hisGamgeFromTable: HistoryGame[] = await this.prisma.historyGame.findMany({ 
+                where: { 
+                    OR: [
+                        { winnerId: userId },
+                        { loserId: userId }
+                    ] 
+                }
+            });
+
+            // loop through the history games and create data to store in array and return it
+            hisGamgeFromTable.map( async (hisGame) => {
+
+                let player1: Player;
+                let player2: Player;
+
+                // make sure allways the player1 is the owner one
+                if (hisGame.winnerId === userId) {
+                    player1 = {
+                        id: hisGame.winnerId,
+                        username: userOwner.fullName,
+                        score: hisGame.scoreWinner,
+                    }
+
+                    player2 = await this.initPlayerInfo(hisGame.loserId, hisGame.scoreLoser);
+                
+                } else if (hisGame.loserId === userId) {
+                
+                    player1 = {
+                        id: hisGame.winnerId,
+                        username: userOwner.fullName,
+                        score: hisGame.scoreLoser,
+                    }
+                
+                    player2 = await this.initPlayerInfo(hisGame.winnerId, hisGame.scoreWinner);
+                
+                }
+
+                const hgame: HistoryGameReturnedType = {
+                    player1,
+                    player2,
+                    timestamp: hisGame.createdAt,
+                }
+
+                hgames.push(hgame);
+            });
+
+            return hgames;
+
+        } catch (error) {
+            this.logger.error(error);
+            throw new InternalServerErrorException();
+        }
+
+    }
+
+    private async initPlayerInfo(userId: string, score: number): Promise< Player > {
+        
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+        if (!user) {
+            throw new NotFoundException();
+        }
+
+        const player: Player = {
+            id: user.id,
+            username: user.fullName,
+            score: score,
+        }
+
+        return player;
+    }
+
 
     async numberGameWinned(userId: string): Promise< { numberWinnedGame: number } > {
 
@@ -176,4 +262,6 @@ export class HistoryGameService {
             return 1;
         }
     }
+
+
 }
