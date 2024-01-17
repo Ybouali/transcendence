@@ -26,7 +26,11 @@ export class HistoryGameController {
     async numberGameLosed(@Param('userId') userId: string) {
         return await this.historyGameService.numberGameLosed(userId);
     }
-
     
+    @HttpCode(HttpStatus.OK)
+    @Get('/games/:userId')
+    async getGamesByIdUser(@Param('userId') userId: string) {
+        return await this.historyGameService.getGamesByIdUser(userId);
+    }
     
 }
