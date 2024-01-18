@@ -10,9 +10,9 @@ function ProfileUserInfos() {
 
   const { userId } = useParams();
 
-  const [userData, setUserData] = useState<UserType>();
+  const [userData, setUserData] = useState<UserType | null>(null);
 
-  const [numberGamePlayed, setNumberGamePlayed] = useState<number>();
+  const [numberGamePlayed, setNumberGamePlayed] = useState<number>(0);
 
   useEffect(() => {
 
@@ -25,30 +25,32 @@ function ProfileUserInfos() {
   
   const initUserinfos = async () => {
 
-    let userData: UserType | undefined = undefined;
+    let userData: UserType | null = null;
 
-    const tokens: Tokens = await getTokensFromLocalStorge();
+    const tokens: Tokens | null = await getTokensFromLocalStorge();
 
-    if (tokens.refresh_token === null || tokens.access_token === null) {
+    if (tokens == null) {
       navigate('/');
       return ;
     }
     
+    console.log(tokens)
+
     if (userId) {
       // the will be called because the url contains a user id
       userData = await getUserById(userId, tokens);
     }
     
-    if (userData === undefined) {
+    if (!userData) {
       // this will be called because the url dose not contain a user id
       // and this is the default one aka display the user logged in info
       userData = await getUserInfo(tokens);
     }
 
     // get the number of game played by the player
-    const numberOfGames: number | undefined = await getNumberGamePlayedByUserId(userData?.id)
+    const numberOfGames: number | null = await getNumberGamePlayedByUserId(userData?.id)
 
-    if (numberOfGames === undefined) {
+    if (!numberOfGames) {
       setNumberGamePlayed(0);
     } else {
       setNumberGamePlayed(numberOfGames);
@@ -68,7 +70,7 @@ function ProfileUserInfos() {
   return (
     <div className="profile-user-infos">
       <div className="profile-user-image">
-        <img src={userData?.avatarName} alt="user image" />
+        <img src={userData?.avatarNameUrl} alt="user image" />
       </div>
 
       <div className="profile-user-description">

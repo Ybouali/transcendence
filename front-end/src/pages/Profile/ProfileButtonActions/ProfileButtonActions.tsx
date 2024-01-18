@@ -22,11 +22,11 @@ function ProfileButtonActions() {
   }, [])
 
   const initData = async () => {
-    let userData: UserType | undefined = undefined;
+    let userData: UserType | null = null;
 
-    const tokens: Tokens = await getTokensFromLocalStorge();
+    const tokens: Tokens | null = await getTokensFromLocalStorge();
 
-    if (tokens.refresh_token === null || tokens.access_token === null) {
+    if (tokens === null) {
       navigate('/');
       return ;
     }

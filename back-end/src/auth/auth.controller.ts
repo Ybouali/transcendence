@@ -44,11 +44,13 @@ export class AuthController {
   @UseGuards(LoginGuard)
   @HttpCode(HttpStatus.OK)
   @Get('refresh')
-  async refresh(@Res() res: Response, @GetUser() user: User): Promise<Tokens> {
+  async refresh(@Res() res: Response, @GetUser() user: User): Promise<{ access_token: string }> {
 
-    const tokens: Tokens = await this.authService.refreshToken(user);
+    const { access_token } = await this.authService.refreshToken(user);
     
-    return tokens;
+    return {
+      access_token
+    };
   }
 
   // @HttpCode(HttpStatus.ACCEPTED)

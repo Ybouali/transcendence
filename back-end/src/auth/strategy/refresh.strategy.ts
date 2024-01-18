@@ -33,7 +33,7 @@ export class RefreshStrategy extends PassportStrategy(
         username: true,
         email: true,
         fullName: true,
-        avatarName: true,
+        avatarNameUrl: true,
         isOnLine: true,
         refreshToken: true,
         levelGame: true,

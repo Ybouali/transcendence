@@ -4,7 +4,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Request } from 'express';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EncryptionService } from 'src/encryption/encryption.service';
-import { User } from '@prisma/client';
 
 @Injectable()
 export class AccessStrategy extends PassportStrategy(Strategy, 'access') {
@@ -31,7 +30,7 @@ export class AccessStrategy extends PassportStrategy(Strategy, 'access') {
         username: true,
         email: true,
         fullName: true,
-        avatarName: true,
+        avatarNameUrl: true,
         isOnLine: true,
         accessToken: true,
         levelGame: true,
