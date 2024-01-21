@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import "./ProfileAchievementsStyle.css"
 import ProfileAchievement from './ProfileAchievement/ProfileAchievement';
-import { getNumberOfWinnedGames, getTokensFromLocalStorge, getUserById, getUserInfo } from '../../../utils/utils';
+import { getNumberOfWinnedGames, getTokensFromSessionStorage, getUserById, getUserInfo } from '../../../utils/utils';
 import { Tokens, UserType } from '../../../types';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -21,11 +21,11 @@ function ProfileAchievements() {
 
 
     const initData = async () => {
-      let userData: UserType | undefined = undefined;
+      let userData: UserType | null = null;
 
-      const tokens: Tokens = await getTokensFromLocalStorge();
+      const tokens: Tokens | null = await getTokensFromSessionStorage();
 
-      if (tokens.refresh_token === null || tokens.access_token === null) {
+      if (tokens === null) {
         navigate('/');
         return ;
       }
@@ -41,9 +41,11 @@ function ProfileAchievements() {
         userData = await getUserInfo(tokens);
       }
 
-      const nGameWinned: number = await getNumberOfWinnedGames(userData?.id)
+      const nGameWinned: number | null = await getNumberOfWinnedGames(userData?.id)
 
-      setNumberGameWinned(nGameWinned);
+      if (nGameWinned) {
+        setNumberGameWinned(nGameWinned);
+      }
     }
 
 

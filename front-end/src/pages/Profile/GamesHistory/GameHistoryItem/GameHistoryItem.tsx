@@ -6,20 +6,16 @@ function GameHistoryItem(props: HistoryGameReturnedType) {
     const { player1, player2, timestamp } = props;
     const date = new Date(timestamp);
     const year = date.getFullYear();
-    const month = date.getMonth() + 1; // JavaScript months are 0-indexed, so we add 1
+    const month = date.getMonth() + 1;
     const day = date.getDate();
   
     return (
       <tr>
-        <td className={`${player1.score >= player2.score ? "winner" : ""}`}>
-          <a href="#">{player1.username}</a>
-        </td>
-        <td>{player1.score}</td>
-        <td>{player2.score}</td>
-        <td className={`${player2.score >= player1.score ? "winner" : ""}`}>
-          <a href="http://example.com/58">{player2.username}</a>
-        </td>
-        <td>{`${year}-${month}-${day}`}</td>
+        <td data-label="Player 1">{player1.username}</td>
+        <td data-label="Player 1 Score">{player1.score}</td>
+        <td data-label="Player 2 Score">{player2.score}</td>
+        <td data-label="Player 2">{player2.username}</td>
+        <td data-label="Date"> {day-month-year} </td>
       </tr>
     );
 }

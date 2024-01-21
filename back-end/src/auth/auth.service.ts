@@ -123,25 +123,24 @@ export class AuthService {
   //   }
   // }
 
-  async refreshToken(@GetUser() user: User): Promise<Tokens> {
+  async refreshToken(@GetUser() user: User): Promise<{ access_token: string }> {
 
-    return await this.returnTokens(user.id, user.email);
-    // const access_token: string = await this.generateJwtToken(
-    //   user.username,
-    //   user.email,
-    //   60 * 5,
-    // );
+    const access_token: string = await this.generateJwtToken(
+      user.username,
+      user.email,
+      60 * 5,
+    );
 
-    // const hashAT: string = (await this.encrypt.encrypt(access_token));
+    const hashAT: string = (await this.encrypt.encrypt(access_token));
 
-    // await this.prisma.user.update({
-    //   where: { id: user.id },
-    //   data: { accessToken: hashAT, isOnLine: true },
-    // });
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { accessToken: hashAT, isOnLine: true },
+    });
 
-    // return {
-    //   access_token,
-    // };
+    return {
+      access_token,
+    };
   }
 
   // async signin(dto: AuthDto) {

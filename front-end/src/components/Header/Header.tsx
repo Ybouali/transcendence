@@ -4,7 +4,7 @@ import "./HeaderStyle.css"
 
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginType, Tokens, UserType } from '../../types';
-import { getTokensFromLocalStorge, getUserInfo } from '../../utils/utils';
+import { getTokensFromSessionStorage, getUserInfo } from '../../utils/utils';
 
 function Header(props: LoginType) {
 
@@ -12,7 +12,7 @@ function Header(props: LoginType) {
 
   const [openMenu, setOpenMenu] = useState<boolean>(false);
 
-  const [user, setUser] = useState<UserType>();
+  const [user, setUser] = useState<UserType | null>(null);
 
   
   useEffect(() => {
@@ -38,21 +38,23 @@ function Header(props: LoginType) {
 
     const initDataHeader = async () => {
 
-      const tokens: Tokens = await getTokensFromLocalStorge();
+      const tokens: Tokens | null = await getTokensFromSessionStorage();
         
-        if (tokens.refresh_token === null || tokens.access_token === null) {
-          navigate('/');
-          return ;
-        }
+      if (tokens) {
         
-        const userData: UserType | undefined = await getUserInfo(tokens);
+        const userData: UserType | null = await getUserInfo(tokens);
 
-        if (userData === undefined) {
-          navigate('/');
+        if (!userData) {
+          // navigate('/');
           return;
         }
 
         setUser(userData);
+      }
+      else {
+        // navigate('/');
+        return;
+      }
 
     }
 
@@ -61,28 +63,30 @@ function Header(props: LoginType) {
   const logoutFromServer = async () => {
 
     // get the tokens
-    const tokens: Tokens = await getTokensFromLocalStorge();
+    const tokens: Tokens | null = await getTokensFromSessionStorage();
 
-    const resData = await fetch('http://localhost:3333/auth/logout', {
-      method: 'GET',
-      headers: {
-        'access_token': tokens.access_token,
-        'refresh_token': tokens.refresh_token
-      },
-    })
-    .then(response => {
-      return response.json();
-    })
-    .catch (err => {
-      console.error(err);
-    })
+    if (tokens) {
+      const resData = await fetch('http://localhost:3333/auth/logout', {
+        method: 'GET',
+        headers: {
+          'access_token': tokens.access_token,
+          'refresh_token': tokens.refresh_token
+        },
+      })
+      .then(response => {
+        return response.json();
+      })
+      .catch (err => {
+        console.error(err);
+      })
 
-    if (resData.message && resData.message === "done" ) {
-      // remove the tokens from the local storage
-      localStorage.setItem('access_token', "");
-      localStorage.setItem('refresh_token', "");
-      navigate("/")
-      return ;
+      if (resData.message && resData.message === "done" ) {
+        // remove the tokens from the local storage
+        sessionStorage.removeItem('access_token');
+        sessionStorage.removeItem('refresh_token');
+        navigate("/")
+        return ;
+      }
     }
 
   }
@@ -157,7 +161,7 @@ function Header(props: LoginType) {
                 className="user-image dropdown-button"
               >
                 <img
-                  src={user?.avatarName}
+                  src={user?.avatarNameUrl}
                   alt={user?.username}
                 />
               </button>
@@ -169,7 +173,7 @@ function Header(props: LoginType) {
                     <li className="dropdown-item user-profile-item">
                       <div className="user-image dropdown-item-user-image">
                         <img
-                          src={user?.avatarName}
+                          src={user?.avatarNameUrl}
                           alt={user?.username}
                         />
                       </div>

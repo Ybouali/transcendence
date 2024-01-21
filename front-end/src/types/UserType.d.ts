@@ -3,7 +3,7 @@ export interface UserType {
     username: string;
     email: string;
     fullName: string;
-    avatarName: string;
+    avatarNameUrl: string;
     isOnLine: boolean;
     levelGame: number;
 }

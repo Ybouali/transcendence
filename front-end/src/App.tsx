@@ -10,6 +10,7 @@ import Game from './pages/Game/Game';
 import Leaderboard from './pages/Leaderboard/Leaderboard';
 import Profile from './pages/Profile/Profile';
 import Settings from './pages/Settings/Settings';
+import NotAuth from './pages/NotAuth/NotAuth';
 
 function App() {
 
@@ -24,6 +25,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/:userId" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/notauth" element={<NotAuth />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

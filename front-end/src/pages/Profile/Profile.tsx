@@ -6,6 +6,7 @@ import ProfileButtonActions from './ProfileButtonActions/ProfileButtonActions'
 import ProfileAchievements from './ProfileAchievements/ProfileAchievements'
 // import GamesHistory from './GamesHistory/GamesHistory'
 import { HistoryGameReturnedType } from '../../types'
+import GamesHistory from './GamesHistory/GamesHistory'
 
 function Profile() {
 
@@ -269,7 +270,7 @@ function Profile() {
             <ProfileUserInfos />
             <ProfileButtonActions />
             <ProfileAchievements />
-            {/* <GamesHistory objects={gamesLog} /> */}
+            <GamesHistory objects={gamesLog} />
           </div>
         </div>
       </section>
