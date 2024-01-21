@@ -4,7 +4,7 @@ import "./HeaderStyle.css"
 
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginType, Tokens, UserType } from '../../types';
-import { getTokensFromLocalStorge, getUserInfo } from '../../utils/utils';
+import { getTokensFromSessionStorage, getUserInfo } from '../../utils/utils';
 
 function Header(props: LoginType) {
 
@@ -38,21 +38,21 @@ function Header(props: LoginType) {
 
     const initDataHeader = async () => {
 
-      const tokens: Tokens | null = await getTokensFromLocalStorge();
+      const tokens: Tokens | null = await getTokensFromSessionStorage();
         
       if (tokens) {
         
         const userData: UserType | null = await getUserInfo(tokens);
 
         if (!userData) {
-          navigate('/');
+          // navigate('/');
           return;
         }
 
         setUser(userData);
       }
       else {
-        navigate('/');
+        // navigate('/');
         return;
       }
 
@@ -63,7 +63,7 @@ function Header(props: LoginType) {
   const logoutFromServer = async () => {
 
     // get the tokens
-    const tokens: Tokens | null = await getTokensFromLocalStorge();
+    const tokens: Tokens | null = await getTokensFromSessionStorage();
 
     if (tokens) {
       const resData = await fetch('http://localhost:3333/auth/logout', {
@@ -82,8 +82,8 @@ function Header(props: LoginType) {
 
       if (resData.message && resData.message === "done" ) {
         // remove the tokens from the local storage
-        localStorage.setItem('access_token', "");
-        localStorage.setItem('refresh_token', "");
+        sessionStorage.removeItem('access_token');
+        sessionStorage.removeItem('refresh_token');
         navigate("/")
         return ;
       }

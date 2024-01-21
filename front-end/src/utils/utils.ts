@@ -1,63 +1,47 @@
 import { Tokens, UserType } from "../types"
 
-export async function getTokensFromLocalStorge (): Promise<Tokens | null> {
+export async function getTokensFromSessionStorage(): Promise<Tokens | null> {
 
-    setTimeout( async () => {
-        // get tokens from local storge
+    let gat = sessionStorage.getItem('access_token');
+    const grt = sessionStorage.getItem('refresh_token');
 
-        let at: string | null = localStorage.getItem('access_token');
-        let rt: string | null = localStorage.getItem('refresh_token');
+    let resData = null;
 
-        let resData = null;
+    if (!grt) return null;
 
-        // if tokens not exist return empty object
-        if (rt === null) {
-            return null;
-        }
+    if (!gat) {
 
-        if (!at) {
-
-            // need to get new access token from the server and store it in local storge
-
-            resData = await fetch('http://localhost:3333/auth/refresh/', {
-                method: 'GET',
-                headers: {
-                    'refresh_token': rt
-                }
-            })
-            .then(response => {
-                return response.json();
-            })
-            // .catch(err => {
-            //     return null;
-            // })
-
-            if (!resData) {
-                return null;
+        resData = await fetch('http://localhost:3333/auth/refresh/', {
+            method: 'GET',
+            headers: {
+                'refresh_token': grt,
             }
+        })
+        .then(response => {
+            return response.json();
+        })
 
-            at = resData.access_token;
+        if (!resData) return null;
 
-            // need to set the new access token ??
-            localStorage.setItem('access_token', resData.access_token);
-        }
+        gat = resData.access_token;
 
-        // now need to check if the the tokens is valid on the server 
-        const userData: UserType | null = await getUserInfo({ access_token: resData.access_token, refresh_token: rt });
+        sessionStorage.setItem('access_token', resData.access_token);
+    }
+    if (gat) {
+        const userData: UserType | null = await getUserInfo({ access_token: gat, refresh_token: grt });
 
         if (!userData) {
             return null;
         }
 
         const tokensRet: Tokens = {
-            access_token: resData.access_token,
-            refresh_token: rt
+            access_token: gat,
+            refresh_token: grt
         }
 
-        // return tokens 
         return tokensRet;
-    }, 1000)
-
+    }
+    
     return null;
 }
 
@@ -152,7 +136,7 @@ export async function getUserInfo(tokens: Tokens | null): Promise<UserType | nul
     // the url 
     let url: string = "http://localhost:3333/history-game/winnedgame/" + userId;
 
-    const tokens: Tokens | null = await getTokensFromLocalStorge();
+    const tokens: Tokens | null = await getTokensFromSessionStorage();
 
     if (tokens === null) {
         return null;
@@ -201,7 +185,7 @@ export async function getUserInfo(tokens: Tokens | null): Promise<UserType | nul
     }
 
     // get the tokens from the local storage
-    const tokens: Tokens | null = await getTokensFromLocalStorge();
+    const tokens: Tokens | null = await getTokensFromSessionStorage();
 
     if (tokens === null) {
         return null;

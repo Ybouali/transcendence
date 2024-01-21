@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import "./ProfileUserInfosStyle.css"
 import { Tokens, UserType } from '../../../types';
-import { getNumberGamePlayedByUserId, getTokensFromLocalStorge, getUserById, getUserInfo } from '../../../utils/utils';
+import { getNumberGamePlayedByUserId, getTokensFromSessionStorage, getUserById, getUserInfo } from '../../../utils/utils';
 import { useNavigate, useParams } from 'react-router-dom';
 
 function ProfileUserInfos() {
@@ -16,7 +16,7 @@ function ProfileUserInfos() {
 
   useEffect(() => {
 
-    initUserinfos();
+    setTimeout(() => initUserinfos(), 1000);
 
   }, [])
 
@@ -27,42 +27,37 @@ function ProfileUserInfos() {
 
     let userData: UserType | null = null;
 
-    const tokens: Tokens | null = await getTokensFromLocalStorge();
+    const tokens: Tokens | null = await getTokensFromSessionStorage();
 
-    if (tokens == null) {
-      navigate('/');
-      return ;
+    if (tokens) {
+      // console.log(tokens)
+  
+      if (userId) {
+        // the will be called because the url contains a user id
+        userData = await getUserById(userId, tokens);
+      }
+      if (!userData) {
+        // this will be called because the url dose not contain a user id
+        // and this is the default one aka display the user logged in info
+        userData = await getUserInfo(tokens);
+      }
+      // get the number of game played by the player
+      const numberOfGames: number | null = await getNumberGamePlayedByUserId(userData?.id)
+  
+      if (!numberOfGames) {
+        setNumberGamePlayed(0);
+      } else {
+        setNumberGamePlayed(numberOfGames);
+      }
+  
+  
+      if (userData === undefined) {
+        navigate('/');
+        return;
+      }
+  
+      setUserData(userData);
     }
-    
-    console.log(tokens)
-
-    if (userId) {
-      // the will be called because the url contains a user id
-      userData = await getUserById(userId, tokens);
-    }
-    
-    if (!userData) {
-      // this will be called because the url dose not contain a user id
-      // and this is the default one aka display the user logged in info
-      userData = await getUserInfo(tokens);
-    }
-
-    // get the number of game played by the player
-    const numberOfGames: number | null = await getNumberGamePlayedByUserId(userData?.id)
-
-    if (!numberOfGames) {
-      setNumberGamePlayed(0);
-    } else {
-      setNumberGamePlayed(numberOfGames);
-    }
-
-
-    if (userData === undefined) {
-      navigate('/');
-      return;
-    }
-
-    setUserData(userData);
   }
 
   

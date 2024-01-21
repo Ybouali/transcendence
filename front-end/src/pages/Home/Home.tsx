@@ -3,9 +3,9 @@ import Showcase from './Showcase/Showcase'
 import About from './About/About'
 import Team from './Team/Team'
 import Header from '../../components/Header/Header'
-import { getTokensFromLocalStorge } from '../../utils/utils'
 import { Tokens } from '../../types'
 import { useNavigate } from 'react-router-dom'
+import { getTokensFromSessionStorage } from '../../utils/utils'
 
 function Home() {
 
@@ -20,7 +20,7 @@ function Home() {
   const logIn = async () => {
 
     // get the tokens from the local storage
-    const tokens: Tokens | null = await getTokensFromLocalStorge();
+    const tokens: Tokens | null = await getTokensFromSessionStorage();
 
     // get the code in the url
     const url = new URL(window.location.href);
@@ -59,12 +59,10 @@ function Home() {
       })
       .catch(err => {
         // console.error(err);
-        // navigate('/notauth');
+        navigate('/notauth');
         return null;
       })
 
-
-      
       // check if the server returns tokens or not
       // if ( !resData.refresh_token || !resData.access_token) {
       //   navigate('/notauth');
@@ -72,11 +70,14 @@ function Home() {
       // }
 
       if (resData) {
-        // store the token in the local storage
-        localStorage.setItem('access_token', resData.access_token);
-        localStorage.setItem('refresh_token', resData.refresh_token);
 
-        setTimeout(() => navigate('/profile'), 1000);
+        // store the token in the session storage
+        sessionStorage.setItem('access_token', resData.access_token);
+        sessionStorage.setItem('refresh_token', resData.refresh_token);
+        
+        console.log("hello world");
+
+        navigate('/profile')
       }
     }
 

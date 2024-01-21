@@ -34,6 +34,7 @@ table tr td > a {
   }
   
   table {
+    width: 100%;
     background-color: #111;
     border-radius: 10px;
     overflow: hidden;
