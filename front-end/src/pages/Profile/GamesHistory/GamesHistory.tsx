@@ -1,20 +1,62 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import "./GamesHistoryStyle.css"
 import { HistoryGameReturnedType } from '../../../types';
 import GameHistoryItem from './GameHistoryItem/GameHistoryItem';
+import { useParams } from 'react-router-dom';
+import { getHisGamesByUserId } from '../../../utils/utils';
 
-interface ChildProps {
-  objects: HistoryGameReturnedType[]
-}
+function GamesHistory( ) {
 
-function GamesHistory( props: ChildProps) {
+  const { userId } = useParams();
 
-  const dataHisGame: HistoryGameReturnedType [] = props.objects;
+  const [dataHisGame, setDataHisGame] = useState<HistoryGameReturnedType [] | null>(null);
 
   useEffect(() => {
     
+    if (userId) {
+      getDatahistoryGames(userId)
+    } else {
+      getDatahistoryGames(null)
+    }
+
   }, []);
+
+  const getDatahistoryGames = async (userId: string | null) => {
+
+
+    try {
+      
+      let data: HistoryGameReturnedType [] | null = null;
+
+      if (userId) {
+        data = await getHisGamesByUserId(userId);
+      } else {
+        
+        data = await getHisGamesByUserId(null);
+      }
+
+      if (Array.isArray(data)) {
+        setDataHisGame(data);
+      }
+      else {
+        setDataHisGame([]);
+      }
+    } catch (error) {
+      setDataHisGame([]);
+    }
+
+    // let data: HistoryGameReturnedType [] | null = null;
+
+    // if (userId) {
+    //   data = await getHisGamesByUserId(userId);
+    // } else {
+      
+    //   data = await getHisGamesByUserId(null);
+    // }
+
+    // setDataHisGame(data);
+  }
   
     return (
       <table>
@@ -28,9 +70,9 @@ function GamesHistory( props: ChildProps) {
             </tr>
         </thead>
         <tbody>
-          { dataHisGame.map((game: HistoryGameReturnedType) => {
-              return <GameHistoryItem player1={game.player1} player2={game.player2} timestamp={game.timestamp} />;
-            }) 
+          { dataHisGame && dataHisGame.map((game: HistoryGameReturnedType, index) => (
+              <GameHistoryItem key={index} player1={game.player1} player2={game.player2} timestamp={game.timestamp} />
+            )) 
           }
         </tbody>
     </table>
