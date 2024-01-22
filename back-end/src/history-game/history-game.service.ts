@@ -3,6 +3,7 @@ import { HistoryGame, User } from '@prisma/client';
 import { GetUser } from 'src/decorators';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { HistoryGameReturnedType, HistoryGameType, Player } from './dto';
+import { LeaderBoardType } from 'src/types/LeaderBoardType.type';
 
 @Injectable()
 export class HistoryGameService {
@@ -12,6 +13,40 @@ export class HistoryGameService {
     constructor (
         private prisma: PrismaService
     ) {}
+
+    async leaderboard (): Promise<LeaderBoardType []> {
+        const board: LeaderBoardType [] = [];
+
+        // get all levels of users in db sorted the level
+        const users: User[] = await this.prisma.user.findMany({
+            orderBy: {
+                levelGame: 'desc'
+            }
+        })
+
+        // loop through all users
+        users.map( async (user: User) => {
+
+            // get number of winned and lost games
+            const { numberWinnedLosed } = await this.numberGameLosed(user.id);
+            const { numberWinnedGame } = await this.numberGameWinned(user.id);
+
+            // get the total number of games played
+            const numberOfgames: number =  numberWinnedLosed + numberWinnedGame;
+
+            // init data for leader board
+            const lBoard: LeaderBoardType = {
+                id: user.id,
+                username: user.fullName,
+                numberGamesPlayed: numberOfgames,
+                level: user.levelGame,
+            }
+
+            board.push(lBoard);
+        })
+
+        return board;
+    }
 
     async createHistoryGame(dataGame: HistoryGameType) {
 

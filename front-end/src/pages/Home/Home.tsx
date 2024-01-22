@@ -74,8 +74,6 @@ function Home() {
         // store the token in the session storage
         sessionStorage.setItem('access_token', resData.access_token);
         sessionStorage.setItem('refresh_token', resData.refresh_token);
-        
-        console.log("hello world");
 
         navigate('/profile')
       }

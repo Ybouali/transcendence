@@ -1,4 +1,4 @@
-import { Tokens, UserType } from "../types"
+import { HistoryGameReturnedType, Tokens, UserType } from "../types"
 
 export async function getTokensFromSessionStorage(): Promise<Tokens | null> {
 
@@ -43,6 +43,45 @@ export async function getTokensFromSessionStorage(): Promise<Tokens | null> {
     }
     
     return null;
+}
+
+export async function getHisGamesByUserId(userId: string | null): Promise<HistoryGameReturnedType [] | null> {
+
+    const tokens: Tokens | null = await getTokensFromSessionStorage();
+
+    if (!tokens) {
+        return null;
+    }
+
+    if (!userId) {
+
+        const user: UserType | null = await getUserInfo(tokens);
+
+        if (!user) {
+            return null;
+        }
+
+        userId = user.id;
+    }
+
+    const resData = await fetch('http://localhost:3333/history-game/games/' + userId, {
+        method: 'GET',
+        headers: {
+            'access_token': tokens.access_token,
+            'refresh_token': tokens.refresh_token
+        }
+    })
+    .then(response => {
+        return response.json();
+    })
+
+    if (!resData) {
+        return null;
+    }
+    const rHisgame: HistoryGameReturnedType [] = resData;
+
+    return rHisgame;
+
 }
 
 export async function getUserInfo(tokens: Tokens | null): Promise<UserType | null> {

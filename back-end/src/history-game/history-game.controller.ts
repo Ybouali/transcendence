@@ -32,5 +32,11 @@ export class HistoryGameController {
     async getGamesByIdUser(@Param('userId') userId: string) {
         return await this.historyGameService.getGamesByIdUser(userId);
     }
+
+    @HttpCode(HttpStatus.OK)
+    @Get('/leaderbord')
+    async leaderboard() {
+        return await this.leaderboard();
+    }
     
 }
