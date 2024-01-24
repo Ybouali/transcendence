@@ -2,7 +2,7 @@ import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Request } from 'express';
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { User } from '@prisma/client';
 
@@ -11,6 +11,7 @@ export class RefreshStrategy extends PassportStrategy(
   Strategy,
   'refresh_token',
 ) {
+
   constructor(
     private prisma: PrismaService,
     private encrypt: EncryptionService,
@@ -47,9 +48,10 @@ export class RefreshStrategy extends PassportStrategy(
     const refreshToken: string = (await this.encrypt.decrypt(user.refreshToken)).toString();
 
     // check if the refresh token is matched against the refresh token that comes from request
-
     if (refreshToken !== refresh_token)
       throw new ForbiddenException('Access denied');
+
+    delete user.refreshToken;
 
     return user;
   }

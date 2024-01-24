@@ -50,15 +50,18 @@ function Home() {
       // send a request to the server
       resData = await fetch(url,
         {
-          method: 'POST'
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json'
+          }
         }
       )
       .then(res => {
         // convert the data to json data and return it
         return res.json();
       })
-      .catch(err => {
-        // console.error(err);
+      .catch(error => {
+        console.error(error);
         navigate('/notauth');
         return null;
       })
@@ -76,6 +79,9 @@ function Home() {
         sessionStorage.setItem('refresh_token', resData.refresh_token);
 
         navigate('/profile')
+      }
+      else {
+        navigate('/notauth');
       }
     }
 

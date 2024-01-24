@@ -20,6 +20,9 @@ export async function getTokensFromSessionStorage(): Promise<Tokens | null> {
         .then(response => {
             return response.json();
         })
+        .catch(error => {
+            return null;
+        }) 
 
         if (!resData) return null;
 
@@ -74,6 +77,9 @@ export async function getHisGamesByUserId(userId: string | null): Promise<Histor
     .then(response => {
         return response.json();
     })
+    .catch(error => {
+        return null;
+    }) 
 
     if (!resData) {
         return null;
@@ -103,10 +109,11 @@ export async function getUserInfo(tokens: Tokens | null): Promise<UserType | nul
             .then(response => {
             return response.json();
         })
-        // .catch (err => {
-        //     // console.error(err);
-        //     return null;
-        // })
+        .catch (error => {
+            console.error({error});
+            return null;
+        }
+    )
 
     if (!resData) {
         return null;
@@ -146,10 +153,10 @@ export async function getUserInfo(tokens: Tokens | null): Promise<UserType | nul
     .then(response => {
         return response.json()
     })
-    // .catch(err => {
-    //     // console.error(err);
-    //     return null;
-    // }) 
+    .catch(error => {
+        // console.error(err);
+        return null;
+    }) 
 
     if (!resData) {
         return null;
@@ -194,10 +201,10 @@ export async function getUserInfo(tokens: Tokens | null): Promise<UserType | nul
     .then(response => {
         return response.json()
     })
-    // .catch(err => {
-    //     // console.error(err);
-    //     return null;
-    // })
+    .catch(error => {
+        // console.error(err);
+        return null;
+    })
 
     if (!resData) {
         return null;
@@ -256,10 +263,10 @@ export async function getUserInfo(tokens: Tokens | null): Promise<UserType | nul
     .then(response => {
         return response.json()
     })
-    // .catch(err => {
-    //     // console.error(err);
-    //     return null;
-    // })
+    .catch(error => {
+        // console.error(err);
+        return null;
+    })
 
     if (!resData) {
         return null;

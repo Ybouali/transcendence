@@ -10,6 +10,7 @@ import {
   UploadedFile,
   Put,
   Res,
+  Logger,
 } from '@nestjs/common';
 import { GetUser } from 'src/decorators';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -19,10 +20,14 @@ import { UpdateUserData } from './dto';
 @UseGuards(LoginGuard, AccessGuard)
 @Controller('users')
 export class UserController {
+  private logger = new Logger(UserController.name);
   constructor(private userService: UserService) {}
 
   @Get('/me')
   async getMe(@GetUser() user: User) {
+  
+    this.logger.debug(user);
+
     return user;
   }
 

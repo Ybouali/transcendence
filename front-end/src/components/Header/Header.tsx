@@ -38,22 +38,30 @@ function Header(props: LoginType) {
 
     const initDataHeader = async () => {
 
-      const tokens: Tokens | null = await getTokensFromSessionStorage();
+      try {
         
-      if (tokens) {
-        
-        const userData: UserType | null = await getUserInfo(tokens);
+        const tokens: Tokens | null = await getTokensFromSessionStorage();
 
-        if (!userData) {
+        console.log(tokens);
+          
+        if (tokens) {
+          
+          const userData: UserType | null = await getUserInfo(tokens);
+
+          if (!userData) {
+            // navigate('/');
+            return;
+          }
+
+          setUser(userData);
+        }
+        else {
           // navigate('/');
           return;
         }
 
-        setUser(userData);
-      }
-      else {
-        // navigate('/');
-        return;
+      } catch (error) {
+        return ;
       }
 
     }

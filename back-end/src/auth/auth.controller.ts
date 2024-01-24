@@ -8,6 +8,7 @@ import {
   Get,
   UseGuards,
   Param,
+  Header,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
@@ -33,6 +34,7 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.ACCEPTED)
+  @Header('Content-Type', 'application/json')
   @Post('login/intranet/:code')
   async loginIntra(@Param('code') code: string): Promise<Tokens> {
 
