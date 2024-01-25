@@ -1,3 +1,4 @@
+import axios from "axios";
 import { HistoryGameReturnedType, Tokens, UserType } from "../types"
 
 export async function getTokensFromSessionStorage(): Promise<Tokens | null> {
@@ -11,24 +12,17 @@ export async function getTokensFromSessionStorage(): Promise<Tokens | null> {
 
     if (!gat) {
 
-        resData = await fetch('http://localhost:3333/auth/refresh/', {
-            method: 'GET',
+        resData = await axios.get('http://localhost:3333/auth/refresh/', {
             headers: {
                 'refresh_token': grt,
             }
         })
-        .then(response => {
-            return response.json();
-        })
-        .catch(error => {
-            return null;
-        }) 
 
-        if (!resData) return null;
+        if (!resData.data) return null;
 
-        gat = resData.access_token;
+        gat = resData.data.access_token;
 
-        sessionStorage.setItem('access_token', resData.access_token);
+        sessionStorage.setItem('access_token', resData.data.access_token);
     }
     if (gat) {
         const userData: UserType | null = await getUserInfo({ access_token: gat, refresh_token: grt });
@@ -67,24 +61,19 @@ export async function getHisGamesByUserId(userId: string | null): Promise<Histor
         userId = user.id;
     }
 
-    const resData = await fetch('http://localhost:3333/history-game/games/' + userId, {
-        method: 'GET',
+    const url = 'http://localhost:3333/history-game/games/' + userId;
+
+    const resData = await axios.get(url, {
         headers: {
             'access_token': tokens.access_token,
             'refresh_token': tokens.refresh_token
-        }
+        }    
     })
-    .then(response => {
-        return response.json();
-    })
-    .catch(error => {
-        return null;
-    }) 
 
-    if (!resData) {
+    if (!resData.data) {
         return null;
     }
-    const rHisgame: HistoryGameReturnedType [] = resData;
+    const rHisgame: HistoryGameReturnedType [] = resData.data;
 
     return rHisgame;
 
@@ -99,34 +88,26 @@ export async function getUserInfo(tokens: Tokens | null): Promise<UserType | nul
     let resData = null;
 
     // send the request
-    resData = await fetch('http://localhost:3333/users/me', {
-        method: 'GET',
+
+    resData = await axios.get('http://localhost:3333/users/me', {
         headers: {
             'access_token': tokens.access_token,
             'refresh_token': tokens.refresh_token
-        },
-        })
-            .then(response => {
-            return response.json();
-        })
-        .catch (error => {
-            console.error({error});
-            return null;
         }
-    )
+    })
 
-    if (!resData) {
+    if (!resData.data) {
         return null;
     }
 
     const userData: UserType = {
-        id: resData.id,
-        username: resData.username,
-        email: resData.email,
-        avatarNameUrl: resData.avatarNameUrl,
-        fullName: resData.fullName,
-        isOnLine: resData.isOnLine,
-        levelGame: resData.levelGame,
+        id: resData.data.id,
+        username: resData.data.username,
+        email: resData.data.email,
+        avatarNameUrl: resData.data.avatarNameUrl,
+        fullName: resData.data.fullName,
+        isOnLine: resData.data.isOnLine,
+        levelGame: resData.data.levelGame,
     }
 
     // return the user data
@@ -141,35 +122,25 @@ export async function getUserInfo(tokens: Tokens | null): Promise<UserType | nul
     let resData = null;
 
     // get data from the server
-    resData = await fetch(url,
-        {
-            method: "GET",
-            headers: {
-                'access_token': tokens.access_token,
-                'refresh_token': tokens.refresh_token
-            }
-        }
-    )
-    .then(response => {
-        return response.json()
-    })
-    .catch(error => {
-        // console.error(err);
-        return null;
-    }) 
+    resData = await axios.get(url, {
+        headers: {
+            'access_token': tokens.access_token,
+            'refresh_token': tokens.refresh_token
+        },
+    });
 
-    if (!resData) {
+    if (!resData.data) {
         return null;
     }
 
     const userData: UserType = {
-        id: resData.id,
-        username: resData.username,
-        email: resData.email,
-        avatarNameUrl: resData.avatarNameUrl,
-        fullName: resData.fullName,
-        isOnLine: resData.isOnLine,
-        levelGame: resData.levelGame,
+        id: resData.data.id,
+        username: resData.data.username,
+        email: resData.data.email,
+        avatarNameUrl: resData.data.avatarNameUrl,
+        fullName: resData.data.fullName,
+        isOnLine: resData.data.isOnLine,
+        levelGame: resData.data.levelGame,
     }
 
     // return the user data
@@ -178,6 +149,10 @@ export async function getUserInfo(tokens: Tokens | null): Promise<UserType | nul
   }
 
   export async function getNumberOfWinnedGames(userId: string | undefined): Promise<number | null> {
+
+    if (userId === undefined) {
+        return null;
+    }
 
     // the url 
     let url: string = "http://localhost:3333/history-game/winnedgame/" + userId;
@@ -189,35 +164,25 @@ export async function getUserInfo(tokens: Tokens | null): Promise<UserType | nul
     }
     let resData = null;
     // make the req to the server
-    resData = await fetch(url,
-        {
-            method: "GET",
-            headers: {
-                'access_token': tokens.access_token,
-                'refresh_token': tokens.refresh_token
-            }
-        }
-    )
-    .then(response => {
-        return response.json()
-    })
-    .catch(error => {
-        // console.error(err);
-        return null;
+    resData = await axios.get(url, {
+        headers: {
+            'access_token': tokens.access_token,
+            'refresh_token': tokens.refresh_token
+        },
     })
 
-    if (!resData) {
+    if (!resData.data) {
         return null;
     }
 
     let win: number;
 
 
-    if (resData.numberWinnedGame === undefined) {
+    if (resData.data.numberWinnedGame === undefined) {
         win = 0;
     }
     else {
-        win = resData.numberWinnedGame;
+        win = resData.data.numberWinnedGame;
     }
 
     return win;
@@ -251,34 +216,24 @@ export async function getUserInfo(tokens: Tokens | null): Promise<UserType | nul
     let resData = null;
 
     // make the req to the server
-    resData = await fetch(url,
-        {
-            method: "GET",
-            headers: {
-                'access_token': tokens.access_token,
-                'refresh_token': tokens.refresh_token
-            }
+    resData = await axios.get(url, {
+        headers: {
+            'access_token': tokens.access_token,
+            'refresh_token': tokens.refresh_token        
         }
-    )
-    .then(response => {
-        return response.json()
-    })
-    .catch(error => {
-        // console.error(err);
-        return null;
-    })
+    });
 
-    if (!resData) {
+    if (!resData.data) {
         return null;
     }
 
     let lose: number = 0;
 
-    if (resData.numberWinnedGame === undefined) {
+    if (resData.data.numberWinnedGame === undefined) {
         lose = 0;
     }
     else {
-        lose = resData.numberWinnedGame;
+        lose = resData.data.numberWinnedGame;
     }
 
     return win + lose;

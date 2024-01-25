@@ -6,12 +6,13 @@ import Header from '../../components/Header/Header'
 import { Tokens } from '../../types'
 import { useNavigate } from 'react-router-dom'
 import { getTokensFromSessionStorage } from '../../utils/utils'
+import axios from 'axios'
 
 function Home() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
+  useEffect( () => {
 
     logIn();
     
@@ -19,22 +20,29 @@ function Home() {
 
   const logIn = async () => {
 
-    // get the tokens from the local storage
-    const tokens: Tokens | null = await getTokensFromSessionStorage();
+    try {
+      
+      // get the tokens from the local storage
+      const tokens: Tokens | null = await getTokensFromSessionStorage();
 
-    // get the code in the url
-    const url = new URL(window.location.href);
-  
-    const codeParam: string | null = url.searchParams.get('code');
+      // get the code in the url
+      const url = new URL(window.location.href);
+    
+      const codeParam: string | null = url.searchParams.get('code');
 
-    // check if the token already exists in the local storage
-    if (tokens && tokens.access_token && tokens.refresh_token) {
-      navigate('/profile');
+      // check if the token already exists in the local storage
+      if (tokens && tokens.access_token && tokens.refresh_token) {
+        navigate('/profile');
+        return ;
+      } else if (codeParam) {
+        // login into the server
+        await loginServer(codeParam);
+
+      }
+
+    } catch (error) {
+      // console.log(error)
       return ;
-    } else if (codeParam) {
-      // login into the server
-      loginServer(codeParam);
-
     }
   }
 
@@ -43,45 +51,32 @@ function Home() {
     // prepare the url
     
     if (code) {
-      const url = `http://localhost:3333/auth/login/intranet/${code}`;
     
-      let resData = null;
-
-      // send a request to the server
-      resData = await fetch(url,
-        {
-          method: 'POST',
+      try {
+        
+        const url = `http://localhost:3333/auth/login/intranet/${code}`;
+    
+        // send a request to the server
+        const resData = await axios.post(url, {
           headers: {
-            'Accept': 'application/json'
+            'Content-Type': 'application/json',
           }
+        });
+        
+        if (resData.data) {
+
+          // store the token in the session storage
+          sessionStorage.setItem('access_token', resData.data.access_token);
+          sessionStorage.setItem('refresh_token', resData.data.refresh_token);
+
+          navigate('/profile')
         }
-      )
-      .then(res => {
-        // convert the data to json data and return it
-        return res.json();
-      })
-      .catch(error => {
-        console.error(error);
-        navigate('/notauth');
-        return null;
-      })
+        else {
+          navigate('/notauth');
+        }
 
-      // check if the server returns tokens or not
-      // if ( !resData.refresh_token || !resData.access_token) {
-      //   navigate('/notauth');
-      //   return;
-      // }
-
-      if (resData) {
-
-        // store the token in the session storage
-        sessionStorage.setItem('access_token', resData.access_token);
-        sessionStorage.setItem('refresh_token', resData.refresh_token);
-
-        navigate('/profile')
-      }
-      else {
-        navigate('/notauth');
+      } catch (error) {
+        return;
       }
     }
 

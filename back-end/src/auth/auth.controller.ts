@@ -1,7 +1,6 @@
 import {
   Controller,
   Post,
-  Body,
   HttpCode,
   HttpStatus,
   Res,
@@ -9,6 +8,7 @@ import {
   UseGuards,
   Param,
   Header,
+  Logger,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
@@ -19,6 +19,7 @@ import { Tokens } from 'src/types';
 
 @Controller('auth')
 export class AuthController {
+
   constructor(private authService: AuthService) {}
 
   @UseGuards(LoginGuard)
@@ -37,9 +38,9 @@ export class AuthController {
   @Header('Content-Type', 'application/json')
   @Post('login/intranet/:code')
   async loginIntra(@Param('code') code: string): Promise<Tokens> {
-
-    const tokens: Tokens = await this.authService.loginInra(code);
     
+    const tokens: Tokens = await this.authService.loginInra(code);
+
     return tokens;
   }
 
