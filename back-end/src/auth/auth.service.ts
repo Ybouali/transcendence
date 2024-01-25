@@ -250,8 +250,6 @@ export class AuthService {
 
   private async fetchDataUserFromIntra(code: string): Promise<IntraUserDto> {
     try {
-      // init data from
-      const form = new FormData();
 
       // get grant type
       const grant_type: string = process.env.INTRA_GRANT_TYPE;
@@ -265,23 +263,21 @@ export class AuthService {
       // get redirect url
       const redirect_uri: string = process.env.INTRA_REDIRECT_URI;
 
-      // append grant type to header
-      form.append('grant_type', grant_type);
-
-      // append client id to header
-      form.append('client_id', client_id);
-
-      // append client secret to header
-      form.append('client_secret', client_secret);
-
-      // append code to header
-      form.append('code', code);
-
-      // append client secret to header
-      form.append('redirect_uri', redirect_uri);
+      const form = {
+        grant_type,
+        client_id,
+        client_secret,
+        code,
+        redirect_uri
+      }
       
       // make a req to the intra to get the access token
       const res = await axios.post('https://api.intra.42.fr/oauth/token/', form)
+
+      if (!res.data) {
+        throw new NotAcceptableException();
+      }
+      
 
       // get the access_token from data of intra 42
       const { access_token } = res.data;
@@ -300,6 +296,11 @@ export class AuthService {
           Authorization: headerAccessToken
         }
       });
+
+      if (!dataInra.data) {
+        throw new NotAcceptableException();
+      }
+      
 
       // extract data from dataIntra
       const { usual_full_name, login, email } = dataInra.data;

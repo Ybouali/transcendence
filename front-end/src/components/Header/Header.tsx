@@ -5,6 +5,7 @@ import "./HeaderStyle.css"
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginType, Tokens, UserType } from '../../types';
 import { getTokensFromSessionStorage, getUserInfo } from '../../utils/utils';
+import axios from 'axios';
 
 function Header(props: LoginType) {
 
@@ -38,22 +39,26 @@ function Header(props: LoginType) {
 
     const initDataHeader = async () => {
 
-      const tokens: Tokens | null = await getTokensFromSessionStorage();
+      try {
         
-      if (tokens) {
-        
-        const userData: UserType | null = await getUserInfo(tokens);
+        const tokens: Tokens | null = await getTokensFromSessionStorage();
+          
+        if (tokens) {
+          
+          const userData: UserType | null = await getUserInfo(tokens);
 
-        if (!userData) {
-          // navigate('/');
+          if (!userData) {
+            return;
+          }
+
+          setUser(userData);
+        }
+        else {
           return;
         }
 
-        setUser(userData);
-      }
-      else {
-        // navigate('/');
-        return;
+      } catch (error) {
+        return ;
       }
 
     }
@@ -66,21 +71,14 @@ function Header(props: LoginType) {
     const tokens: Tokens | null = await getTokensFromSessionStorage();
 
     if (tokens) {
-      const resData = await fetch('http://localhost:3333/auth/logout', {
-        method: 'GET',
+      const resData = await axios.get('http://localhost:3333/auth/logout', {
         headers: {
           'access_token': tokens.access_token,
           'refresh_token': tokens.refresh_token
-        },
-      })
-      .then(response => {
-        return response.json();
-      })
-      .catch (err => {
-        console.error(err);
+        }
       })
 
-      if (resData.message && resData.message === "done" ) {
+      if (resData.data.message && resData.data.message === "done" ) {
         // remove the tokens from the local storage
         sessionStorage.removeItem('access_token');
         sessionStorage.removeItem('refresh_token');

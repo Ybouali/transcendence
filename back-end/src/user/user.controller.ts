@@ -1,4 +1,3 @@
-import { Response } from 'express';
 import { User } from '@prisma/client';
 import { UserService } from './user.service';
 import {
@@ -6,13 +5,9 @@ import {
   Get,
   Param,
   UseGuards,
-  UseInterceptors,
-  UploadedFile,
   Put,
-  Res,
 } from '@nestjs/common';
 import { GetUser } from 'src/decorators';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { AccessGuard, LoginGuard } from 'src/auth/guard';
 import { UpdateUserData } from './dto';
 
@@ -40,23 +35,5 @@ export class UserController {
   async updateUser(dataUser: UpdateUserData, @GetUser('id') userId: string) {
     return this.userService.updateUser(dataUser, userId);
   }
-
   
-
-  // @Put('/avatar')
-  // @UseInterceptors(FileInterceptor('image'))
-  // async updateAvatar(
-  //   @GetUser() user: User,
-  //   @UploadedFile() file: Express.Multer.File,
-  // ) {
-  //   return this.userService.updateAvatar(user, file);
-  // }
-
-  // @Get('/avatar/:nameAvatar')
-  // async getAvatar(
-  //   @Param('nameAvatar') nameAvatar: string,
-  //   @Res() res: Response,
-  // ) {
-  //   return this.userService.getAvatar(nameAvatar, res);
-  // }
 }

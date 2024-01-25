@@ -1,6 +1,5 @@
 import { Injectable, InternalServerErrorException, Logger, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { HistoryGame, User } from '@prisma/client';
-import { GetUser } from 'src/decorators';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { HistoryGameReturnedType, HistoryGameType, Player } from './dto';
 import { LeaderBoardType } from 'src/types/LeaderBoardType.type';
