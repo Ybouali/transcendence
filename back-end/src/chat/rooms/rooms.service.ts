@@ -4,6 +4,7 @@ import { CreateRoomDto } from "./dto/create-room.dto";
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { ChatRoom, Member, MutedUsers } from "@prisma/client";
 import { RoomDto } from "./dto/room-conv.dto";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { RoomMessageDto } from "./dto/room-message.dto";
 import { CreateMessageDto } from "./dto/create-message.dto";
 import * as bcrypt from 'bcrypt';
@@ -112,71 +113,206 @@ export class RoomsService {
         }
     }
 
-    async getRoomsForUser(userId: string): Promise<RoomDto[]> {
+    // async getRoomsForUser(userId: string): Promise<RoomDto[]> {
+    //     const userRooms = await this.prisma.member.findMany({
+    //         where: {
+    //             userId: userId,
+    //         },
+    //         include: {
+    //             chatRoom: true,
+    //         },
+    //     });
+    //     const rooms: RoomDto[] = userRooms.map((userRoom) => {
+    //         return {
+    //             id: userRoom.chatRoom.id,
+    //             roomName: userRoom.chatRoom.roomName,
+    //             roomType: userRoom.chatRoom.roomType,
+    //             image: userRoom.chatRoom.image,
+    //         };
+    //     });
+    
+    //     return rooms;
+    // }
+
+    async getRoomsForUser(userId: string): Promise<any[]> {
+        console.log('here here');
         const userRooms = await this.prisma.member.findMany({
             where: {
                 userId: userId,
             },
             include: {
-                chatRoom: true,
+                chatRoom: {
+                    include: {
+                        members: {
+                            select: {
+                                userId: true,
+                                user: {
+                                    select: {
+                                        username: true,
+                                        avatarUrl: true,
+                                    },
+                                },
+                            },
+                        },
+                        messages: {
+                            select: {
+                                createdAt: true,
+                                message: true,
+                            },
+                            orderBy: {
+                                createdAt: 'desc',
+                            },
+                            take: 1,
+                        },
+                    },
+                },
             },
         });
+    
         const rooms: RoomDto[] = userRooms.map((userRoom) => {
+            const chatRoom = userRoom.chatRoom;
+            const membersCount = chatRoom.members.length;
+    
+            // Get up to 4 member avatars
+            const memberAvatars = chatRoom.members.slice(0, 4).map((member) => member.user.avatarUrl);
+    
             return {
-                id: userRoom.chatRoom.id,
-                roomName: userRoom.chatRoom.roomName,
-                roomType: userRoom.chatRoom.roomType,
-                image: userRoom.chatRoom.image,
+                id: chatRoom.id,
+                roomName: chatRoom.roomName,
+                members: membersCount,
+                group: {
+                    name: chatRoom.roomName,
+                    images: memberAvatars,
+                    lastMessage: chatRoom.messages.length > 0 ? chatRoom.messages[0].message : null,
+                },
             };
         });
     
+        // console.log(rooms);
         return rooms;
     }
     
-
-    async getMessagesForRoom(roomId: string): Promise<RoomMessageDto[]> {
-        const roomMessages = await this.prisma.roomMessage.findMany({
+    async getMessagesInRoom(roomId: string, userId: string): Promise<any> {
+        const room = await this.prisma.chatRoom.findUnique({
             where: {
-                roomId: roomId,
+                id: roomId,
             },
             include: {
-                sender: {
+                members: {
                     select: {
-                        id: true,
-                        username: true,
-                        avatarUrl: true,
+                        user: {
+                            select: {
+                                id: true,
+                                username: true,
+                                avatarUrl: true,
+                                Status: true,
+                            },
+                        },
                     },
                 },
-                room: {
-                    select: {
-                        id: true,
-                        roomName: true,
+                messages: {
+                    orderBy: {
+                        createdAt: 'asc',
+                    },
+                    include: {
+                        sender: {
+                            select: {
+                                id: true,
+                                username: true,
+                                avatarUrl: true,
+                                Status: true,
+                            },
+                        },
                     },
                 },
-            },
-            orderBy: {
-                createdAt: 'asc',
             },
         });
     
-        const formattedMessages: RoomMessageDto[] = roomMessages.map((message) => {
+        if (!room) {
+            throw new Error('Room not found');
+        }
+    
+        const members = room.members.map((member) => member.user);
+    
+        // If the number of members is more than 4, get the first 4 images, otherwise, get all images
+        const images =
+            members.length > 4 ? members.slice(0, 4).map((member) => member.avatarUrl) : members.map((member) => member.avatarUrl);
+    
+        const conversationInfos = {
+            type: 'group',
+            name: room.roomName,
+            members: members.length,
+            id: room.id,
+            images: images,
+        };
+    
+        const formattedMessages: any[] = room.messages.map((message) => {
+            const isSender = message.sender.id === userId;
+            const sender = message.sender;
+    
             return {
-                roomId: message.roomId,
-                createdAt: message.createdAt,
+                userType: isSender ? 'sender' : 'receiver',
+                username: sender.username,
+                otherUsername: members.find((member) => member.id !== sender.id)?.username,
+                timestamp: message.createdAt,
                 message: message.message,
-                sender: {
-                    id: message.sender.id,
-                    username: message.sender.username,
-                },
-                room: {
-                    id: message.room.id,
-                    roomName: message.room.roomName,
-                },
+                image: sender.avatarUrl,
             };
         });
     
-        return formattedMessages;
+        return {
+            conversationInfos: conversationInfos,
+            chatMessages: formattedMessages,
+        };
     }
+    
+
+    // async getMessagesForRoom(roomId: string): Promise<RoomMessageDto[]> {
+    //     const roomMessages = await this.prisma.roomMessage.findMany({
+    //         where: {
+    //             roomId: roomId,
+    //         },
+    //         include: {
+    //             sender: {
+    //                 select: {
+    //                     id: true,
+    //                     username: true,
+    //                     avatarUrl: true,
+    //                 },
+    //             },
+    //             room: {
+    //                 select: {
+    //                     id: true,
+    //                     roomName: true,
+    //                 },
+    //             },
+    //         },
+    //         orderBy: {
+    //             createdAt: 'asc',
+    //         },
+    //     });
+    
+    //     const formattedMessages: RoomMessageDto[] = roomMessages.map((message) => {
+    //         return {
+    //             roomId: message.roomId,
+    //             createdAt: message.createdAt,
+    //             message: message.message,
+    //             sender: {
+    //                 id: message.sender.id,
+    //                 username: message.sender.username,
+    //             },
+    //             room: {
+    //                 id: message.room.id,
+    //                 roomName: message.room.roomName,
+    //             },
+    //         };
+    //     });
+    
+    //     return formattedMessages;
+    // }
+
+    
+    
 
     async banUserInRoom(adminId: string, roomId: string, bannedId: string): Promise<boolean> {
         try {
@@ -596,6 +732,257 @@ export class RoomsService {
             return false;
         }
         
+        
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            // async  getRoomInfo(roomId: string, userId: string): Promise<any> {
+            //     const room = await this.prisma.chatRoom.findUnique({
+            //     where: { id: roomId },
+            //     include: {
+            //         owner: {
+            //         select: {
+            //             username: true,
+            //             Status: true,
+            //             avatarUrl: true,
+            //         },
+            //         },
+            //         AdminUsers: {
+            //         select: {
+            //             user: {
+            //             select: {
+            //                 username: true,
+            //                 Status: true,
+            //                 avatarUrl: true,
+            //             },
+            //             },
+            //         },
+            //         },
+            //         members: {
+            //         select: {
+            //             user: {
+            //             select: {
+            //                 id: true,
+            //                 username: true,
+            //                 Status: true,
+            //                 avatarUrl: true,
+            //             },
+            //             },
+            //         },
+            //         },
+            //         banedUsers: {
+            //         select: {
+            //             user: {
+            //             select: {
+            //                 username: true,
+            //                 Status: true,
+            //                 avatarUrl: true,
+            //             },
+            //             },
+            //         },
+            //         },
+            //     },
+            //     });
+            
+            //     if (!room) {
+            //     return null; // Room not found
+            //     }
+            
+            //     // Check if the user making the request is a member of the room
+            //     const isMember = room.members.some((member) => member.user.id === userId);
+            
+            //     if (!isMember) {
+            //     return null; // User is not a member of the room
+            //     }
+            
+            //     const mapUser = (user): any => ({
+            //     name: user.username,
+            //     status: user.Status,
+            //     images: [user.avatarUrl],
+            //     });
+            
+            //     const roomInfo: any = {
+            //     name: room.roomName,
+            //     type: room.roomType,
+            //     owner: [mapUser(room.owner)],
+            //     admins: room.AdminUsers.map((admin) => mapUser(admin.user)),
+            //     members: room.members.map((member) => mapUser(member.user)),
+            //     members_requests: [],
+            //     banned_members: room.banedUsers.map((banned) => mapUser(banned.user)),
+            //     };
+            
+            //     return roomInfo;
+            // }
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            async  getRoomInfo(roomId: string, userId: string): Promise<any> {
+                    const room = await this.prisma.chatRoom.findUnique({
+                    where: { id: roomId },
+                    include: {
+                        owner: {
+                        select: {
+                            id: true,
+                            username: true,
+                            Status: false,
+                            avatarUrl: true,
+                        },
+                        },
+                        AdminUsers: {
+                        select: {
+                            user: {
+                            select: {
+                                id: true,
+                                username: true,
+                                Status: false,
+                                avatarUrl: true,
+                            },
+                            },
+                        },
+                        },
+                        members: {
+                        select: {
+                            user: {
+                            select: {
+                                id: true,
+                                username: true,
+                                Status: false,
+                                avatarUrl: true,
+                            },
+                            },
+                        },
+                        },
+                        banedUsers: {
+                        select: {
+                            user: {
+                            select: {
+                                username: true,
+                                Status: false,  // TODO: will be checked
+                                avatarUrl: true,
+                            },
+                            },
+                        },
+                        },
+                    },
+                    });
+                
+                    if (!room) {
+                    return null; // Room not found
+                    }
+                
+                    // Check if the user making the request is a member of the room
+                    // const isMember = room.members.some((member) => member.user.id === userId);
+                
+                    // if (!isMember) {
+                    // return null; // User is not a member of the room
+                    // }
+                
+                    const mapUser = (user): any => ({
+                        id: user.id,
+                        name: user.username,
+                        status: user.Status,
+                        images: [user.avatarUrl],
+                    });
+                
+                    const ownerInfo = mapUser(room.owner);
+                    const adminsIds = room.AdminUsers.map((admin) => admin.user.id);
+                    const roomInfo: any = {
+                    name: room.roomName,
+                    type: room.roomType,
+                    owner: [ownerInfo],
+                    admins: room.AdminUsers
+                        .filter((admin) => admin.user.id !== room.owner.id) // Exclude owner from admins
+                        .map((admin) => mapUser(admin.user)),
+                    members_requests: [],
+                    members: room.members
+                        .filter((member) => member.user.id !== room.owner.id && !adminsIds.includes(member.user.id)) // Exclude owner from members
+                        .map((member) => mapUser(member.user)),
+                    banned_members: room.banedUsers.map((banned) => mapUser(banned.user)),
+                    };
+                
+                    return roomInfo;
+                }
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // async getRoomInfo(roomId: string): Promise<any> {
+            //     const room = await this.prisma.chatRoom.findUnique({
+            //         where: { id: roomId },
+            //         include: {
+            //             owner: {
+            //             select: {
+            //                 id: true,
+            //                 username: true,
+            //                 Status: true,
+            //                 avatarUrl: true,
+            //             },
+            //             },
+            //             AdminUsers: {
+            //             select: {
+            //                 user: {
+            //                 select: {
+            //                     id: true,
+            //                     username: true,
+            //                     Status: true,
+            //                     avatarUrl: true,
+            //                 },
+            //                 },
+            //             },
+            //             },
+            //             members: {
+            //             select: {
+            //                 user: {
+            //                 select: {
+            //                     id: true,
+            //                     username: true,
+            //                     Status: true,
+            //                     avatarUrl: true,
+            //                 },
+            //                 },
+            //             },
+            //             },
+            //             banedUsers: {
+            //             select: {
+            //                 user: {
+            //                 select: {
+            //                     username: true,
+            //                     Status: true,
+            //                     avatarUrl: true,
+            //                 },
+            //                 },
+            //             },
+            //             },
+            //         },
+            //         });
+                
+            //         if (!room) {
+            //         return null; // Room not found
+            //         }
+                
+            //         const mapUser = (user): any => ({
+            //         id: user.id,
+            //         name: user.username,
+            //         status: user.Status,
+            //         images: [user.avatarUrl],
+            //         });
+                
+            //         const ownerInfo = mapUser(room.owner);
+            //         const adminsIds = room.AdminUsers.map((admin) => admin.user.id);
+            //         room.AdminUsers.map((admin) => { mapUser(admin.user)});
+            //         const roomInfo: any = {
+            //         name: room.roomName,
+            //         type: room.roomType,
+            //         owner: [ownerInfo],
+            //         admins: room.AdminUsers.filter(admin => admin.user.id !== ownerInfo.id ),
+            //         members_requests: [],
+            //         members: room.members
+            //             .filter((member) => member.user.id !== room.owner.id && !adminsIds.includes(member.user.id)) // Exclude owner and admins from members
+            //             .map((member) => mapUser(member.user)),
+            //         banned_members: room.banedUsers.map((banned) => mapUser(banned.user)),
+            //         };
+                
+            //         return roomInfo;
+            //     }
+                
+                
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         async kickUserfromRoomHTTP(adminId: string, roomId: string, userId: string): Promise<any> {

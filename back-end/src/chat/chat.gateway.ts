@@ -59,10 +59,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         try 
         {
             // [test]
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const userId = client.handshake.headers.authorization;
-            if (userId !== createMessageDto.senderId || createMessageDto.message.length > 150) return;
+            // if (userId !== createMessageDto.senderId || createMessageDto.message.length > 150) return;
             if (createMessageDto.isRoom === false) {
                     const isBlocked = await this.messageService.isBlocked(createMessageDto.receiverId, createMessageDto.senderId);
+                    const senderImage = await this.messageService.getImageByUserId(createMessageDto.senderId);
                     if (isBlocked) {
                         this.server.to(client.id).emit('newMESSAGE_ERROR', { message: 'The receiver has blocked you.' });
                         return;
@@ -73,10 +75,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     if (recvSockets)
                         destUserSockets = [...destUserSockets, ...recvSockets];
                     destUserSockets.forEach((socket) => {
-                    this.server.to(socket).emit('newMESSAGE', { ...createMessageDto });
+                    this.server.to(socket).emit('newMESSAGE', { ...createMessageDto, senderImage });
                 });
             } else {
                 const room = await this.roomsService.findRoomById(createMessageDto.receiverId);
+                const senderImage = await this.messageService.getImageByUserId(createMessageDto.senderId);
                 if (!room) {
                     this.server.to(client.id).emit('newMESSAGE_ERROR', { message: `Room with ID ${createMessageDto.receiverId} not found`});
                     return;
@@ -111,7 +114,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     if (!banedUserIds.includes(user.userId)) {
                         const userSockets = SharedService.UsersSockets.get(user.userId);
                         userSockets?.forEach((socket) => {
-                            this.server.to(socket).emit('newMESSAGE', {...createMessageDto });
+                            this.server.to(socket).emit('newMESSAGE', {...createMessageDto, senderImage });
                         });
                     }
                 });
@@ -324,7 +327,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // eslint-disable-next-line prefer-const
         let { userId, roomId, duration, adminId } = data;
 
-        duration = 1;
+        duration = 5;
         const result = await this.roomsService.isUserAdmin(adminId, roomId);
         if (!result) {
             client.emit('muteUserError', { message: 'You are not authorized to mute users in this room.' });

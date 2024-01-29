@@ -10,6 +10,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserStatus {
+  ONLINE
+  OFFLINE
+  BUSY
+}
+
 model User {
   id                String           @id @default(cuid())
   createdAt         DateTime         @default(now())
@@ -19,7 +25,7 @@ model User {
   verifiedEmail     Boolean
   password          String
   avatarUrl         String
-  Status            Boolean          // offline / online
+  Status            UserStatus               // offline / online
   twoFactor         Boolean
 
   historyGames1     HistoryGame[]    @relation("user1")

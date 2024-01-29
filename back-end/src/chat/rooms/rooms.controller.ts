@@ -19,11 +19,16 @@ export class RoomsController {
         return this.roomsService.getRoomsForUser(userId);
     }
 
-    @Get('messages/:roomId')
+    @Get('/:userId/:roomId')
+    async getRoomInfo(@Param('userId') userId: string, @Param('roomId') roomId: string): Promise<RoomDto[]> {
+        return this.roomsService.getRoomInfo(roomId, userId);
+    }
+
+    @Get('messages/:userId/:roomId')
     async getMessagesForRoom(
-        @Param('roomId') roomId: string,
+        @Param('roomId') roomId: string, @Param('userId')userId
     ): Promise<RoomMessageDto[]> {
-        return this.roomsService.getMessagesForRoom(roomId);
+        return this.roomsService.getMessagesInRoom(roomId, userId);
     }
 
     @Get(':userId/:roomId/members')
