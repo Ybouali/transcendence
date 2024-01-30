@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { CreateMessageDto } from './DirectMessages/dto/create-message.dto';
@@ -31,6 +31,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const userId = client.handshake.headers.authorization;
         this.chatService.removeUserSocket(userId, client.id);
         this.logger.debug('onDisconnect ', client.id);
+
+
     }
 
     handleConnection(client: any) {
@@ -352,5 +354,84 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 console.error('Error muting user:', error.message);
                 client.emit('muteUserError', { message: 'Failed to mute user.' });
             });
+    }
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        async  getUserInfo(userId: string): Promise<any> {
+            // Get user data
+            const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                Status: true,
+                username: true,
+                avatarUrl: true,
+            },
+            });
+        
+            if (!user) {
+                return null; // User not found
+            }
+        
+            // Map user data to desired format
+            const userInfo: any = {
+                status: user.Status,
+                name: user.username,
+                avatarUrl: user.avatarUrl,
+            };
+        
+            return userInfo;
+        }
+
+    @OnEvent('addFriend')
+    async addFriend({userId, friendId}): Promise<any> {
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const friendship = await this.prisma.friendship.create({
+                data: {
+                userOne: userId,
+                userTwo: friendId,
+                },
+            });
+            const infoUser = await this.getUserInfo(userId);
+        
+            const recvSockets = SharedService.UsersSockets.get( friendId );
+            console.log('recvSockets => ', recvSockets);
+            // let destUserSockets = [ ...(SharedService.UsersSockets.get(userId)), ];
+            // console.log('destUserSockets => ', destUserSockets);
+            // if (recvSockets)
+                // destUserSockets = [...destUserSockets, ...recvSockets];
+            // console.log('cococococ');
+            // destUserSockets.forEach((socket) => {
+            //     this.server.to(socket).emit('newFriend', { 
+            //         id: userId,
+            //         status: infoUser.status,
+            //         friend: {
+            //             name: infoUser.name,
+            //             image: infoUser.avatarUrl,
+            //             message: 'start conversation',
+            //             notifications: 0,
+            //         },
+            //         notifications: 0
+            //     });
+            // });
+            recvSockets.forEach((socket) => {
+                this.server.to(socket).emit('newFriend', { 
+                    id: userId,
+                    status: infoUser.status,
+                    friend: {
+                        name: infoUser.name,
+                        image: infoUser.avatarUrl,
+                        message: 'start conversation',
+                        notifications: 0,
+                    },
+                    notifications: 0
+                });
+            });
+            console.log(' <= finale => ');
+        } catch (error) {
+            // return { error: error.message };
+            throw new BadRequestException('Already friend');
+        }
     }
 }

@@ -2,7 +2,7 @@
 
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { FriendshipDto } from "./dto/friendship.dto";
+// import { FriendshipDto } from "./dto/friendship.dto";
 
 
 @Injectable()
@@ -38,24 +38,24 @@ export class FriendService{
         return friends;
     }
 
-    async addFriend(userId: string, friendId: string): Promise<FriendshipDto | { error: string }> {
-        try {
-            const friendship = await this.prisma.friendship.create({
-                data: {
-                userOne: userId,
-                userTwo: friendId,
-                },
-            });
+    // async addFriend(userId: string, friendId: string): Promise<FriendshipDto | { error: string }> {
+    //     try {
+    //         const friendship = await this.prisma.friendship.create({
+    //             data: {
+    //             userOne: userId,
+    //             userTwo: friendId,
+    //             },
+    //         });
         
-            return {
-                id: friendship.id,
-                userOneId: friendship.userOne,
-                userTwoId: friendship.userTwo,
-            };
-        } catch (error) {
-            return { error: error.message };
-        }
-    }
+    //         return {
+    //             id: friendship.id,
+    //             userOneId: friendship.userOne,
+    //             userTwoId: friendship.userTwo,
+    //         };
+    //     } catch (error) {
+    //         return { error: error.message };
+    //     }
+    // }
 
     async blockFriend(userId: string, friendId: string): Promise<boolean> {
         try {

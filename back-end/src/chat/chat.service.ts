@@ -13,6 +13,7 @@ export class ChatService {
             SharedService.UsersSockets.set(userId, [ ...openedSocketsOfUser, socketId ]);
         else
             SharedService.UsersSockets.set(userId, [socketId]);
+        // console.log(SharedService.UsersSockets.get(userId));
     }
 
     async removeUserSocket(userId: string, socketId: string) {

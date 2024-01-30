@@ -2,12 +2,14 @@
 
 import { Controller, Get, Param, Post } from "@nestjs/common";
 import { FriendService } from "./friend.service";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 
 
 @Controller('friend')
 export class FriendController{
-    constructor(private readonly friendService: FriendService) {}
+    constructor(private readonly friendService: FriendService,
+        private eventEmitter: EventEmitter2) {}
 
     // :userId for test
     @Get('all/:userId')
@@ -18,7 +20,12 @@ export class FriendController{
     // :userId for test
     @Post(':userId/add/:friendId')
     async addFriend(@Param('userId') userId: string, @Param('friendId') friendId: string) {
-        return this.friendService.addFriend(userId, friendId);
+        try {
+            this.eventEmitter.emit('addFriend', {userId, friendId});
+        } catch (error) {
+            console.log('errrrrrrrrrrror');
+            throw error;
+        }
     }
 
     // :userId for test
