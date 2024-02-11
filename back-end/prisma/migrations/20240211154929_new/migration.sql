@@ -9,6 +9,7 @@ CREATE TABLE "User" (
     "avatarNameUrl" TEXT NOT NULL,
     "isOnLine" BOOLEAN NOT NULL,
     "accessToken" TEXT NOT NULL,
+    "phoneNumber" TEXT NOT NULL,
     "refreshToken" TEXT NOT NULL,
     "twoFactor" BOOLEAN NOT NULL,
     "qrCodeFileName" TEXT NOT NULL,
