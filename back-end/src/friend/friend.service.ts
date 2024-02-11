@@ -30,12 +30,26 @@ export class FriendService{
             },
             select: {
                 id: true,
+                Status: true,
                 username: true,
                 avatarUrl:true
             },
         });
 
-        return friends;
+        const newFriends = friends.map(item => ({
+            id: item.id,
+            name: item.username,
+            status: item.Status,
+            images: [
+                item.avatarUrl
+            ]
+        }))
+
+        return {
+            friends: [
+                ...newFriends
+            ]
+        };
     }
 
     // async addFriend(userId: string, friendId: string): Promise<FriendshipDto | { error: string }> {
@@ -80,7 +94,7 @@ export class FriendService{
                 return true;
         } catch (error) {
                 console.error('Error blocking user:', error.message);
-                return false;
+                throw new Error;
         }
     }
 
@@ -126,6 +140,19 @@ export class FriendService{
             return blockedUsers.map(({ blockedUser }) => blockedUser);
         } catch (error) {
             return { error: error.message };
+        }
+    }
+
+    async addFriend(userId: string, friendId: string) {
+        try {
+            await this.prisma.friendship.create({
+                data: {
+                userOne: userId,
+                userTwo: friendId,
+                },
+            });
+        } catch (error) {
+            throw { error: error.message };
         }
     }
 }

@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 
-import { Controller, Get, Param, Post } from "@nestjs/common";
+import { BadRequestException, Controller, Get, Param, Post } from "@nestjs/common";
 import { FriendService } from "./friend.service";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 
@@ -21,10 +21,11 @@ export class FriendController{
     @Post(':userId/add/:friendId')
     async addFriend(@Param('userId') userId: string, @Param('friendId') friendId: string) {
         try {
+            await this.friendService.addFriend(userId, friendId);
             this.eventEmitter.emit('addFriend', {userId, friendId});
         } catch (error) {
             console.log('errrrrrrrrrrror');
-            throw error;
+            throw new BadRequestException('Already friend');
         }
     }
 
@@ -32,16 +33,38 @@ export class FriendController{
     @Post(':userId/block/:friendId')
     async blockFriend(@Param('userId') userId: string, @Param('friendId') friendId: string) {
         try {
-            const blocked = await this.friendService.blockFriend(userId, friendId);
-            if (blocked) {
-                return { message: 'User blocked successfully.' };
-            } else {
-                return { error: 'Failed to block the user.' };
-            }
+            await this.friendService.blockFriend(userId, friendId);
+            this.eventEmitter.emit('blockFriend', {userId, friendId});
         } catch (error) {
-                return { error: 'Failed to block the user.' };
+            throw new BadRequestException('Failed to block friend');
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // :userId for test
     @Post(':userId/unblock/:friendId')

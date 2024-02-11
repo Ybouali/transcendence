@@ -9,12 +9,14 @@ import { RoomMessageDto } from "./dto/room-message.dto";
 import { CreateMessageDto } from "./dto/create-message.dto";
 import * as bcrypt from 'bcrypt';
 import { SharedService } from "../shared/shared.service";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 
 @Injectable()
 export class RoomsService {
     constructor(
-        private prisma: PrismaService, 
+        private prisma: PrismaService,
+        private eventEmitter: EventEmitter2 
         ) {}
 
 
@@ -39,7 +41,7 @@ export class RoomsService {
         }
     }
 
-    async addUserToRoom(roomId: string, userId: string) {
+    async addUserToRoom(roomId: string, userId: string, isProtected: boolean) {
         const existingMember = await this.prisma.member.findFirst({
             where: {
                 userId,
@@ -52,6 +54,7 @@ export class RoomsService {
                 data: {
                     userId,
                     chatRoomId: roomId,
+                    status: isProtected
                 },
             });
         }
@@ -135,7 +138,6 @@ export class RoomsService {
     // }
 
     async getRoomsForUser(userId: string): Promise<any[]> {
-        console.log('here here');
         const userRooms = await this.prisma.member.findMany({
             where: {
                 userId: userId,
@@ -153,6 +155,9 @@ export class RoomsService {
                                     },
                                 },
                             },
+                            where: {
+                                status: true
+                            }
                         },
                         messages: {
                             select: {
@@ -190,6 +195,67 @@ export class RoomsService {
     
         // console.log(rooms);
         return rooms;
+    }
+
+
+
+    async getAllRoomsForUser(userId: string): Promise<any> {
+        const userRooms = await this.prisma.member.findMany({
+            where: {
+                userId: userId,
+                status: true
+            },
+            include: {
+                chatRoom: {
+                    include: {
+                        members: {
+                            select: {
+                                userId: true,
+                                user: {
+                                    select: {
+                                        username: true,
+                                        avatarUrl: true,
+                                    },
+                                },
+                            },
+                            where: {
+                                status: true
+                            }
+                        },
+                        messages: {
+                            select: {
+                                createdAt: true,
+                                message: true,
+                            },
+                            orderBy: {
+                                createdAt: 'desc',
+                            },
+                            take: 1,
+                        },
+                    },
+                },
+            },
+        });
+    
+        const rooms: any = userRooms.map((userRoom) => {
+            const chatRoom = userRoom.chatRoom;
+            const membersCount = chatRoom.members.length;
+    
+            // Get up to 4 member avatars
+            const memberAvatars = chatRoom.members.slice(0, 4).map((member) => member.user.avatarUrl);
+    
+            return {
+                id: chatRoom.id,
+                name: chatRoom.roomName,
+                members: membersCount,
+                images: memberAvatars,
+            };
+        });
+    
+        // console.log(rooms);
+        return {
+            groups: rooms
+        };
     }
     
     async getMessagesInRoom(roomId: string, userId: string): Promise<any> {
@@ -232,6 +298,14 @@ export class RoomsService {
             throw new Error('Room not found');
         }
     
+        const isBanned = await this.prisma.banedUsers.findFirst({
+            where: {
+                roomId: roomId,
+                userId: userId
+            }
+        });
+
+
         const members = room.members.map((member) => member.user);
     
         // If the number of members is more than 4, get the first 4 images, otherwise, get all images
@@ -263,7 +337,17 @@ export class RoomsService {
         return {
             conversationInfos: conversationInfos,
             chatMessages: formattedMessages,
+            isMuted: this.isUserMutedInRoom(userId, roomId),
+            isBanned: !!isBanned,
         };
+    }
+
+    private isUserMutedInRoom(userId: string, roomId: string): boolean {
+        const roomMutes = SharedService.mutedUsers.get(userId);
+        if (roomMutes && roomMutes.has(roomId)) {
+            return true;
+        }
+        return false;
     }
     
 
@@ -529,9 +613,19 @@ export class RoomsService {
                 select: { ownerID: true },
             });
         
-            const newOwner = await this.prisma.member.findFirst({
+            // const newOwner = await this.prisma.member.findFirst({
+            //     where: {
+            //         chatRoomId: roomId,
+            //         userId: { not: oldOwner?.ownerID },
+            //     },
+            //     orderBy: {
+            //         createdAt: 'asc',
+            //     },
+            // });
+
+            const newOwner = await this.prisma.admins.findFirst({
                 where: {
-                    chatRoomId: roomId,
+                    roomId: roomId,
                     userId: { not: oldOwner?.ownerID },
                 },
                 orderBy: {
@@ -546,11 +640,31 @@ export class RoomsService {
                             ownerID: newOwner.userId,
                         },
                     });
+                    return;
                 }
-                    if (newOwner && newOwner.userId) {
+
+                const newOwnerMember = await this.prisma.member.findFirst({
+                    where: {
+                        chatRoomId: roomId,
+                        userId: { not: oldOwner?.ownerID },
+                    },
+                    orderBy: {
+                        createdAt: 'asc',
+                    },
+                });
+
+                    if (newOwnerMember && newOwnerMember.userId) {
+                        if (newOwnerMember) {
+                            await this.prisma.chatRoom.update({
+                                where: { id: roomId },
+                                data: {
+                                    ownerID: newOwnerMember.userId,
+                                },
+                            });
+                        }
                     const isAdmin = await this.prisma.admins.findFirst({
                         where: {
-                            userId: newOwner.userId,
+                            userId: newOwnerMember.userId,
                             roomId,
                         },
                     });
@@ -558,7 +672,7 @@ export class RoomsService {
                     if (!isAdmin) {
                         await this.prisma.admins.create({
                             data: {
-                                userId: newOwner.userId,
+                                userId: newOwnerMember.userId,
                                 roomId,
                             },
                         });
@@ -815,92 +929,265 @@ export class RoomsService {
             // }
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            async  getRoomInfo(roomId: string, userId: string): Promise<any> {
-                    const room = await this.prisma.chatRoom.findUnique({
+            // async  getRoomInfo(roomId: string, userId: string): Promise<any> {
+            //         const room = await this.prisma.chatRoom.findUnique({
+            //         where: { id: roomId },
+            //         include: {
+            //             owner: {
+            //             select: {
+            //                 id: true,
+            //                 username: true,
+            //                 Status: false,
+            //                 avatarUrl: true,
+            //             },
+            //             },
+            //             AdminUsers: {
+            //             select: {
+            //                 user: {
+            //                 select: {
+            //                     id: true,
+            //                     username: true,
+            //                     Status: false,
+            //                     avatarUrl: true,
+            //                 },
+            //                 },
+            //             },
+            //             },
+            //             members: {
+            //             select: {
+            //                 user: {
+            //                 select: {
+            //                     id: true,
+            //                     username: true,
+            //                     Status: false,
+            //                     avatarUrl: true,
+            //                 },
+            //                 },
+            //             },
+            //             },
+            //             banedUsers: {
+            //             select: {
+            //                 user: {
+            //                 select: {
+            //                     username: true,
+            //                     Status: false,  // TODO: will be checked
+            //                     avatarUrl: true,
+            //                 },
+            //                 },
+            //             },
+            //             },
+            //         },
+            //         });
+                
+            //         if (!room) {
+            //         return null;
+            //         }
+                
+            //         const mapUser = (user): any => ({
+            //             id: user.id,
+            //             name: user.username,
+            //             status: user.Status,
+            //             images: [user.avatarUrl],
+            //         });
+                
+            //         const ownerInfo = mapUser(room.owner);
+            //         const adminsIds = room.AdminUsers.map((admin) => admin.user.id);
+            //         const roomInfo: any = {
+            //         name: room.roomName,
+            //         type: room.roomType,
+            //         owner: [ownerInfo],
+            //         admins: room.AdminUsers
+            //             .filter((admin) => admin.user.id !== room.owner.id) // Exclude owner from admins
+            //             .map((admin) => mapUser(admin.user)),
+            //         members_requests: [],
+            //         members: room.members
+            //             .filter((member) => member.user.id !== room.owner.id && !adminsIds.includes(member.user.id)) // Exclude owner from members
+            //             .map((member) => mapUser(member.user)),
+            //         banned_members: room.banedUsers.map((banned) => mapUser(banned.user)),
+            //         };
+                
+            //         return roomInfo;
+            //     }
+
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            async getRoomInfo(roomId: string, userId: string): Promise<any> {
+                const room = await this.prisma.chatRoom.findUnique({
                     where: { id: roomId },
                     include: {
                         owner: {
-                        select: {
-                            id: true,
-                            username: true,
-                            Status: false,
-                            avatarUrl: true,
-                        },
+                            select: {
+                                id: true,
+                                username: true,
+                                Status: false,
+                                avatarUrl: true,
+                            },
                         },
                         AdminUsers: {
-                        select: {
-                            user: {
                             select: {
-                                id: true,
-                                username: true,
-                                Status: false,
-                                avatarUrl: true,
+                                user: {
+                                    select: {
+                                        id: true,
+                                        username: true,
+                                        Status: false,
+                                        avatarUrl: true,
+                                    },
+                                },
                             },
-                            },
-                        },
                         },
                         members: {
-                        select: {
-                            user: {
                             select: {
-                                id: true,
-                                username: true,
-                                Status: false,
-                                avatarUrl: true,
-                            },
+                                userId: true,
+                                status: true,
+                                user: {
+                                    select: {
+                                        username: true,
+                                        Status: false, // TODO: will be checked
+                                        avatarUrl: true,
+                                    },
+                                },
                             },
                         },
-                        },
+                        // members_requests: true,
                         banedUsers: {
-                        select: {
-                            user: {
                             select: {
-                                username: true,
-                                Status: false,  // TODO: will be checked
-                                avatarUrl: true,
+                                userId: true,
+                                user: {
+                                    select: {
+                                        username: true,
+                                        Status: false, // TODO: will be checked
+                                        avatarUrl: true,
+                                    },
+                                },
                             },
-                            },
-                        },
                         },
                     },
-                    });
+                });
+            
+                if (!room) {
+                    return null;
+                }
+
                 
-                    if (!room) {
-                    return null; // Room not found
+
+                const mutedIds: string[] = [];
+
+                // eslint-disable-next-line prefer-const
+                for (let [userId, roomMap] of SharedService.mutedUsers.entries()) {
+                    if (roomMap.has(roomId)) {
+                        mutedIds.push(userId);
                     }
-                
-                    // Check if the user making the request is a member of the room
-                    // const isMember = room.members.some((member) => member.user.id === userId);
-                
-                    // if (!isMember) {
-                    // return null; // User is not a member of the room
-                    // }
-                
-                    const mapUser = (user): any => ({
-                        id: user.id,
-                        name: user.username,
-                        status: user.Status,
-                        images: [user.avatarUrl],
-                    });
-                
-                    const ownerInfo = mapUser(room.owner);
-                    const adminsIds = room.AdminUsers.map((admin) => admin.user.id);
-                    const roomInfo: any = {
+                }
+
+
+            
+                const mapUser = (user): any => ({
+                    id: user.id,
+                    name: user.username,
+                    status: user.Status,
+                    images: [user.avatarUrl],
+                });
+
+                const mapUser2 = (user): any => ({
+                    id: user.userId,
+                    name: user.user.username,
+                    status: user?.Status || '',
+                    images: [user.user.avatarUrl],
+                });
+            
+                const ownerInfo = mapUser(room.owner);
+                const adminsIds = room.AdminUsers.map((admin) => admin.user.id);
+                const bannedIds = room.banedUsers.map((user) => user.userId);
+            
+                // const members = room.members.filter((member) => member.status === true);
+                const members = room.members.filter((member) => !mutedIds.includes(member.userId));
+                const members_requests = room.members.filter((request) => request.status === false);
+            
+                const roomInfo: any = {
                     name: room.roomName,
                     type: room.roomType,
                     owner: [ownerInfo],
                     admins: room.AdminUsers
-                        .filter((admin) => admin.user.id !== room.owner.id) // Exclude owner from admins
+                        .filter((admin) => admin.user.id !== room.owner.id ) // Exclude owner from admins
+
                         .map((admin) => mapUser(admin.user)),
-                    members_requests: [],
-                    members: room.members
-                        .filter((member) => member.user.id !== room.owner.id && !adminsIds.includes(member.user.id)) // Exclude owner from members
-                        .map((member) => mapUser(member.user)),
-                    banned_members: room.banedUsers.map((banned) => mapUser(banned.user)),
-                    };
+                    members_requests: members_requests.map((request) => mapUser2(request)),
+                    members: members
+                        .filter((member) => member.userId !== room.owner.id && member.status === true && !adminsIds.includes(member.userId) && !bannedIds.includes(member.userId)) // Exclude owner from members
+                        .map((member) => mapUser2(member)),
+                    banned_members: room.banedUsers.map((banned) => mapUser2(banned)),
+                    muted_members: room.members.filter((member) => mutedIds.includes(member.userId)).map((member) => mapUser2(member))
+                };
+                console.log(roomInfo);
+                return roomInfo;
+            }
+            
+            
+            async removeRoom(roomId: string): Promise<any[]> {
+                    const room = await this.prisma.chatRoom.findUnique({
+                    where: { id: roomId },
+                    include: {
+                        members: true,
+                        AdminUsers: {
+                        select: {
+                            userId: true,
+                        },
+                        },
+                        banedUsers: {
+                        select: {
+                            userId: true,
+                        },
+                        },
+                    },
+                    });
+
+                    const memberIds = room.members.map((member) => member.userId);
                 
-                    return roomInfo;
+                    if (!room) {
+                        throw new NotFoundException('Room not found');
+                    }
+                try {
+                    await this.prisma.roomMessage.deleteMany({
+                        where: {
+                            roomId: roomId,
+                        },
+                    });
+                    // Delete room members
+                    await this.prisma.member.deleteMany({
+                        where: {
+                            chatRoomId: roomId,
+                        },
+                    });
+                
+                    // Delete room admins
+                    await this.prisma.admins.deleteMany({
+                        where: {
+                            roomId: roomId,
+                        },
+                    });
+                
+                    // Delete room banned members
+                    await this.prisma.banedUsers.deleteMany({
+                        where: {
+                            roomId: roomId,
+                        },
+                    });
+                
+                    // Delete the room itself
+                    await this.prisma.chatRoom.delete({
+                        where: {
+                            id: roomId,
+                        },
+                    });
+
+                    return memberIds
+                } catch(error) {
+                    throw new BadRequestException('Failed to remove room');
                 }
+            }
+            
+            
+            
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             // async getRoomInfo(roomId: string): Promise<any> {
@@ -986,6 +1273,7 @@ export class RoomsService {
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         async kickUserfromRoomHTTP(adminId: string, roomId: string, userId: string): Promise<any> {
+                let eventName = 'removeMember';
                 const room = await this.prisma.chatRoom.findUnique({
                     where: { id: roomId },
                 });
@@ -995,31 +1283,22 @@ export class RoomsService {
                 }
         
                 if (room.ownerID === userId) {
+                    console.log('111111111111');
                     throw new BadRequestException('Cannot kick the owner of the room.');
                 }
-        
+                
                 const isMember = await this.prisma.member.findFirst({
                     where: {
                         userId: userId,
                         chatRoomId: roomId,
                     },
                 });
-        
+                
                 if (!isMember) {
+                    console.log('22222222222');
                     throw new BadRequestException('User is not a member of this room.');
                 }
-        
-                const isAdmin = await this.prisma.admins.findFirst({
-                    where: {
-                        userId: adminId,
-                        roomId: roomId,
-                    },
-                });
-        
-                if (!isAdmin) {
-                    throw new BadRequestException('You are not an admin in this room.');
-                }
-        
+                        
                 await this.prisma.member.deleteMany({
                     where: {
                         userId: userId,
@@ -1035,15 +1314,15 @@ export class RoomsService {
                 });
 
                 if (wasAdmin) {
-                    await this.prisma.admins.delete({
+                    eventName = 'removeAdmin';
+                    await this.prisma.admins.deleteMany({
                         where: {
-                            userId_roomId: {
                                 userId: userId,
                                 roomId: roomId,
-                            },
                         },
                     });
                 }
+                return eventName;
         }
 
 
@@ -1089,6 +1368,59 @@ export class RoomsService {
                     },
                 });
         }
+
+
+        async unbanUserInRoomHTTP(adminId: string, roomId: string, bannedId: string): Promise<string> {
+            let role: string = 'member';
+            const room = await this.prisma.chatRoom.findUnique({
+                where: { id: roomId },
+            });
+    
+            if (!room) {
+                throw new NotFoundException('Room does not exist.');
+            }
+    
+            const isMember = await this.prisma.member.findFirst({
+                where: {
+                    userId: bannedId,
+                    chatRoomId: roomId,
+                },
+            });
+    
+            if (!isMember) {
+                throw new BadRequestException('User is not a member of this room.');
+            }
+    
+            const isAdmin = await this.prisma.admins.findFirst({
+                where: {
+                    userId: adminId,
+                    roomId: roomId,
+                },
+            });
+    
+            if (!isAdmin) {
+                throw new BadRequestException('You are not an admin in this room.');
+            }
+
+            const isMemberAdmin = await this.prisma.admins.findFirst({
+                where: {
+                    userId: bannedId,
+                    roomId: roomId,
+                },
+            });
+
+            if (isMemberAdmin) {
+                role = 'admin'
+            }
+    
+            await this.prisma.banedUsers.deleteMany({
+                where: {
+                    userId: bannedId,
+                    roomId: roomId,
+                },
+            });
+            return role;
+    }
 
 
         async addAdminToRoomHTTP(ownerId: string, roomId: string, adminId: string): Promise<void> {
@@ -1169,9 +1501,9 @@ export class RoomsService {
                 if (!room) {
                     throw new NotFoundException('Room not found');
                 }
-                if (room.roomType !== 'Public') {
-                    throw new BadRequestException('This room is Private.');
-                }
+                // if (room.roomType !== 'public') {
+                //     throw new BadRequestException('This room is Private.');
+                // }
                 const memberCount = await this.prisma.member.count({
                     where: {
                         userId: newMember.userId,
@@ -1182,15 +1514,35 @@ export class RoomsService {
                     throw new BadRequestException('User is already a member of this room');
                 }
                 if (room.isProtected === false){
-                    await this.addUserToRoom(newMember.roomId, newMember.userId);
+                    await this.addUserToRoom(newMember.roomId, newMember.userId, !(room.roomType === 'private'));
                 } else {
                     const isPasswordMatch = await this.compareRoomPassword(room, newMember.password);
                     if (isPasswordMatch) {
-                        await this.addUserToRoom(newMember.roomId, newMember.userId);
+                        await this.addUserToRoom(newMember.roomId, newMember.userId, true);
                     } else {
                         throw new BadRequestException('Incorrect room password');
                     }
                 }
+
+                let userImages: string[] = [];
+
+                const userData = await this.prisma.user.findUnique({
+                    where: {
+                        id: newMember.userId,
+                    },
+                    select: {
+                        username: true,
+                        avatarUrl: true,
+                    },
+                });
+    
+                if (userData) {
+
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    userImages = [userData.avatarUrl];
+                }
+
+                return room;
         }
 
         async compareRoomPassword(room: ChatRoom, enteredPassword: string): Promise<boolean> {
@@ -1208,48 +1560,87 @@ export class RoomsService {
 
         async createRoomHTTP (createRoom: CreateRoomDto) {
             let newRoom;
-            const roomType = (createRoom.roomType === 'Private' ? 'Private' : 'Public');
             if (createRoom.isProtected){
                 const hashedPassword = await this.hashPassword(createRoom.password);;
-				newRoom = await this.createRoom({...createRoom, roomType, password:hashedPassword});
+				newRoom = await this.createRoom({...createRoom, password:hashedPassword});
             } else {
-                newRoom = await this.createRoom({...createRoom, roomType});
-                if (createRoom.users && createRoom.users.length > 0) {
-                    for (const userId of createRoom.users) {
-                        await this.addUserToRoom(newRoom.id, userId);
-                    }
-                }
+                newRoom = await this.createRoom({...createRoom});
+                // if (createRoom.users && createRoom.users.length > 0) {
+                //     for (const userId of createRoom.users) {
+                //         await this.addUserToRoom(newRoom.id, userId);
+                //     }
+                // }
             }
-            await this.addUserToRoom(newRoom.id, createRoom.ownerID);
+            await this.addUserToRoom(newRoom.id, createRoom.ownerID, true);
             await this.addUserAsAdmin(newRoom.id, createRoom.ownerID);
+            return newRoom;
         }
 
 
-        async updateRoomHTTP(roomId: string, updateRoom: {roomName: string, password: string, roomType: string}): Promise<ChatRoom | null> {
+        async updateRoomHTTP(roomId: string, updateRoom: { roomName: string, password: string, roomType: string, admins: string[] }): Promise<any> {
             let room: any;
-            if (updateRoom.roomType === 'Protected') {
+            
+            const existingAdmins = await this.prisma.admins.findMany({
+                where: {
+                roomId: roomId,
+                },
+                select: {
+                userId: true,
+                },
+            });
+            const newAdmins = updateRoom.admins.filter(admin => !existingAdmins.some(existingAdmin => existingAdmin.userId === admin));
+                
+            console.log(newAdmins)
+            if (updateRoom.roomType === 'protected') {
                 const hashedPassword = await this.hashPassword(updateRoom.password);
-                room = await this.prisma.chatRoom.update({
-                where: { id: roomId },
-                    data: {
-                        roomName: updateRoom.roomName,
-                        isProtected: true,
-                        password: hashedPassword,
-                    },
-                });
-
-            } else {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 room = await this.prisma.chatRoom.update({
                     where: { id: roomId },
+                    data: {
+                    roomName: updateRoom.roomName,
+                    roomType: updateRoom.roomType,
+                    isProtected: true,
+                    password: hashedPassword,
+                    },
+                });
+            
+                // const newAdmins = updateRoom.admins.filter(admin => !existingAdmins.some(existingAdmin => existingAdmin.userId === admin));
+                } else {
+                    await this.prisma.chatRoom.update({
+                        where: { id: roomId },
                         data: {
                             roomName: updateRoom.roomName,
                             roomType: updateRoom.roomType,
+                            isProtected: false,
+                            password: '',
                         },
                     });
+                    
+            
+                // Remove existing admins not included in the updated list
+                await this.prisma.admins.deleteMany({
+                    where: {
+                    roomId: roomId,
+                    userId: {
+                        notIn: updateRoom.admins,
+                    },
+                    },
+                });
+                }
+
+                await this.prisma.admins.createMany({
+                    data: newAdmins.map(admin => ({
+                        userId: admin,
+                        roomId: roomId,
+                    })),
+                });
+            
+                // delete room.password;
+                // return room;
+                return this.getRoomInfo(roomId, undefined);
             }
-            delete room.password;
-            return room;
-        }
+            
+
 
 
         private async muteUser(userId: string, roomId: string, duration: number): Promise<void> {
@@ -1276,14 +1667,191 @@ export class RoomsService {
             if (userRooms && userRooms.has(roomId)) {
                 clearTimeout(userRooms.get(roomId));
                 userRooms.delete(roomId);
+                this.eventEmitter.emit('unMuteMember', {userId: userId, roomId: roomId});
             }
         }
     
-        async handleMuteUser(data: { userId: string, roomId: string, duration : number }): Promise<void> {
+        async handleMuteUser(data: { userId: string, roomId: string, duration : number }): Promise<any> {
             // eslint-disable-next-line prefer-const
             let { userId, roomId, duration } = data;
+            const isMember = await this.prisma.member.findFirst({
+                where: {
+                    userId: userId,
+                    chatRoomId: roomId
+                }
+            });
+            if (!isMember){
+                throw new NotFoundException();
+            }
+            const isAdmin = await this.prisma.admins.findFirst({
+                where: {
+                    userId,
+                    roomId,
+                },
+            });
             duration = 1;
             this.muteUser(userId, roomId, duration);
+            return isAdmin;
         }
 
+        async getRoomData(roomId: string): Promise<any> {
+            // Fetch room information including members and messages
+            const room = await this.prisma.chatRoom.findUnique({
+                where: { id: roomId },
+                include: {
+                    members: {
+                        include: {
+                            user: {
+                                select: {
+                                    avatarUrl: true,
+                                }
+                            }
+                        }
+                    },
+                    messages: {
+                        orderBy: { createdAt: 'desc' },
+                        take: 1, // Get the latest message
+                    }
+                }
+            });
+        
+            return {
+                roomName: room.roomName,
+                members: room.members,
+                messages: room.messages,
+            };
+            }
+
+
+            async  getUserInfo(userId: string): Promise<any> {
+            // Get user data
+            const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                Status: true,
+                username: true,
+                avatarUrl: true,
+            },
+            });
+        
+            if (!user) {
+                return null; // User not found
+            }
+        
+            // Map user data to desired format
+            const userInfo: any = {
+                id: user.id,
+                status: user.Status,
+                name: user.username,
+                avatarUrl: user.avatarUrl,
+            };
+        
+            return userInfo;
+        }
+
+        async getImageOfUser(userId: string) : Promise<any> {
+            const prismaUser = await this.prisma.user.findUnique({
+                where: { id: userId },
+                select: {
+                    avatarUrl: true,
+                },
+            });
+            return prismaUser;
+        }
+
+        async searchUsersByUsername(query: string): Promise<any[]> {
+            return this.prisma.user.findMany({
+                where: {
+                    username: {
+                    contains: query,
+                    },
+                },
+            });
+        }
+
+        async getImagesOfRoom(roomId: string) {
+            const groups = await this.prisma.chatRoom.findUnique({
+                where: {
+                    id: roomId
+                },
+                include: {
+                    members: {
+                        include: {
+                            user: true,
+                        },
+                    },
+                },
+                });
+                return groups.members?.slice(0, 4).map((member) => member.user.avatarUrl)
+        }
+
+        async searchChatRoomsByRoomName(query: string): Promise<any[]> {
+                const groups = await this.prisma.chatRoom.findMany({
+                where: {
+                    roomName: {
+                        contains: query,
+                    },
+                },
+                include: {
+                    members: {
+                        include: {
+                            user: true,
+                        },
+                    },
+                },
+                });
+            
+                const groupResults = groups.map((group) => ({
+                id: group.id,   
+                members: group.members?.length || 0,
+                name: group.roomName,
+                images: group.members?.slice(0, 4).map((member) => member.user.avatarUrl) || [], // Assuming avatarUrl is a field in your User model
+                }));
+            console.log(groupResults);
+            return groupResults;
+        }
+
+        async getSearchResults(query: string): Promise<any> {
+            // Assuming you have methods like searchUsersByUsername and searchChatRoomsByRoomName in UserService and GroupService
+            const users = await this.searchUsersByUsername(query);
+            const groups = await this.searchChatRoomsByRoomName(query);
+        
+            const userResults = users.map((user) => ({
+                id: user.id,
+                name: user.username,
+                status: user.Status,
+                images: [user.avatarUrl],
+            }));
+        
+            return {
+                users: userResults,
+                groups: groups,
+            };
+        }
+
+        async AcceptRequestRoomHTTP(adminId: string, roomId: string, userId: string ) {
+            await this.prisma.member.update({
+                where: {
+                    userId_chatRoomId: {
+                        userId: userId,
+                        chatRoomId: roomId,
+                    },
+                },
+                data: {
+                    status: true,
+                },
+            });
+        }
+
+        async declineRequestRoomHTTP(adminId: string, roomId: string, userId: string ) {
+            await this.prisma.member.delete({
+                where: {
+                    userId_chatRoomId: {
+                        userId: userId,
+                        chatRoomId: roomId,
+                    },
+                }
+            });
+        }
 }

@@ -1,13 +1,13 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestException, Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
-import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { CreateMessageDto } from './DirectMessages/dto/create-message.dto';
 import { MessagesService } from './DirectMessages/messages.service';
 import { ChatService } from './chat.service';
 import { SharedService } from './shared/shared.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateRoomDto } from './rooms/dto/create-room.dto';
+// import { CreateRoomDto } from './rooms/dto/create-room.dto';
 import { RoomsService } from './rooms/rooms.service';
 import { OnEvent } from '@nestjs/event-emitter';
 
@@ -40,7 +40,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const userId = client.handshake.headers.authorization;
 
         this.chatService.addUserSocket(userId, client.id);
-        this.logger.debug('onConnection: ', client.id);
+        this.logger.debug('onConnection: ', client.id, '=> ', userId);
     }
 
     private async isUserMuted(senderId: string, roomId: string): Promise<boolean> {
@@ -71,13 +71,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                         this.server.to(client.id).emit('newMESSAGE_ERROR', { message: 'The receiver has blocked you.' });
                         return;
                     }
-                    await this.messageService.createMessage(createMessageDto);
+                    const message = await this.messageService.createMessage(createMessageDto);
                     const recvSockets = SharedService.UsersSockets.get( createMessageDto.receiverId );
                     let destUserSockets = [ ...SharedService.UsersSockets.get(createMessageDto.senderId), ];
                     if (recvSockets)
                         destUserSockets = [...destUserSockets, ...recvSockets];
                     destUserSockets.forEach((socket) => {
-                    this.server.to(socket).emit('newMESSAGE', { ...createMessageDto, senderImage });
+                    this.server.to(socket).emit('newMESSAGE', { ...createMessageDto, senderImage, timestamp: message.createdAt });
                 });
             } else {
                 const room = await this.roomsService.findRoomById(createMessageDto.receiverId);
@@ -110,13 +110,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     }
                 });
                 
-                this.roomsService.createMessage(createMessageDto);
+                const message = await this.roomsService.createMessage(createMessageDto);
                 const targetMembersOfRoom = await this.roomsService.getAllMembersOfRoom(createMessageDto.receiverId);
                 targetMembersOfRoom?.forEach((user) => {
                     if (!banedUserIds.includes(user.userId)) {
                         const userSockets = SharedService.UsersSockets.get(user.userId);
                         userSockets?.forEach((socket) => {
-                            this.server.to(socket).emit('newMESSAGE', {...createMessageDto, senderImage });
+                            this.server.to(socket).emit('newMESSAGE', {...createMessageDto, senderImage, timestamp: message.createdAt });
                         });
                     }
                 });
@@ -141,48 +141,62 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         });
     }
 
-    @SubscribeMessage('createROOM')
-    async createRoom ( @ConnectedSocket() client: Socket, @MessageBody() createRoom: CreateRoomDto) {
-            try {            
-                let newRoom;
-                const roomType = (createRoom.roomType === 'Private' ? 'Private' : 'Public');
-                if (createRoom.isProtected){
-                    // hash the Password
-                } else {
-                    newRoom = await this.roomsService.createRoom({...createRoom, roomType});
-                }
-                if (newRoom) {
-                    await this.roomsService.addUserToRoom(newRoom.id, createRoom.ownerID);  // Add owner to Members table
-                    await this.roomsService.addUserAsAdmin(newRoom.id, createRoom.ownerID); // Add owner to Admins table
-                    // client.join(newRoom.id);
-                    this.server.emit('roomsUPDATED');
-                } else {
-                    client.emit('roomERROR', { message: 'Failed to create room' });
-                }
-            } catch (error) {
-                client.emit('roomERROR', { message: 'Failed to create room' });
-            }
-    }
+    // @SubscribeMessage('createROOM')
+    // async createRoom ( @ConnectedSocket() client: Socket, @MessageBody() createRoom: CreateRoomDto) {
+    //         try {            
+    //             let newRoom;
+    //             const roomType = (createRoom.roomType === 'Private' ? 'Private' : 'Public');
+    //             if (createRoom.isProtected){
+    //                 // hash the Password
+    //             } else {
+    //                 newRoom = await this.roomsService.createRoom({...createRoom, roomType});
+    //             }
+    //             if (newRoom) {
+    //                 await this.roomsService.addUserToRoom(newRoom.id, createRoom.ownerID);  // Add owner to Members table
+    //                 await this.roomsService.addUserAsAdmin(newRoom.id, createRoom.ownerID); // Add owner to Admins table
+    //                 // client.join(newRoom.id);
+    //                 this.server.emit('roomsUPDATED');
+    //             } else {
+    //                 client.emit('roomERROR', { message: 'Failed to create room' });
+    //             }
+    //         } catch (error) {
+    //             client.emit('roomERROR', { message: 'Failed to create room' });
+    //         }
+    // }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @SubscribeMessage('joinROOM')
-    async joinRoom(
-        @ConnectedSocket() client: Socket,
-        @MessageBody() newMember: { userId: string; roomId: string }
-    ) {
-        try {
-            const room = await this.roomsService.findRoomById(newMember.roomId);
-            if (!room) {
-                throw new Error('Room not found');
-            }
-            // client.join(newMember.roomId);
-            await this.roomsService.addUserToRoom(newMember.roomId, newMember.userId);
-            const memberSockets = SharedService.UsersSockets.get(newMember.userId);
-            memberSockets?.forEach((socket) => { this.server.to(socket).emit('roomsUPDATED'); });
-        } catch (error) {
-            console.error('Error joining room:', error.message);
-            client.emit('roomERROR', { message: error.message });
-        }
-    }
+// @SubscribeMessage('joinROOM')
+// async joinRoom(
+//         @ConnectedSocket() client: Socket,
+//         @MessageBody() newMember: { userId: string; roomId: string }
+    // ) {
+    //     try {
+            
+    //         const room = await this.roomsService.findRoomById(newMember.roomId);
+    //         if (!room) {
+    //             throw new Error('Room not found');
+    //         }
+    //         const roomData = await this.roomsService.getRoomData(newMember.roomId);
+            
+    //         // client.join(newMember.roomId);
+    //         await this.roomsService.addUserToRoom(newMember.roomId, newMember.userId);
+    //         const responseData = {
+    //             id: newMember.roomId,
+    //             members: roomData.members.length,
+    //             group: {
+    //                 name: roomData.roomName,
+    //                 images: roomData.members.map(member => member.user.avatarUrl).slice(0, 4),
+    //                 message: roomData.messages.length > 0 ? roomData.messages[roomData.messages.length - 1].message : 'start conversation'
+    //             }
+    //         };
+    //         const memberSockets = SharedService.UsersSockets.get(newMember.userId);
+    //         memberSockets?.forEach((socket) => { this.server.to(socket).emit('roomsUPDATED', responseData); });
+    //     } catch (error) {
+    //         console.error('Error joining room:', error.message);
+    //         client.emit('roomERROR', { message: error.message });
+    //     }
+    // }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @SubscribeMessage('setPASSWORD')
     async setPassword(
@@ -260,6 +274,46 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 this.server.to(socket).emit('userKICKED');
             });
         }
+    }
+
+    @OnEvent('addRoom')
+    async addRoom( {newRoom, ownerID, images}
+    ) {
+        const recv = SharedService.UsersSockets.get(ownerID);
+        console.log('sockets: ', recv);
+        recv?.forEach((socket) => {
+            console.log('newRoom', newRoom.id)
+            this.server.to(socket).emit('newRoom', {
+                    id: newRoom.id,
+                    roomName: newRoom.roomName,
+                    members: 1,
+                    group: {
+                        name: newRoom.roomName,
+                        images: images,
+                        lastMessage: 'start conversation',
+                    },
+            });
+        });
+    }
+
+    @OnEvent('deleteRoom')
+    async deleteRoom( roomId : string, membersIds: string[]
+    ) {
+        console.log(membersIds);
+        membersIds.forEach((userId) => {
+            const userSockets = SharedService.UsersSockets.get(userId);
+    
+            if (userSockets) {
+                userSockets.forEach((socket) => {
+                    this.server.to(socket).emit('leaveRoom', {eventName: '',
+                        payload: {
+                            userId: userId,
+                            roomId: roomId
+                        }}
+                        );
+                });
+            }
+        });
     }
 
     @SubscribeMessage('leaveROOM')
@@ -363,6 +417,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             const user = await this.prisma.user.findUnique({
             where: { id: userId },
             select: {
+                id: true,
                 Status: true,
                 username: true,
                 avatarUrl: true,
@@ -375,6 +430,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         
             // Map user data to desired format
             const userInfo: any = {
+                id: user.id,
                 status: user.Status,
                 name: user.username,
                 avatarUrl: user.avatarUrl,
@@ -386,35 +442,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @OnEvent('addFriend')
     async addFriend({userId, friendId}): Promise<any> {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const friendship = await this.prisma.friendship.create({
-                data: {
-                userOne: userId,
-                userTwo: friendId,
-                },
-            });
             const infoUser = await this.getUserInfo(userId);
-        
             const recvSockets = SharedService.UsersSockets.get( friendId );
-            console.log('recvSockets => ', recvSockets);
-            // let destUserSockets = [ ...(SharedService.UsersSockets.get(userId)), ];
-            // console.log('destUserSockets => ', destUserSockets);
-            // if (recvSockets)
-                // destUserSockets = [...destUserSockets, ...recvSockets];
-            // console.log('cococococ');
-            // destUserSockets.forEach((socket) => {
-            //     this.server.to(socket).emit('newFriend', { 
-            //         id: userId,
-            //         status: infoUser.status,
-            //         friend: {
-            //             name: infoUser.name,
-            //             image: infoUser.avatarUrl,
-            //             message: 'start conversation',
-            //             notifications: 0,
-            //         },
-            //         notifications: 0
-            //     });
-            // });
             recvSockets.forEach((socket) => {
                 this.server.to(socket).emit('newFriend', { 
                     id: userId,
@@ -430,7 +459,131 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             });
             console.log(' <= finale => ');
         } catch (error) {
-            // return { error: error.message };
+            throw new BadRequestException('Already friend');
+        }
+    }
+
+    @OnEvent('blockFriend')
+    async blockFriend({userId, friendId}): Promise<any> {
+        try {
+            const infoUser = await this.getUserInfo(userId);
+            const recvSockets = SharedService.UsersSockets.get( friendId );
+            recvSockets?.forEach((socket) => {
+                this.server.to(socket).emit('removeFriend', { 
+                    id: userId,
+                    status: infoUser.status,
+                    friend: {
+                        name: infoUser.name,
+                        image: infoUser.avatarUrl,
+                        message: 'start conversation',
+                        notifications: 0,
+                    },
+                    notifications: 0
+                });
+            });
+
+            const destUserSockets = SharedService.UsersSockets.get(userId);
+            destUserSockets?.forEach((socket) => {
+                this.server.to(socket).emit('removeFriend', { id: friendId });
+            });
+            console.log(' <= finale => ');
+        } catch (error) {
+            console.log(error)
+            throw new BadRequestException('Already friend');
+        }
+    }
+
+
+    @OnEvent('kickMember')
+    async kickMember({roomId, userId}): Promise<any> {
+        try {
+            // const infoUser = await this.getUserInfo(userId);
+            const destUserSockets = SharedService.UsersSockets.get(userId);
+            destUserSockets?.forEach((socket) => {
+                this.server.to(socket).emit('removeRoom', { id: roomId });
+            });
+            // return infoUser;
+        } catch (error) {
+            console.log(error)
+            throw new BadRequestException('Already friend');
+        }
+    }
+
+    @OnEvent('roomUpdate')
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async roomUpdate({roomId, userId, eventName, adminId}): Promise<any> {
+        try {
+            if (eventName === 'leaveRoom') {
+                console.log('leave leavve')
+                const recv = userId ? SharedService.UsersSockets.get(userId) : undefined;
+                recv?.forEach((socket) => {
+                    this.server.to(socket).emit('leaveRoom', {eventName: eventName,
+                        payload: {
+                            userId: userId,
+                            roomId: roomId
+                        }});
+                });
+            }
+            // if (eventName === 'removeMember' || eventName === 'removeAdmin') {
+            //     const recv = userId ? SharedService.UsersSockets.get(userId) : undefined;
+            //     recv?.forEach((socket) => {
+            //         this.server.to(socket).emit('roomUPDATED', {eventName: eventName,
+            //             payload: {
+            //                 userId: userId,
+            //                 roomId: roomId
+            //             }});
+            //     });
+            //     const destUserSockets = adminId ? SharedService.UsersSockets.get(adminId) : undefined;
+            //     destUserSockets?.forEach((socket) => {
+            //         this.server.to(socket).emit('roomUPDATED', {eventName: eventName,
+            //         payload: {
+            //             userId: userId,
+            //             roomId: roomId
+            //         }});
+            //     });
+            // }
+
+            // if (eventName === 'setAdmin') {
+            //     const infoUser = await this.getUserInfo(adminId);
+            //     const destUserSockets = SharedService.UsersSockets.get(adminId);
+            //     destUserSockets?.forEach((socket) => {
+            //         this.server.to(socket).emit('roomUPDATED', {eventName: eventName,
+            //         payload: {
+            //             userId: infoUser?.id,
+            //             images: [infoUser?.avatarUrl],
+            //             name: infoUser?.username,
+            //             roomId: roomId
+            //         }});
+            //     });
+            // }
+
+        } catch (error) {
+            throw new BadRequestException('Already friend');
+        }
+    }
+
+    @OnEvent('muteMember')
+    async muteMember({roomId, userMuted}): Promise<any> {
+        try {
+            const destUserSockets = SharedService.UsersSockets.get(userMuted);
+            console.log(destUserSockets);
+            destUserSockets?.forEach((socket) => {
+                this.server.to(socket).emit('youAreMuted', { roomId: roomId });
+            });
+        } catch (error) {
+            throw new BadRequestException('Already friend');
+        }
+    }
+
+    @OnEvent('unMuteMember')
+    async unMuteMember({roomId, userId}): Promise<any> {
+        try {
+            const destUserSockets = SharedService.UsersSockets.get(userId);
+            console.log(destUserSockets);
+            destUserSockets?.forEach((socket) => {
+                this.server.to(socket).emit('youAreUnMuted', { roomId: roomId });
+            });
+        } catch (error) {
             throw new BadRequestException('Already friend');
         }
     }

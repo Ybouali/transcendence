@@ -81,6 +81,7 @@ model Member {
   chatRoomId        String
   joinedAt          DateTime       @default(now()) // New 'joinedAt' field
   createdAt         DateTime         @default(now())
+  status            Boolean       @default(true)
 
   // Relation with User and chatRoom
   user              User             @relation("UserMemberships", fields: [userId], references: [id])
