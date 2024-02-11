@@ -64,7 +64,10 @@ export class AppService {
       for (let user of users) {
         try {
 
-          if (!user.refreshToken) throw new InternalServerErrorException();
+          if (!user.refreshToken) {
+            // this.logger.error("Check the refresh token exists in a user ")
+            throw new InternalServerErrorException();
+          }
 
           const data: Buffer = Buffer.from(user.refreshToken);
 
@@ -88,6 +91,7 @@ export class AppService {
             this.logger.log(`User ${user.email} Is logged out `);
           }
         } catch (error) {
+          // this.logger.error("catch error in for bocle 1 refreshing");
           throw new InternalServerErrorException();
         }
       }
@@ -100,7 +104,10 @@ export class AppService {
       for (let user of users) {
         try {
 
-          if (!user.accessToken) throw new InternalServerErrorException();
+          if (!user.accessToken) {
+            // this.logger.error("Check the access token exists in a user");
+            throw new InternalServerErrorException()
+          }
 
           // const data: Buffer = Buffer.from(user.accessToken)
 
@@ -109,6 +116,8 @@ export class AppService {
 
           // if the throw exeption so the user should be signed again
           if (this.verifyJwtToken(tokenToVerify)) {
+
+            this.logger.debug("Verified the access token");
             // update the user
             await this.prisma.user.update({
               where: { id: user.id },
@@ -122,6 +131,7 @@ export class AppService {
             this.logger.log(`User ${user.email} Is Off Line `);
           }
         } catch (error) {
+          this.logger.error("catch error in for bocle 1 Access Token");
           throw new InternalServerErrorException();
         }
       }
@@ -145,7 +155,7 @@ export class AppService {
         const dateNow: number = Math.floor(Date.now() / 1000);
 
         // check expiration
-        if (dateNow > tokenDecoded.exp) return true;
+        if (dateNow >= tokenDecoded.exp) return true;
       }
 
       return false;

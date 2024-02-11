@@ -15,14 +15,14 @@ export class TowFactorAuthService {
     ) { }
 
     // validate will return the QC code image to the user
-    async validate(@GetUser() user: User, @Res() res: Response) {
+    async validate(user: User, res: Response) {
 
         try {
             
             let fileName: string;
 
             // check if the user has already been generated a QR Code
-            if (user.qrCodeFileName === "/")
+            if (user.qrCodeFileName === "nothing" && !user.twoFactor)
             {
                 const secret = speakeasy.generateSecret({
                     name: 'transcendence'
@@ -53,7 +53,7 @@ export class TowFactorAuthService {
                     },
                     data: {
                         qrCodeFileName: fileName,
-                        towFactorSecret: secret.base32
+                        towFactorSecret: secret.base32,
                     }
                 })
             }
@@ -72,11 +72,11 @@ export class TowFactorAuthService {
         }
     }
 
-    async confirm(@GetUser() user: User, code: string) {
+    async confirm(user: User, code: string) {
 
         try {
             
-            console.log(user.towFactorSecret)
+            // console.log(user.towFactorSecret)
 
             // verify the user tow factor using speakeasy 
             const verify = speakeasy.totp.verify({

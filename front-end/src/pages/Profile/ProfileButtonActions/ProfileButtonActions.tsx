@@ -13,7 +13,7 @@ function ProfileButtonActions() {
 
   const [friend, setFriend] = useState<boolean>(false);
 
-  const [personal, setPersonal] = useState<boolean>(false);
+  const [personal, setPersonal] = useState<boolean>(true);
 
   useEffect(() => {
 
@@ -47,8 +47,6 @@ function ProfileButtonActions() {
       userData = await getUserInfo(tokens);
       setPersonal(true);
     }
-
-
   }
 
 

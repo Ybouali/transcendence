@@ -58,6 +58,7 @@ function Home() {
     
         // send a request to the server
         const resData = await axios.post(url, {
+          timeout: 2000,
           headers: {
             'Content-Type': 'application/json',
           }

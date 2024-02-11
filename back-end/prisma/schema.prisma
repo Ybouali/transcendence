@@ -21,6 +21,7 @@ model User {
   avatarNameUrl   String
   isOnLine        Boolean
   accessToken     String
+  phoneNumber     String
   refreshToken    String
   twoFactor       Boolean
   qrCodeFileName  String

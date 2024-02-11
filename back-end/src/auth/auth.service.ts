@@ -69,6 +69,7 @@ export class AuthService {
           avatarNameUrl: dataIntra.avatarNameUrl,
           isOnLine: true,
           accessToken: 'offline',
+          phoneNumber: "+212 666 666 6666",
           refreshToken: 'logout',
           twoFactor: false,
           qrCodeFileName: "nothing",

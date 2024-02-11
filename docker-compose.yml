@@ -8,7 +8,7 @@ services:
     depends_on:
       - front-end
     ports:
-      - "80:80"
+      - "8000:8000"
     networks:
       - transcendence
   back-end:
