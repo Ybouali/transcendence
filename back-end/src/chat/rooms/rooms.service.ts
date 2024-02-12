@@ -137,6 +137,67 @@ export class RoomsService {
     //     return rooms;
     // }
 
+    // correct code
+    // async getRoomsForUser(userId: string): Promise<any[]> {
+    //     const userRooms = await this.prisma.member.findMany({
+    //         where: {
+    //             userId: userId,
+    //         },
+    //         include: {
+    //             chatRoom: {
+    //                 include: {
+    //                     members: {
+    //                         select: {
+    //                             userId: true,
+    //                             user: {
+    //                                 select: {
+    //                                     username: true,
+    //                                     avatarUrl: true,
+    //                                 },
+    //                             },
+    //                         },
+    //                         where: {
+    //                             status: true
+    //                         }
+    //                     },
+    //                     messages: {
+    //                         select: {
+    //                             createdAt: true,
+    //                             message: true,
+    //                         },
+    //                         orderBy: {
+    //                             createdAt: 'desc',
+    //                         },
+    //                         take: 1,
+    //                     },
+    //                 },
+    //             },
+    //         },
+    //     });
+    
+    //     const rooms: RoomDto[] = userRooms.map((userRoom) => {
+    //         const chatRoom = userRoom.chatRoom;
+    //         const membersCount = chatRoom.members.length;
+    
+    //         // Get up to 4 member avatars
+    //         const memberAvatars = chatRoom.members.slice(0, 4).map((member) => member.user.avatarUrl);
+    
+    //         return {
+    //             id: chatRoom.id,
+    //             roomName: chatRoom.roomName,
+    //             members: membersCount,
+    //             group: {
+    //                 name: chatRoom.roomName,
+    //                 images: memberAvatars,
+    //                 lastMessage: chatRoom.messages.length > 0 ? chatRoom.messages[0].message : null,
+    //             },
+    //         };
+    //     });
+    
+    //     // console.log(rooms);
+    //     return rooms;
+    // }
+
     async getRoomsForUser(userId: string): Promise<any[]> {
         const userRooms = await this.prisma.member.findMany({
             where: {
@@ -156,8 +217,16 @@ export class RoomsService {
                                 },
                             },
                             where: {
-                                status: true
-                            }
+                                status: true,
+                            },
+                        },
+                        banedUsers: {
+                            select: {
+                                userId: true,
+                            },
+                            where: {
+                                userId: userId,
+                            },
                         },
                         messages: {
                             select: {
@@ -174,28 +243,30 @@ export class RoomsService {
             },
         });
     
-        const rooms: RoomDto[] = userRooms.map((userRoom) => {
-            const chatRoom = userRoom.chatRoom;
-            const membersCount = chatRoom.members.length;
+        const rooms: RoomDto[] = userRooms
+            .filter((userRoom) => userRoom.chatRoom.banedUsers.length === 0) // Exclude rooms where user is banned
+            .map((userRoom) => {
+                const chatRoom = userRoom.chatRoom;
+                const membersCount = chatRoom.members.length;
     
-            // Get up to 4 member avatars
-            const memberAvatars = chatRoom.members.slice(0, 4).map((member) => member.user.avatarUrl);
+                // Get up to 4 member avatars
+                const memberAvatars = chatRoom.members.slice(0, 4).map((member) => member.user.avatarUrl);
     
-            return {
-                id: chatRoom.id,
-                roomName: chatRoom.roomName,
-                members: membersCount,
-                group: {
-                    name: chatRoom.roomName,
-                    images: memberAvatars,
-                    lastMessage: chatRoom.messages.length > 0 ? chatRoom.messages[0].message : null,
-                },
-            };
-        });
+                return {
+                    id: chatRoom.id,
+                    roomName: chatRoom.roomName,
+                    members: membersCount,
+                    group: {
+                        name: chatRoom.roomName,
+                        images: memberAvatars,
+                        lastMessage: chatRoom.messages.length > 0 ? chatRoom.messages[0].message : null,
+                    },
+                };
+            });
     
-        // console.log(rooms);
         return rooms;
     }
+    
 
 
 
@@ -1853,5 +1924,13 @@ export class RoomsService {
                     },
                 }
             });
+        }
+
+        async getInfosOfRoom(roomId: string) {
+            return this.prisma.chatRoom.findUnique({
+                where :{
+                    id: roomId
+                }
+            })
         }
 }

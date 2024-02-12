@@ -63,6 +63,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             // [test]
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const userId = client.handshake.headers.authorization;
+            console.log('send message', createMessageDto);
             // if (userId !== createMessageDto.senderId || createMessageDto.message.length > 150) return;
             if (createMessageDto.isRoom === false) {
                     const isBlocked = await this.messageService.isBlocked(createMessageDto.receiverId, createMessageDto.senderId);

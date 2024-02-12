@@ -185,6 +185,12 @@ export class RoomsController {
             const infoUser = await this.roomsService.getUserInfo(room1.bannedId);
             console.log(infoUser)
             await  this.roomsService.banUserInRoomHTTP(room1.adminId, room1.roomId, room1.bannedId);
+            this.eventEmitter.emit('roomUpdate', {
+                roomId: room1.roomId, 
+                userId: room1.bannedId, 
+                eventName: 'leaveRoom', 
+                adminId: undefined
+            });
             return {
                 id: infoUser.id,
                 images: [infoUser.avatarUrl],
@@ -196,6 +202,7 @@ export class RoomsController {
         }
     }
 
+
     @UseGuards(RolesGuard)
     @Roles(Role.Admin, Role.Owner)
     @Post(':userId/:roomId/unban')
@@ -206,6 +213,9 @@ export class RoomsController {
             const infoUser = await this.roomsService.getUserInfo(room1.unbannedId);
             console.log(infoUser)
             const role = await  this.roomsService.unbanUserInRoomHTTP(room1.adminId, room1.roomId, room1.unbannedId);
+            const images = await this.roomsService.getImagesOfRoom(room1?.roomId);
+            const newRoom = await this.roomsService.getInfosOfRoom(room1?.roomId);
+            this.eventEmitter.emit('addRoom', {newRoom, ownerID: room1.unbannedId, images});
             return {
                 id: infoUser.id,
                 images: [infoUser.avatarUrl],
