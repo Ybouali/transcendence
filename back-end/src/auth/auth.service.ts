@@ -1,4 +1,6 @@
 import {
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -11,8 +13,7 @@ import { Tokens } from 'src/types';
 import { GetUser } from 'src/decorators';
 import { User } from '@prisma/client';
 import { EncryptionService } from 'src/encryption/encryption.service';
-import axios from 'axios';
-import * as FormData from 'form-data';
+import axios, { AxiosError } from 'axios';
 
 @Injectable()
 export class AuthService {
@@ -39,20 +40,28 @@ export class AuthService {
   }
 
   // TODO: implement the logging using intra 42
-  async loginInra(code: string): Promise<Tokens> {
+  async loginInra( dto: IntraUserDto): Promise<Tokens> {
     try {
-      
-      // get the user data from intra 42 api's
-      const dataIntra: IntraUserDto = await this.fetchDataUserFromIntra(code);
-      
-      if (dataIntra === undefined) {
+
+      this.logger.debug({
+        dto
+      })
+
+      if (!dto) {
         throw new NotAcceptableException();
       }
+
+      // get the user data from intra 42 api's
+      // const dataIntra: IntraUserDto = await this.fetchDataUserFromIntra(code);
+      
+      // if (dataIntra === undefined) {
+      //   throw new NotAcceptableException();
+      // }
 
       // check if the user is already in the database by fetching the user by email address
 
       const user: User = await this.prisma.user.findFirst({
-        where: { email: dataIntra.email },
+        where: { email: dto.email },
       });
 
       // if the user exists in the database just return the tokens
@@ -63,10 +72,10 @@ export class AuthService {
       // store new user in database
       const newUser: User = await this.prisma.user.create({
         data: {
-          username: dataIntra.login,
-          email: dataIntra.email,
-          fullName: dataIntra.fullName,
-          avatarNameUrl: dataIntra.avatarNameUrl,
+          username: dto.login,
+          email: dto.email,
+          fullName: dto.fullName,
+          avatarNameUrl: dto.avatarNameUrl,
           isOnLine: true,
           accessToken: 'offline',
           phoneNumber: "+212 666 666 6666",
@@ -87,7 +96,6 @@ export class AuthService {
       }
       
     } catch (error) {
-      this.logger.error(error.message);
       throw new NotAcceptableException();
     }
   }
@@ -273,9 +281,12 @@ export class AuthService {
       }
       
       // make a req to the intra to get the access token
-      const res = await axios.post('https://api.intra.42.fr/oauth/token/', form)
+      const res = await axios.post('https://api.intra.42.fr/oauth/token/', form, {
+        timeout: 2000,
+      })
 
       if (!res.data) {
+        this.logger.debug("No data from intra 42")
         throw new NotAcceptableException();
       }
       
@@ -285,6 +296,7 @@ export class AuthService {
 
       // check if the access token is here
       if (access_token === undefined) {
+        this.logger.debug("No access token found")
         throw new NotAcceptableException();
       }
 
@@ -299,6 +311,7 @@ export class AuthService {
       });
 
       if (!dataInra.data) {
+        this.logger.debug("No info user from intra")
         throw new NotAcceptableException();
       }
       
@@ -328,6 +341,9 @@ export class AuthService {
 
       return extractedData;
     } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new HttpException('Success', HttpStatus.OK);
+      }
       this.logger.error(error);
       throw new NotAcceptableException();
     }

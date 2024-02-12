@@ -50,19 +50,18 @@ function Home() {
 
     // prepare the url
     
-    if (code) {
+    // if (code) {
     
       try {
         
-        const url = `http://localhost:3333/auth/login/intranet/${code}`;
+        const url = `http://localhost:3333/auth/42/`;
     
         // send a request to the server
-        const resData = await axios.post(url, {
-          timeout: 2000,
-          headers: {
-            'Content-Type': 'application/json',
-          }
+        const resData = await axios.get(url, {
+          timeout: 2000
         });
+
+        console.log("hello world", resData.data);
         
         if (resData.data) {
 
@@ -79,7 +78,7 @@ function Home() {
       } catch (error) {
         return;
       }
-    }
+    // }
 
     return ;
   }
