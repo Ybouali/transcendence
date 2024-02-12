@@ -1,24 +1,28 @@
 import {
   Controller,
-  Post,
   HttpCode,
   HttpStatus,
   Res,
   Get,
   UseGuards,
+  Request,
   Param,
   Header,
+  Req,
   Logger,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { GetUser } from 'src/decorators';
 import { User } from '@prisma/client';
-import { LoginGuard } from './guard';
+import { IntraGuard, LoginGuard } from './guard';
 import { Tokens } from 'src/types';
+import { IntraUserDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
+
+  private logger = new Logger(AuthController.name);
 
   constructor(private authService: AuthService) {}
 
@@ -34,15 +38,48 @@ export class AuthController {
     }
   }
 
-  @HttpCode(HttpStatus.ACCEPTED)
-  @Header('Content-Type', 'application/json')
-  @Post('login/intranet/:code')
-  async loginIntra(@Param('code') code: string): Promise<Tokens> {
+  @UseGuards(IntraGuard)
+  @Get('42')
+  async loginIntraNe(@Request() req) {}
+  
+  @UseGuards(IntraGuard)
+  @Get('42/callback')
+  async loginIntraNew(@Request() req) {
+
+    console.log(req.user);
+
+    const { usual_full_name, login, email } = req.user;
+
+    const { link } = req.user.image;
+
+    const extractedData: IntraUserDto = new IntraUserDto();
+
+    // store the data 
+    extractedData.login = login;
+    extractedData.fullName = usual_full_name;
+    extractedData.avatarNameUrl = link;
+    extractedData.email = email;
+
+    const tokens: Tokens = await this.authService.loginInra(extractedData);
+
+    this.logger.debug({
+      tokens
+    })
     
-    const tokens: Tokens = await this.authService.loginInra(code);
 
     return tokens;
   }
+
+
+  // @HttpCode(HttpStatus.ACCEPTED)
+  // @Header('Content-Type', 'application/json')
+  // @Get('login/intranet/:code')
+  // async loginIntra(@Param('code') code: string, @Req() req: Request): Promise<Tokens> {
+    
+  //   const tokens: Tokens = await this.authService.loginInra(code, req);
+
+  //   return tokens;
+  // }
 
   @UseGuards(LoginGuard)
   @HttpCode(HttpStatus.OK)
