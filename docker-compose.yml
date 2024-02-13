@@ -1,16 +1,5 @@
 version: '3.9'
 services:
-  nginx:
-    build: ./nginx
-    container_name: nginx
-    image: nginx:nginx
-    restart: unless-stopped
-    depends_on:
-      - front-end
-    ports:
-      - "8000:8000"
-    networks:
-      - transcendence
   back-end:
     build: ./back-end
     container_name: back-end
