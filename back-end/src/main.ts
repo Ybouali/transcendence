@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,11 +16,17 @@ async function bootstrap() {
     .setDescription('had l project naaaaaaaaddiiiiiii')
     .setVersion('1.0')
     .build();
+
+  // Serve static files from the "public" directory
+  
   const document = SwaggerModule.createDocument(app, config);
+  
   SwaggerModule.setup('api', app, document);
-
-  const port = process.env.PORT || 3333;
-
+  
+  const port = process.env.PORT_BACK_END || 3333;
+  
+  app.use('/public', express.static('public'));
+  
   await app.listen(port);
 }
 

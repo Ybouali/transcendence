@@ -10,6 +10,8 @@ import {
   Header,
   Req,
   Logger,
+  Redirect,
+  NotAcceptableException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
@@ -18,6 +20,7 @@ import { User } from '@prisma/client';
 import { IntraGuard, LoginGuard } from './guard';
 import { Tokens } from 'src/types';
 import { IntraUserDto } from './dto';
+import * as fs from 'fs';
 
 @Controller('auth')
 export class AuthController {
@@ -40,17 +43,22 @@ export class AuthController {
 
   @UseGuards(IntraGuard)
   @Get('42')
-  async loginIntraNe(@Request() req) {}
-  
+  async loginIntraNe(@Request() req) {
+    return;
+  }
+
   @UseGuards(IntraGuard)
   @Get('42/callback')
+  // @Redirect('/')
   async loginIntraNew(@Request() req) {
-
-    console.log(req.user);
 
     const { usual_full_name, login, email } = req.user;
 
-    const { link } = req.user.image;
+    // const pathAvatars = process.env.PATH_AVATAR_USERS;
+
+    // const port = process.env.PORT_BACK_END;
+
+    const link = "http";
 
     const extractedData: IntraUserDto = new IntraUserDto();
 
@@ -60,12 +68,17 @@ export class AuthController {
     extractedData.avatarNameUrl = link;
     extractedData.email = email;
 
-    const tokens: Tokens = await this.authService.loginInra(extractedData);
+    this.logger.debug(
+      "--------------------------------------------------------------",
+      {
+        extractedData
+      },
+      "---------------------------------------------------------------"
+    )
 
-    this.logger.debug({
-      tokens
-    })
-    
+    throw new NotAcceptableException();
+
+    const tokens: Tokens = await this.authService.loginInra(extractedData);
 
     return tokens;
   }
