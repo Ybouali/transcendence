@@ -63,18 +63,8 @@ function Home() {
 
         console.log("hello world", resData.data);
         
-        if (resData.data) {
 
-          // store the token in the session storage
-          sessionStorage.setItem('access_token', resData.data.access_token);
-          sessionStorage.setItem('refresh_token', resData.data.refresh_token);
-
-          navigate('/profile')
-        }
-        else {
-          navigate('/notauth');
-        }
-
+        
       } catch (error) {
         return;
       }
@@ -85,11 +75,24 @@ function Home() {
 
   const loginIntra = async () => {
 
-    const intraUrl: string | undefined = process.env.REACT_APP_INTRA_42_LINK;
+    try {
+      
+      const url = `http://localhost:3333/auth/42/`;
     
+        // send a request to the server
+        const resData = await axios.get(url, {
+          timeout: 2000,
+          headers: {
+            'Access-Control-Allow-Origin': '*'
+          }
+        });
 
-    if (intraUrl) {
-      window.location.href = intraUrl;
+        console.log({
+          resData
+        })
+
+    } catch (error) {
+      return ;
     }
   }
 

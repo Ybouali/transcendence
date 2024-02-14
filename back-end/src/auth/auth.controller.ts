@@ -6,12 +6,8 @@ import {
   Get,
   UseGuards,
   Request,
-  Param,
-  Header,
-  Req,
   Logger,
   Redirect,
-  NotAcceptableException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
@@ -20,7 +16,6 @@ import { User } from '@prisma/client';
 import { IntraGuard, LoginGuard } from './guard';
 import { Tokens } from 'src/types';
 import { IntraUserDto } from './dto';
-import * as fs from 'fs';
 
 @Controller('auth')
 export class AuthController {
@@ -49,38 +44,27 @@ export class AuthController {
 
   @UseGuards(IntraGuard)
   @Get('42/callback')
-  // @Redirect('/')
-  async loginIntraNew(@Request() req) {
+  @Redirect('/')
+  async loginIntraNew(@Request() req, @Res() res: Response) {
 
-    const { usual_full_name, login, email } = req.user;
+    const { usual_full_name, username, email } = req.user;
 
-    // const pathAvatars = process.env.PATH_AVATAR_USERS;
-
-    // const port = process.env.PORT_BACK_END;
-
-    const link = "http";
+    const link = "/public/images/default.png"
 
     const extractedData: IntraUserDto = new IntraUserDto();
 
     // store the data 
-    extractedData.login = login;
+    extractedData.login = username;
     extractedData.fullName = usual_full_name;
     extractedData.avatarNameUrl = link;
     extractedData.email = email;
 
-    this.logger.debug(
-      "--------------------------------------------------------------",
-      {
-        extractedData
-      },
-      "---------------------------------------------------------------"
-    )
-
-    throw new NotAcceptableException();
-
     const tokens: Tokens = await this.authService.loginInra(extractedData);
 
-    return tokens;
+    res.cookie("access_token", tokens.access_token, { httpOnly: true })
+    res.cookie("refresh_token", tokens.refresh_token, { httpOnly: true })
+
+    return res.send('Cookie set successfully!');
   }
 
 

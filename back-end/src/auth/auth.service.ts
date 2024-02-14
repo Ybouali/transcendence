@@ -43,10 +43,6 @@ export class AuthService {
   async loginInra( dto: IntraUserDto): Promise<Tokens> {
     try {
 
-      this.logger.debug({
-        dto
-      })
-
       if (!dto) {
         throw new NotAcceptableException();
       }
