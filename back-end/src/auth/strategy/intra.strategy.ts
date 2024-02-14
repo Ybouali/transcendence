@@ -24,8 +24,6 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42auth') {
 
     async validate ( accessToken: string, refreshToken: string, profile: IntraDto ) {
 
-        this.logger.debug(profile);
-
         return profile;
     }
 }

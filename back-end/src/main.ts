@@ -17,6 +17,10 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
 
+  app.enableCors({
+    origin: 'http://127.0.0.1:3000/'
+  });
+
   // Serve static files from the "public" directory
   
   const document = SwaggerModule.createDocument(app, config);
@@ -26,7 +30,7 @@ async function bootstrap() {
   const port = process.env.PORT_BACK_END || 3333;
   
   app.use('/public', express.static('public'));
-  
+
   await app.listen(port);
 }
 

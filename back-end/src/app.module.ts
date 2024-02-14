@@ -1,5 +1,5 @@
 import { JwtService } from '@nestjs/jwt';
-import { Module, OnApplicationBootstrap } from '@nestjs/common';
+import { MiddlewareConsumer, Module, OnApplicationBootstrap } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
@@ -24,7 +24,7 @@ import { HistoryGameModule } from './history-game/history-game.module';
   providers: [AppService, JwtService],
 })
 export class AppModule implements OnApplicationBootstrap {
-  constructor(private appService: AppService) {}
+  constructor(private appService: AppService) { }
 
   onApplicationBootstrap() {
     this.appService.init_server();
