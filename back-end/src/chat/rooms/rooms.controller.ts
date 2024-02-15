@@ -15,10 +15,10 @@ export class RoomsController {
     constructor(private readonly roomsService: RoomsService,
         private eventEmitter: EventEmitter2) {}
 
-    @Get('search/:que')
-    async getSearchResults(@Param('que') que: string,): Promise<any> {
+    @Get('search/:userId/:que')
+    async getSearchResults(@Param('que') que: string, @Param('userId') userId: string): Promise<any> {
         try {
-            return this.roomsService.getSearchResults(que);
+            return this.roomsService.getSearchResults(que, userId);
         } catch (error) {
             throw error;
         }
@@ -38,7 +38,9 @@ export class RoomsController {
 
     @Get('/:userId/:roomId')
     async getRoomInfo(@Param('userId') userId: string, @Param('roomId') roomId: string): Promise<RoomDto[]> {
-        return this.roomsService.getRoomInfo(roomId, userId);
+        
+        const res = this.roomsService.getRoomInfo(roomId, userId);
+        return res;
     }
 
     @UseGuards(RolesGuard)

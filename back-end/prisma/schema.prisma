@@ -22,6 +22,9 @@ model User {
   updatedAt         DateTime         @updatedAt
   username          String           @unique
   email             String           @unique
+  fullName          String
+
+
   verifiedEmail     Boolean
   password          String
   avatarUrl         String

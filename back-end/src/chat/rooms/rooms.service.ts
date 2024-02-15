@@ -1169,11 +1169,30 @@ export class RoomsService {
                 const ownerInfo = mapUser(room.owner);
                 const adminsIds = room.AdminUsers.map((admin) => admin.user.id);
                 const bannedIds = room.banedUsers.map((user) => user.userId);
+
+                const friends = await this.prisma.friendship.findMany({
+                    where: {
+                        OR: [
+                            {userOne: userId},
+                            {userTwo: userId}
+                        ]
+                    }
+                });
+
+                const friendResults = friends.map((friendship) => {
+                    const friendUser = friendship.userOne === userId
+                        ? friendship.userTwo
+                        : friendship.userOne;
+            
+                    return friendUser
+                });
+
+                // console.log()
             
                 // const members = room.members.filter((member) => member.status === true);
                 const members = room.members.filter((member) => !mutedIds.includes(member.userId));
                 const members_requests = room.members.filter((request) => request.status === false);
-            
+                // const blocked = await this.getBlockedUserIds(userId)
                 const roomInfo: any = {
                     name: room.roomName,
                     type: room.roomType,
@@ -1187,7 +1206,8 @@ export class RoomsService {
                         .filter((member) => member.userId !== room.owner.id && member.status === true && !adminsIds.includes(member.userId) && !bannedIds.includes(member.userId)) // Exclude owner from members
                         .map((member) => mapUser2(member)),
                     banned_members: room.banedUsers.map((banned) => mapUser2(banned)),
-                    muted_members: room.members.filter((member) => mutedIds.includes(member.userId)).map((member) => mapUser2(member))
+                    muted_members: room.members.filter((member) => mutedIds.includes(member.userId)).map((member) => mapUser2(member)),
+                    friends_list: friendResults
                 };
                 console.log(roomInfo);
                 return roomInfo;
@@ -1831,6 +1851,32 @@ export class RoomsService {
             return prismaUser;
         }
 
+        async getBlockedUserIds(userId: string): Promise<string[]> {
+            const blockingUsers = await this.prisma.blockedUsers.findMany({
+                where: {
+                    blockedId: userId,
+                },
+                select: {
+                    blockingId: true,
+                },
+            });
+        
+            const blockingUserIds = blockingUsers.map((blockingUser) => blockingUser.blockingId);
+        
+            const blockedUsers = await this.prisma.blockedUsers.findMany({
+                where: {
+                    blockingId: userId,
+                },
+                select: {
+                    blockedId: true,
+                },
+            });
+        
+            const blockedUserIds = blockedUsers.map((blockedUser) => blockedUser.blockedId);
+        
+            return [...blockingUserIds, ...blockedUserIds];
+        }
+
         async searchUsersByUsername(query: string): Promise<any[]> {
             return this.prisma.user.findMany({
                 where: {
@@ -1872,6 +1918,7 @@ export class RoomsService {
                     },
                 },
                 });
+                
             
                 const groupResults = groups.map((group) => ({
                 id: group.id,   
@@ -1883,12 +1930,17 @@ export class RoomsService {
             return groupResults;
         }
 
-        async getSearchResults(query: string): Promise<any> {
+        async getSearchResults(query: string, userId: string): Promise<any> {
             // Assuming you have methods like searchUsersByUsername and searchChatRoomsByRoomName in UserService and GroupService
             const users = await this.searchUsersByUsername(query);
             const groups = await this.searchChatRoomsByRoomName(query);
+
+            const blockedUserIds = await this.getBlockedUserIds(userId);
+
+            const filteredUsers = users.filter((user) => !blockedUserIds.includes(user.id));
+
         
-            const userResults = users.map((user) => ({
+            const userResults = filteredUsers.map((user) => ({
                 id: user.id,
                 name: user.username,
                 status: user.Status,

@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMatchDto } from "./dto";
 
@@ -149,5 +149,40 @@ export class MatchService {
             ranking: rankingString,
         };
     }
+
+    async checkValues(username: string, id: string, fullname: string, email: string){
+        const userWithUsername = await this.prisma.user.findUnique({
+            where: { username },
+        });
+        if (!userWithUsername) return;
+        if (userWithUsername.id != id)
+            throw new BadRequestException('username already exist!');
+        
+        const userWithEmail = await this.prisma.user.findUnique({
+            where: { email: email },
+        });
+        if (!userWithEmail) return;
+        if (userWithEmail.id != id)
+            throw new BadRequestException('email already exist!');
+    }
     
+
+    async updateValues(username: string, id: string, fullname: string, email: string, filePath: string){
+        const existingUser = await this.prisma.user.findUnique({
+            where: { id },
+        });
+    
+        if (!existingUser) {
+        throw new NotFoundException(`User with id ${id} not found`);
+        }
+    
+        await this.prisma.user.update({
+            where: { id },
+            data: {
+                email,
+                avatarUrl: filePath,
+                username
+            }
+        });
+    }
 }
