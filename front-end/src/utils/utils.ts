@@ -3,6 +3,12 @@ import { HistoryGameReturnedType, Tokens, UserType } from "../types"
 
 export async function getTokensFromSessionStorage(): Promise<Tokens | null> {
 
+    const coo = document.cookie;
+
+    const ccArr = coo.split(';');
+
+    console.log(ccArr)
+
     let gat = sessionStorage.getItem('access_token');
     const grt = sessionStorage.getItem('refresh_token');
 
@@ -25,7 +31,7 @@ export async function getTokensFromSessionStorage(): Promise<Tokens | null> {
         sessionStorage.setItem('access_token', resData.data.access_token);
     }
     if (gat) {
-        const userData: UserType | null = await getUserInfo({ access_token: gat, refresh_token: grt });
+        const userData: UserType | null = await getUserInfo();
 
         if (!userData) {
             return null;
@@ -52,7 +58,7 @@ export async function getHisGamesByUserId(userId: string | null): Promise<Histor
 
     if (!userId) {
 
-        const user: UserType | null = await getUserInfo(tokens);
+        const user: UserType | null = await getUserInfo();
 
         if (!user) {
             return null;
@@ -79,22 +85,17 @@ export async function getHisGamesByUserId(userId: string | null): Promise<Histor
 
 }
 
-export async function getUserInfo(tokens: Tokens | null): Promise<UserType | null> {
+export async function getUserInfo(): Promise<UserType | null> {
 
-    if (tokens === null) {
-        return null;
-    }
+    // if (tokens === null) {
+    //     return null;
+    // }
 
     let resData = null;
 
     // send the request
 
-    resData = await axios.get('http://localhost:3333/users/me', {
-        headers: {
-            'access_token': tokens.access_token,
-            'refresh_token': tokens.refresh_token
-        }
-    })
+    resData = await axios.get('http://localhost:3333/users/me')
 
     if (!resData.data) {
         return null;

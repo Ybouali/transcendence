@@ -38,7 +38,7 @@ function ProfileAchievements() {
       if (userData === undefined) {
         // this will be called because the url dose not contain a user id
         // and this is the default one aka display the user logged in info
-        userData = await getUserInfo(tokens);
+        userData = await getUserInfo();
       }
 
       const nGameWinned: number | null = await getNumberOfWinnedGames(userData?.id)

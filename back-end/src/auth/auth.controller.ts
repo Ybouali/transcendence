@@ -44,7 +44,7 @@ export class AuthController {
 
   @UseGuards(IntraGuard)
   @Get('42/callback')
-  @Redirect('/')
+  @Redirect('http://localhost:3000/profile/')
   async loginIntraNew(@Request() req, @Res() res: Response) {
 
     const { usual_full_name, username, email } = req.user;
@@ -64,7 +64,7 @@ export class AuthController {
     res.cookie("access_token", tokens.access_token, { httpOnly: true })
     res.cookie("refresh_token", tokens.refresh_token, { httpOnly: true })
 
-    return res.send('Cookie set successfully!');
+    return ;
   }
 
 

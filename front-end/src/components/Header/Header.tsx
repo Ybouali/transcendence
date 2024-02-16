@@ -45,7 +45,7 @@ function Header(props: LoginType) {
           
         if (tokens) {
           
-          const userData: UserType | null = await getUserInfo(tokens);
+          const userData: UserType | null = await getUserInfo();
 
           if (!userData) {
             return;

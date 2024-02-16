@@ -26,6 +26,8 @@ function ProfileUserInfos() {
   const initUserinfos = async () => {
 
     let userData: UserType | null = null;
+    userData = await getUserInfo();
+
 
     const tokens: Tokens | null = await getTokensFromSessionStorage();
 
@@ -39,7 +41,7 @@ function ProfileUserInfos() {
       if (!userData) {
         // this will be called because the url dose not contain a user id
         // and this is the default one aka display the user logged in info
-        userData = await getUserInfo(tokens);
+        userData = await getUserInfo();
       }
       // get the number of game played by the player
       const numberOfGames: number | null = await getNumberGamePlayedByUserId(userData?.id)

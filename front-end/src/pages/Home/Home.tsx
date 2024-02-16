@@ -34,10 +34,6 @@ function Home() {
       if (tokens && tokens.access_token && tokens.refresh_token) {
         navigate('/profile');
         return ;
-      } else if (codeParam) {
-        // login into the server
-        await loginServer(codeParam);
-
       }
 
     } catch (error) {
@@ -46,50 +42,28 @@ function Home() {
     }
   }
 
-  const loginServer = async (code: string | null) => {
-
-    // prepare the url
-    
-    // if (code) {
-    
-      try {
-        
-        const url = `http://localhost:3333/auth/42/`;
-    
-        // send a request to the server
-        const resData = await axios.get(url, {
-          timeout: 2000
-        });
-
-        console.log("hello world", resData.data);
-        
-
-        
-      } catch (error) {
-        return;
-      }
-    // }
-
-    return ;
-  }
-
   const loginIntra = async () => {
 
     try {
       
       const url = `http://localhost:3333/auth/42/`;
     
-        // send a request to the server
-        const resData = await axios.get(url, {
-          timeout: 2000,
-          headers: {
-            'Access-Control-Allow-Origin': '*'
-          }
-        });
+      // send a request to the server
 
-        console.log({
-          resData
-        })
+        // const resData = await axios.get(url, {
+        //   timeout: 2000,
+        //   headers: {
+          //     'Access-Control-Allow-Origin': '*',
+        //   }
+        // });
+
+        window.location.href = url;
+
+        // if (resData) {
+        //   console.log({
+        //     resData
+        //   })
+        // }
 
     } catch (error) {
       return ;
