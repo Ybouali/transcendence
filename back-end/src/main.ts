@@ -3,11 +3,10 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as express from 'express';
+const cors = require('cors');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  app.enableCors();
 
   app.useGlobalPipes(new ValidationPipe());
 
@@ -17,9 +16,9 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
 
-  app.enableCors({
-    origin: 'http://127.0.0.1:3000/'
-  });
+  app.use(cors({
+    origin: 'http://127.0.0.1:3000'
+  }));
 
   // Serve static files from the "public" directory
   
