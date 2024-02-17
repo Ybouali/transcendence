@@ -11,7 +11,7 @@ import { GetUser } from 'src/decorators';
 import { AccessGuard, LoginGuard } from 'src/auth/guard';
 import { UpdateUserData } from './dto';
 
-@UseGuards(LoginGuard, AccessGuard)
+@UseGuards(AccessGuard, LoginGuard)
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}

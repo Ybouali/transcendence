@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import "./ProfileButtonActionsStyle.css"
 import { useNavigate, useParams } from 'react-router-dom';
 import { Tokens, UserType } from '../../../types';
-import { getTokensFromSessionStorage, getUserById, getUserInfo } from '../../../utils/utils';
+import {  getTokensFromCookie, getUserById, getUserInfo } from '../../../utils/utils';
 
 
 function ProfileButtonActions() {
@@ -24,7 +24,7 @@ function ProfileButtonActions() {
   const initData = async () => {
     let userData: UserType | null = null;
 
-    const tokens: Tokens | null = await getTokensFromSessionStorage();
+    const tokens: Tokens | null = await getTokensFromCookie();
 
     if (tokens === null) {
       navigate('/');

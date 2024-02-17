@@ -5,7 +5,7 @@ import Team from './Team/Team'
 import Header from '../../components/Header/Header'
 import { Tokens } from '../../types'
 import { useNavigate } from 'react-router-dom'
-import { getTokensFromSessionStorage } from '../../utils/utils'
+import { getTokensFromCookie } from '../../utils/utils'
 import axios from 'axios'
 
 function Home() {
@@ -23,17 +23,11 @@ function Home() {
     try {
       
       // get the tokens from the local storage
-      const tokens: Tokens | null = await getTokensFromSessionStorage();
+      const tokens: Tokens | null = await getTokensFromCookie();
 
-      // get the code in the url
-      const url = new URL(window.location.href);
-    
-      const codeParam: string | null = url.searchParams.get('code');
-
-      // check if the token already exists in the local storage
-      if (tokens && tokens.access_token && tokens.refresh_token) {
-        navigate('/profile');
-        return ;
+      // check if the tokens is present in the cookie so you should redirect to the profile page
+      if (tokens) {
+        navigate("/profile");
       }
 
     } catch (error) {
@@ -48,22 +42,8 @@ function Home() {
       
       const url = `http://localhost:3333/auth/42/`;
     
-      // send a request to the server
-
-        // const resData = await axios.get(url, {
-        //   timeout: 2000,
-        //   headers: {
-          //     'Access-Control-Allow-Origin': '*',
-        //   }
-        // });
-
-        window.location.href = url;
-
-        // if (resData) {
-        //   console.log({
-        //     resData
-        //   })
-        // }
+      // make call to server to login with the intra 42
+      window.location.href = url;
 
     } catch (error) {
       return ;

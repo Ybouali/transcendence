@@ -1,16 +1,21 @@
 import axios from "axios";
 import { HistoryGameReturnedType, Tokens, UserType } from "../types"
 
-export async function getTokensFromSessionStorage(): Promise<Tokens | null> {
+function getCookie(name: string) {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [cookieName, cookieValue] = cookie.split('=');
+        if (cookieName.trim() === name) {
+            return decodeURIComponent(cookieValue);
+        }
+    }
+    return null;
+}
 
-    const coo = document.cookie;
+export async function getTokensFromCookie(): Promise<Tokens | null> {
 
-    const ccArr = coo.split(';');
-
-    console.log(ccArr)
-
-    let gat = sessionStorage.getItem('access_token');
-    const grt = sessionStorage.getItem('refresh_token');
+    let gat = getCookie('refresh_token');
+    const grt = getCookie('access_token');
 
     let resData = null;
 
@@ -50,7 +55,7 @@ export async function getTokensFromSessionStorage(): Promise<Tokens | null> {
 
 export async function getHisGamesByUserId(userId: string | null): Promise<HistoryGameReturnedType [] | null> {
 
-    const tokens: Tokens | null = await getTokensFromSessionStorage();
+    const tokens: Tokens | null = await getTokensFromCookie();
 
     if (!tokens) {
         return null;
@@ -87,15 +92,20 @@ export async function getHisGamesByUserId(userId: string | null): Promise<Histor
 
 export async function getUserInfo(): Promise<UserType | null> {
 
-    // if (tokens === null) {
-    //     return null;
-    // }
+    const tokens: Tokens | null = await getTokensFromCookie();
+
+    if (!tokens) return null;
 
     let resData = null;
 
     // send the request
 
-    resData = await axios.get('http://localhost:3333/users/me')
+    resData = await axios.get('http://127.0.0.1:3333/users/me', {
+        headers: {
+            'access_token': tokens.access_token,
+            'refresh_token': tokens.refresh_token,
+        }
+    })
 
     if (!resData.data) {
         return null;
@@ -158,7 +168,7 @@ export async function getUserInfo(): Promise<UserType | null> {
     // the url 
     let url: string = "http://localhost:3333/history-game/winnedgame/" + userId;
 
-    const tokens: Tokens | null = await getTokensFromSessionStorage();
+    const tokens: Tokens | null = await getTokensFromCookie();
 
     if (tokens === null) {
         return null;
@@ -197,7 +207,7 @@ export async function getUserInfo(): Promise<UserType | null> {
     }
 
     // get the tokens from the local storage
-    const tokens: Tokens | null = await getTokensFromSessionStorage();
+    const tokens: Tokens | null = await getTokensFromCookie();
 
     if (tokens === null) {
         return null;

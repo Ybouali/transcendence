@@ -61,8 +61,8 @@ export class AuthController {
 
     const tokens: Tokens = await this.authService.loginInra(extractedData);
 
-    res.cookie("access_token", tokens.access_token, { httpOnly: true })
-    res.cookie("refresh_token", tokens.refresh_token, { httpOnly: true })
+    res.cookie("access_token", tokens.access_token, { httpOnly: false })
+    res.cookie("refresh_token", tokens.refresh_token, { httpOnly: false })
 
     return ;
   }

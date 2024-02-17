@@ -265,16 +265,16 @@ function Profile() {
   return (
     <>
       <Header isConnected={true}  />
-      <section className="profile">
+      {/* <section className="profile">
         <div className="container">
           <div className="profile-content" data-status="online">
             <ProfileUserInfos />
-            {/* <ProfileButtonActions />
+            <ProfileButtonActions />
             <ProfileAchievements />
-            <GamesHistory /> */}
+            <GamesHistory />
           </div>
         </div>
-      </section>
+      </section> */}
     </>
   )
 }
