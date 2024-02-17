@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import "./ProfileUserInfosStyle.css"
 import { Tokens, UserType } from '../../../types';
-import { getNumberGamePlayedByUserId, getTokensFromSessionStorage, getUserById, getUserInfo } from '../../../utils/utils';
+import { getNumberGamePlayedByUserId, getTokensFromCookie, getUserById, getUserInfo } from '../../../utils/utils';
 import { useNavigate, useParams } from 'react-router-dom';
 
 function ProfileUserInfos() {
@@ -29,7 +29,7 @@ function ProfileUserInfos() {
     userData = await getUserInfo();
 
 
-    const tokens: Tokens | null = await getTokensFromSessionStorage();
+    const tokens: Tokens | null = await getTokensFromCookie();
 
     if (tokens) {
       // console.log(tokens)

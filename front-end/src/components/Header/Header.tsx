@@ -4,7 +4,7 @@ import "./HeaderStyle.css"
 
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginType, Tokens, UserType } from '../../types';
-import { getTokensFromSessionStorage, getUserInfo } from '../../utils/utils';
+import { getTokensFromCookie, getUserInfo } from '../../utils/utils';
 import axios from 'axios';
 
 function Header(props: LoginType) {
@@ -41,9 +41,9 @@ function Header(props: LoginType) {
 
       try {
         
-        const tokens: Tokens | null = await getTokensFromSessionStorage();
+        // const tokens: Tokens | null = await getTokensFromSessionStorage();
           
-        if (tokens) {
+        // if (tokens) {
           
           const userData: UserType | null = await getUserInfo();
 
@@ -52,10 +52,10 @@ function Header(props: LoginType) {
           }
 
           setUser(userData);
-        }
-        else {
-          return;
-        }
+        // }
+        // else {
+        //   return;
+        // }
 
       } catch (error) {
         return ;
@@ -68,7 +68,7 @@ function Header(props: LoginType) {
   const logoutFromServer = async () => {
 
     // get the tokens
-    const tokens: Tokens | null = await getTokensFromSessionStorage();
+    const tokens: Tokens | null = await getTokensFromCookie();
 
     if (tokens) {
       const resData = await axios.get('http://localhost:3333/auth/logout', {

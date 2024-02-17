@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import "./ProfileAchievementsStyle.css"
 import ProfileAchievement from './ProfileAchievement/ProfileAchievement';
-import { getNumberOfWinnedGames, getTokensFromSessionStorage, getUserById, getUserInfo } from '../../../utils/utils';
+import { getNumberOfWinnedGames, getTokensFromCookie, getUserById, getUserInfo } from '../../../utils/utils';
 import { Tokens, UserType } from '../../../types';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -23,7 +23,7 @@ function ProfileAchievements() {
     const initData = async () => {
       let userData: UserType | null = null;
 
-      const tokens: Tokens | null = await getTokensFromSessionStorage();
+      const tokens: Tokens | null = await getTokensFromCookie();
 
       if (tokens === null) {
         navigate('/');
