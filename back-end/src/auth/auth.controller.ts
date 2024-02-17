@@ -13,7 +13,7 @@ import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { GetUser } from 'src/decorators';
 import { User } from '@prisma/client';
-import { IntraGuard, LoginGuard } from './guard';
+import { AccessGuard, IntraGuard, LoginGuard } from './guard';
 import { Tokens } from 'src/types';
 import { IntraUserDto } from './dto';
 
@@ -24,12 +24,18 @@ export class AuthController {
 
   constructor(private authService: AuthService) {}
 
-  @UseGuards(LoginGuard)
+  @UseGuards(LoginGuard, AccessGuard)
   @HttpCode(HttpStatus.ACCEPTED)
   @Get('/logout')
-  async logout(@GetUser() user: User): Promise<{ message: string }> {
+  async logout(@GetUser() user: User, @Res() res: Response): Promise<{ message: string }> {
+
+    // logout from the server
 
     this.authService.logout(user);
+
+    // remove tokens from the cookie
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
 
     return {
       message: "done"
@@ -67,61 +73,17 @@ export class AuthController {
     return ;
   }
 
-
-  // @HttpCode(HttpStatus.ACCEPTED)
-  // @Header('Content-Type', 'application/json')
-  // @Get('login/intranet/:code')
-  // async loginIntra(@Param('code') code: string, @Req() req: Request): Promise<Tokens> {
-    
-  //   const tokens: Tokens = await this.authService.loginInra(code, req);
-
-  //   return tokens;
-  // }
-
   @UseGuards(LoginGuard)
   @HttpCode(HttpStatus.OK)
   @Get('refresh')
-  async refresh(@Res() res: Response, @GetUser() user: User): Promise<{ access_token: string }> {
+  async refresh(@Res() res: Response, @GetUser() user: User) {
 
     const { access_token } = await this.authService.refreshToken(user);
     
+    res.cookie("access_token", access_token, { httpOnly: false })
+
     return {
-      access_token
+      message: 'done'
     };
   }
-
-  // @HttpCode(HttpStatus.ACCEPTED)
-  // @Post('signup')
-  // async signup(@Body() dto: AuthDto, @Res() res: Response) {
-  //   // get the tokens from the auth service
-  //   const tokens: Tokens = await this.authService.signup(dto);
-
-  //   // set the tokens in the header of the response
-
-  //   res.setHeader('access_token', tokens.access_token);
-
-  //   res.setHeader('refresh_token', tokens.refresh_token);
-
-  //   return res.send({
-  //     message: 'done',
-  //   });
-  // }
-
-  // @HttpCode(HttpStatus.ACCEPTED)
-  // @Post('signin')
-  // async signin(@Body() dto: AuthDto, @Res() res: Response) {
-  //   // get the tokens from the auth service
-
-  //   const tokens: Tokens = await this.authService.signin(dto);
-
-  //   // set the tokens in the header of the response
-
-  //   res.setHeader('access_token', tokens.access_token);
-
-  //   res.setHeader('refresh_token', tokens.refresh_token);
-
-  //   return res.send({
-  //     message: 'done',
-  //   });
-  // }
 }

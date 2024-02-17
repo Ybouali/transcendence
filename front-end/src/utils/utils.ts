@@ -14,8 +14,8 @@ function getCookie(name: string) {
 
 export async function getTokensFromCookie(): Promise<Tokens | null> {
 
-    let gat = getCookie('refresh_token');
-    const grt = getCookie('access_token');
+    let gat = getCookie('access_token');
+    const grt = getCookie('refresh_token');
 
     let resData = null;
 
@@ -23,24 +23,16 @@ export async function getTokensFromCookie(): Promise<Tokens | null> {
 
     if (!gat) {
 
+        // refresh the access token 
         resData = await axios.get('http://localhost:3333/auth/refresh/', {
             headers: {
                 'refresh_token': grt,
             }
         })
 
-        if (!resData.data) return null;
-
-        gat = resData.data.access_token;
-
-        sessionStorage.setItem('access_token', resData.data.access_token);
+        if (resData.data.message !== "done") return null;
     }
     if (gat) {
-        const userData: UserType | null = await getUserInfo();
-
-        if (!userData) {
-            return null;
-        }
 
         const tokensRet: Tokens = {
             access_token: gat,

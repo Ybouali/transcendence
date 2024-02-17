@@ -41,26 +41,25 @@ function Header(props: LoginType) {
 
       try {
         
-        // const tokens: Tokens | null = await getTokensFromSessionStorage();
-          
-        // if (tokens) {
-          
-          const userData: UserType | null = await getUserInfo();
+        const userData: UserType | null = await getUserInfo();
 
-          if (!userData) {
-            return;
-          }
+        console.log({
+          userData
+        })
 
-          setUser(userData);
-        // }
-        // else {
-        //   return;
-        // }
+        if (!userData) {
+
+          navigate("/");
+
+          return;
+        }
+
+
+        setUser(userData);
 
       } catch (error) {
         return ;
       }
-
     }
 
   
@@ -70,20 +69,37 @@ function Header(props: LoginType) {
     // get the tokens
     const tokens: Tokens | null = await getTokensFromCookie();
 
-    if (tokens) {
-      const resData = await axios.get('http://localhost:3333/auth/logout', {
-        headers: {
-          'access_token': tokens.access_token,
-          'refresh_token': tokens.refresh_token
-        }
-      })
+    if (!tokens) {
+      navigate("/notauth");
+    }
 
-      if (resData.data.message && resData.data.message === "done" ) {
-        // remove the tokens from the local storage
-        sessionStorage.removeItem('access_token');
-        sessionStorage.removeItem('refresh_token');
-        navigate("/")
-        return ;
+    if (tokens) {
+
+      try {
+        
+        console.log({
+          tokens
+        })
+        
+        const resData = await axios.get('http://localhost:3333/auth/logout/', {
+          headers: {
+            'access_token': tokens.access_token,
+            'refresh_token': tokens.refresh_token
+          }
+        })
+
+        console.log({
+          resData
+        })
+
+        if (resData.data.message && resData.data.message === "done" ) {
+          // remove the tokens from the local storage
+          navigate("/")
+          return ;
+        }
+
+      } catch (error) {
+        console.log(error);
       }
     }
 
@@ -159,7 +175,7 @@ function Header(props: LoginType) {
                 className="user-image dropdown-button"
               >
                 <img
-                  src={user?.avatarNameUrl}
+                  src={`http://localhost:3333` + user?.avatarNameUrl}
                   alt={user?.username}
                 />
               </button>
@@ -171,7 +187,7 @@ function Header(props: LoginType) {
                     <li className="dropdown-item user-profile-item">
                       <div className="user-image dropdown-item-user-image">
                         <img
-                          src={user?.avatarNameUrl}
+                          src={`http://localhost:3333` + user?.avatarNameUrl}
                           alt={user?.username}
                         />
                       </div>
