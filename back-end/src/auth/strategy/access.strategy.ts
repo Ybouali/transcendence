@@ -26,16 +26,6 @@ export class AccessStrategy extends PassportStrategy(Strategy, 'access') {
     // Get the user based on the id that comes from the refresh token
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        fullName: true,
-        avatarNameUrl: true,
-        isOnLine: true,
-        accessToken: true,
-        levelGame: true,
-      }
     });
 
     // if the user is not found
@@ -50,6 +40,8 @@ export class AccessStrategy extends PassportStrategy(Strategy, 'access') {
       throw new ForbiddenException('Access denied');
 
     delete user.accessToken;
+    delete user.refreshToken;
+    delete user.towFactorSecret;
 
     return user;
   }

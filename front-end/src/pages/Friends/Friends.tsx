@@ -4,7 +4,7 @@ import Header from '../../components/Header/Header'
 function Friends() {
   return (
     <div>
-      <Header isConnected={true}  />
+      {/* <Header isConnected={true}  /> */}
       Friends
     </div>
   )

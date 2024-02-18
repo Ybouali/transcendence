@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 
 import "./HeaderStyle.css"
 
@@ -6,62 +6,65 @@ import { Link, useNavigate } from 'react-router-dom';
 import { LoginType, Tokens, UserType } from '../../types';
 import { getTokensFromCookie, getUserInfo } from '../../utils/utils';
 import axios from 'axios';
+import UserContext from '../../context/UserContext';
 
 function Header(props: LoginType) {
+
+  const userData = useContext(UserContext);
 
   const navigate = useNavigate();
 
   const [openMenu, setOpenMenu] = useState<boolean>(false);
 
-  const [user, setUser] = useState<UserType | null>(null);
+  // const [user, setUser] = useState<UserType | null>(null);
 
   
-  useEffect(() => {
+  useEffect( () => {
 
     if (props.isConnected) {
       
+      if (!userData) {
+        navigate('/');
+      }
+    }
+
       // this code will run just if the header shoud be online
       
       // set the time to give the chat components time to set the tokens in the local storge
-      const delayedTask = setTimeout( async () => {
+      // const delayedTask = setTimeout( async () => {
         
-        initDataHeader();
+        // initDataHeader();
         
         
-      }, 1000);
+      // }, 1000);
       
       // Cleanup function to clear the timeout in case the component unmounts before the delay
-      return () => clearTimeout(delayedTask);
-    }
+    //   return () => clearTimeout(delayedTask);
+    // }
 
   }, [])
 
 
-    const initDataHeader = async () => {
+    // const initDataHeader = async () => {
 
-      try {
+    //   try {
         
-        // const tokens: Tokens | null = await getTokensFromSessionStorage();
-          
-        // if (tokens) {
-          
-          const userData: UserType | null = await getUserInfo();
+    //     const userData: UserType | null = await getUserInfo();
 
-          if (!userData) {
-            return;
-          }
+    //     if (!userData) {
 
-          setUser(userData);
-        // }
-        // else {
-        //   return;
-        // }
+    //       navigate("/");
 
-      } catch (error) {
-        return ;
-      }
+    //       return;
+    //     }
 
-    }
+
+    //     setUser(userData);
+
+    //   } catch (error) {
+    //     return ;
+    //   }
+    // }
 
   
 
@@ -70,20 +73,36 @@ function Header(props: LoginType) {
     // get the tokens
     const tokens: Tokens | null = await getTokensFromCookie();
 
-    if (tokens) {
-      const resData = await axios.get('http://localhost:3333/auth/logout', {
-        headers: {
-          'access_token': tokens.access_token,
-          'refresh_token': tokens.refresh_token
-        }
-      })
+    if (!tokens) {
+      navigate("/notauth");
+    }
 
-      if (resData.data.message && resData.data.message === "done" ) {
-        // remove the tokens from the local storage
-        sessionStorage.removeItem('access_token');
-        sessionStorage.removeItem('refresh_token');
-        navigate("/")
-        return ;
+    if (tokens) {
+
+      try {
+        
+        // logout from the server
+        const res = await axios.get('http://localhost:3333/auth/logout/', {
+          headers: {
+            'access_token': tokens.access_token,
+            'refresh_token': tokens.refresh_token
+          }
+        })
+        
+        if (res.data.message === "done") {
+        
+          // remove tokens from the cookie
+          document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          document.cookie = "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+          // navigate to home page
+          navigate("/")
+        }
+        else {
+          navigate("/notauth");
+        }
+      } catch (error) {
+        console.log(error);
       }
     }
 
@@ -159,8 +178,8 @@ function Header(props: LoginType) {
                 className="user-image dropdown-button"
               >
                 <img
-                  src={user?.avatarNameUrl}
-                  alt={user?.username}
+                  src={`http://localhost:3333` + userData?.avatarNameUrl}
+                  alt={userData?.username}
                 />
               </button>
               <button
@@ -171,15 +190,15 @@ function Header(props: LoginType) {
                     <li className="dropdown-item user-profile-item">
                       <div className="user-image dropdown-item-user-image">
                         <img
-                          src={user?.avatarNameUrl}
-                          alt={user?.username}
+                          src={`http://localhost:3333` + userData?.avatarNameUrl}
+                          alt={userData?.username}
                         />
                       </div>
                       <div className="user-infos">
                         <div className="username">
-                          {user?.username}
+                          {userData?.username}
                         </div>
-                        <div className="user-status">{user?.isOnLine ? "On Line" : "Off Line"}</div>
+                        <div className="user-status">{userData?.isOnLine ? "On Line" : "Off Line"}</div>
                       </div>
                     </li>
                     <li className="dropdown-item">

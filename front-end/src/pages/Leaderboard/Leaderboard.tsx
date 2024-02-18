@@ -7,7 +7,7 @@ import LeaderboardTable from './LeaderboardTable/LeaderboardTable'
 function Leaderboard() {
   return (
     <div>
-      <Header isConnected={true}  />
+      {/* <Header isConnected={true}  /> */}
       <section className='profile' >
         <div className='container' >
           <Podum />

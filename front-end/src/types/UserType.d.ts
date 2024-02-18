@@ -6,4 +6,7 @@ export interface UserType {
     avatarNameUrl: string;
     isOnLine: boolean;
     levelGame: number;
+    phoneNumber: string;
+    twoFactor: boolean;
+    qrCodeFileName: string;
 }
