@@ -70,6 +70,9 @@ export class RoomsController {
         try {
             const infoUser = await this.roomsService.getUserInfo(room1.userTwo);
             await this.roomsService.AcceptRequestRoomHTTP(room1.adminId, room1.roomId, room1.userTwo);
+            const images = await this.roomsService.getImagesOfRoom(room1?.roomId);
+            const newRoom = await this.roomsService.getInfosOfRoom(room1?.roomId);
+            this.eventEmitter.emit('addRoom', {newRoom, ownerID: room1.userTwo, images});
             return {
                 id: infoUser.id,
                 images: [infoUser.avatarUrl],
@@ -211,7 +214,6 @@ export class RoomsController {
     async unbanMember(@Param('userId') userId: string ,@Body() room1: { adminId: string; roomId: string; unbannedId: string })
     {
         try {
-            console.log('hello we are here merci', room1)
             const infoUser = await this.roomsService.getUserInfo(room1.unbannedId);
             console.log(infoUser)
             const role = await  this.roomsService.unbanUserInRoomHTTP(room1.adminId, room1.roomId, room1.unbannedId);
