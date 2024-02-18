@@ -723,6 +723,7 @@ export class RoomsService {
                     where: {
                         chatRoomId: roomId,
                         userId: { not: oldOwner?.ownerID },
+                        status: true
                     },
                     orderBy: {
                         createdAt: 'asc',
@@ -738,21 +739,21 @@ export class RoomsService {
                                 },
                             });
                         }
-                    const isAdmin = await this.prisma.admins.findFirst({
-                        where: {
-                            userId: newOwnerMember.userId,
-                            roomId,
-                        },
-                    });
-            
-                    if (!isAdmin) {
-                        await this.prisma.admins.create({
-                            data: {
+                        const isAdmin = await this.prisma.admins.findFirst({
+                            where: {
                                 userId: newOwnerMember.userId,
                                 roomId,
                             },
                         });
-                    }
+                
+                        if (!isAdmin) {
+                            await this.prisma.admins.create({
+                                data: {
+                                    userId: newOwnerMember.userId,
+                                    roomId,
+                                },
+                            });
+                        }
                 }
             }
         }
@@ -769,7 +770,7 @@ export class RoomsService {
 
         async getRoomMembersCount(roomId: string): Promise<number> {
             const count = await this.prisma.member.count({
-                where: { chatRoomId: roomId },
+                where: { chatRoomId: roomId, status: true },
             });
             return count;
         }
@@ -777,6 +778,9 @@ export class RoomsService {
         async deleteRoom(roomId: string): Promise<void> {
             await this.prisma.roomMessage.deleteMany({
                 where: { roomId: roomId },
+            });
+            await this.prisma.member.deleteMany({
+                where: { chatRoomId: roomId },
             });
             await this.prisma.chatRoom.delete({
                 where: { id: roomId },
