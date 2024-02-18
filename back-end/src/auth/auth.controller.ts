@@ -27,19 +27,16 @@ export class AuthController {
   @UseGuards(LoginGuard, AccessGuard)
   @HttpCode(HttpStatus.ACCEPTED)
   @Get('/logout')
-  async logout(@GetUser() user: User, @Res() res: Response): Promise<{ message: string }> {
+  async logout(@GetUser() user: User, @Res() res: Response): Promise< any > {
 
     // logout from the server
 
     this.authService.logout(user);
 
-    // remove tokens from the cookie
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');
-
-    return {
-      message: "done"
-    }
+    
+    return res.status(HttpStatus.OK).json({ message: "done" });
   }
 
   @UseGuards(IntraGuard)

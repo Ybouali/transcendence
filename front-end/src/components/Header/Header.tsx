@@ -16,7 +16,7 @@ function Header(props: LoginType) {
   const [user, setUser] = useState<UserType | null>(null);
 
   
-  useEffect(() => {
+  useEffect( () => {
 
     if (props.isConnected) {
       
@@ -76,12 +76,12 @@ function Header(props: LoginType) {
     if (tokens) {
 
       try {
+
+        document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         
-        console.log({
-          tokens
-        })
         
-        const resData = await axios.get('http://localhost:3333/auth/logout/', {
+        const res = await axios.get('http://localhost:3333/auth/logout/', {
           headers: {
             'access_token': tokens.access_token,
             'refresh_token': tokens.refresh_token
@@ -89,15 +89,12 @@ function Header(props: LoginType) {
         })
 
         console.log({
-          resData
+          res
         })
-
-        if (resData.data.message && resData.data.message === "done" ) {
-          // remove the tokens from the local storage
-          navigate("/")
-          return ;
-        }
-
+        
+        
+        navigate("/")
+        
       } catch (error) {
         console.log(error);
       }
