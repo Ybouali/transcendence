@@ -42,7 +42,8 @@ export class MatchController {
         @Body() body: any,
     ): Promise<{ message: string}> {
         try {
-            const {username, id, fullname, email} = body;
+            console.log(body);
+            const {username, id, fullname, email, twoFactor} = body;
             let filePath: string;
             await this.matchService.checkValues(username, id, fullname, email);
             console.log(file);
@@ -56,7 +57,7 @@ export class MatchController {
                 filePath = "/images/uploads/" + uniqueFileName;
                 console.log('File saved at:', filePath);
             }
-            await this.matchService.updateValues(username, id, fullname, email, filePath);
+            await this.matchService.updateValues(username, id, fullname, email, filePath, twoFactor);
             return { message: 'File uploaded successfully!' };
         } catch (error) {
             console.error('Error saving file:', error);

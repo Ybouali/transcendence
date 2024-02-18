@@ -167,7 +167,7 @@ export class MatchService {
     }
     
 
-    async updateValues(username: string, id: string, fullname: string, email: string, filePath: string){
+    async updateValues(username: string, id: string, fullname: string, email: string, filePath: string, twoFactor: string){
         const existingUser = await this.prisma.user.findUnique({
             where: { id },
         });
@@ -181,7 +181,9 @@ export class MatchService {
             data: {
                 email,
                 avatarUrl: filePath,
-                username
+                username,
+                fullName: fullname,
+                twoFactor: twoFactor === "True"
             }
         });
     }

@@ -23,13 +23,14 @@ model User {
   username          String           @unique
   email             String           @unique
   fullName          String
+  twoFactor         Boolean
+  levelGame         Int
 
 
   verifiedEmail     Boolean
   password          String
   avatarUrl         String
   Status            UserStatus               // offline / online
-  twoFactor         Boolean
 
   historyGames1     HistoryGame[]    @relation("user1")
   historyGames2     HistoryGame[]    @relation("user2")

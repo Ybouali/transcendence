@@ -38,7 +38,7 @@ export class RoomsController {
 
     @Get('/:userId/:roomId')
     async getRoomInfo(@Param('userId') userId: string, @Param('roomId') roomId: string): Promise<RoomDto[]> {
-        
+        console.log('get info of a room.')
         const res = this.roomsService.getRoomInfo(roomId, userId);
         return res;
     }
