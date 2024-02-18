@@ -348,6 +348,9 @@ export class RoomsService {
                             },
                         },
                     },
+                    where: {
+                        status: true
+                    }
                 },
                 messages: {
                     orderBy: {
@@ -1917,6 +1920,9 @@ export class RoomsService {
                         include: {
                             user: true,
                         },
+                        where: {
+                            status: true
+                        }
                     },
                 },
                 });
@@ -1933,7 +1939,6 @@ export class RoomsService {
         }
 
         async getSearchResults(query: string, userId: string): Promise<any> {
-            // Assuming you have methods like searchUsersByUsername and searchChatRoomsByRoomName in UserService and GroupService
             const users = await this.searchUsersByUsername(query);
             const groups = await this.searchChatRoomsByRoomName(query);
 
