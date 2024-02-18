@@ -4,7 +4,7 @@ import Header from '../../components/Header/Header'
 function Game() {
   return (
     <div>
-      <Header isConnected={true}  />
+      {/* <Header isConnected={true}  /> */}
       Game
     </div>
   )

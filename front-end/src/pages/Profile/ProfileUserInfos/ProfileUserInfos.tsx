@@ -28,37 +28,44 @@ function ProfileUserInfos() {
     let userData: UserType | null = null;
     userData = await getUserInfo();
 
+    // make sure there is a user logged in
+    if (userData === null) {
+      navigate('/noauth');
+    } else {
+      // get the tokens
+      const tokens: Tokens | null = await getTokensFromCookie();
+  
+      if (tokens) {
+    
+        if (userId) {
+          // the will be called because the url contains a user id
+          userData = await getUserById(userId, tokens);
+        }
 
-    const tokens: Tokens | null = await getTokensFromCookie();
+        if (!userData) {
+          // this will be called because the url dose not contain a user id
+          // and this is the default one aka display the user logged in info
+          userData = await getUserInfo();
+        }
+        // get the number of game played by the player
+        const numberOfGames: number | null = await getNumberGamePlayedByUserId(userData?.id)
+    
+        if (!numberOfGames) {
+          setNumberGamePlayed(0);
+        } else {
+          setNumberGamePlayed(numberOfGames);
+        }
+    
+    
+        if (userData === undefined) {
+          navigate('/');
+          return;
+        }
+    
+        setUserData(userData);
+      }
 
-    if (tokens) {
-      // console.log(tokens)
-  
-      if (userId) {
-        // the will be called because the url contains a user id
-        userData = await getUserById(userId, tokens);
-      }
-      if (!userData) {
-        // this will be called because the url dose not contain a user id
-        // and this is the default one aka display the user logged in info
-        userData = await getUserInfo();
-      }
-      // get the number of game played by the player
-      const numberOfGames: number | null = await getNumberGamePlayedByUserId(userData?.id)
-  
-      if (!numberOfGames) {
-        setNumberGamePlayed(0);
-      } else {
-        setNumberGamePlayed(numberOfGames);
-      }
-  
-  
-      if (userData === undefined) {
-        navigate('/');
-        return;
-      }
-  
-      setUserData(userData);
+
     }
   }
 
@@ -67,7 +74,7 @@ function ProfileUserInfos() {
   return (
     <div className="profile-user-infos">
       <div className="profile-user-image">
-        <img src={userData?.avatarNameUrl} alt="user image" />
+        <img src={ `http://localhost:3333` + userData?.avatarNameUrl} alt="user image" />
       </div>
 
       <div className="profile-user-description">

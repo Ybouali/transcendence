@@ -111,6 +111,9 @@ export async function getUserInfo(): Promise<UserType | null> {
         fullName: resData.data.fullName,
         isOnLine: resData.data.isOnLine,
         levelGame: resData.data.levelGame,
+        phoneNumber: resData.data.phoneNumber,
+        twoFactor: resData.data.twoFactor,
+        qrCodeFileName: resData.data.qrCodeFileName,
     }
 
     // return the user data
@@ -144,6 +147,9 @@ export async function getUserInfo(): Promise<UserType | null> {
         fullName: resData.data.fullName,
         isOnLine: resData.data.isOnLine,
         levelGame: resData.data.levelGame,
+        phoneNumber: resData.data.phoneNumber,
+        twoFactor: resData.data.twoFactor,
+        qrCodeFileName: resData.data.qrCodeFileName,
     }
 
     // return the user data

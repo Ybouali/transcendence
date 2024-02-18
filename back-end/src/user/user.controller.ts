@@ -6,6 +6,7 @@ import {
   Param,
   UseGuards,
   Put,
+  Logger,
 } from '@nestjs/common';
 import { GetUser } from 'src/decorators';
 import { AccessGuard, LoginGuard } from 'src/auth/guard';
@@ -14,6 +15,9 @@ import { UpdateUserData } from './dto';
 @UseGuards(AccessGuard, LoginGuard)
 @Controller('users')
 export class UserController {
+
+  private logger = new Logger();
+
   constructor(private userService: UserService) {}
 
   @Get('/me')
