@@ -243,7 +243,7 @@ export class RoomsService {
             },
         });
 
-        console.log('usersroom', userRooms);
+        // console.log('usersroom', userRooms);
     
         const rooms: RoomDto[] = userRooms
             .filter((userRoom) => userRoom.chatRoom.banedUsers.length === 0 && userRoom.status === true) // Exclude rooms where user is banned
@@ -1422,6 +1422,13 @@ export class RoomsService {
                         },
                     });
                 }
+
+                await this.prisma.banedUsers.deleteMany({
+                    where: {
+                        userId: userId,
+                        roomId: roomId
+                    },
+                });
                 return eventName;
         }
 
@@ -1459,6 +1466,17 @@ export class RoomsService {
         
                 if (!isAdmin) {
                     throw new BadRequestException('You are not an admin in this room.');
+                }
+
+                const isBanned = await this.prisma.banedUsers.findFirst({
+                    where: {
+                        roomId: roomId,
+                        userId: bannedId
+                    }
+                });
+
+                if (isBanned) {
+                    throw new BadRequestException('this user already banned.');
                 }
         
                 await this.prisma.banedUsers.create({
@@ -1543,6 +1561,7 @@ export class RoomsService {
             });
         
             if (!isMember) {
+                console.log('User is not a member of this room');
                 throw new BadRequestException('User is not a member of this room');
             }
 
