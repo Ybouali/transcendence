@@ -242,9 +242,11 @@ export class RoomsService {
                 },
             },
         });
+
+        console.log('usersroom', userRooms);
     
         const rooms: RoomDto[] = userRooms
-            .filter((userRoom) => userRoom.chatRoom.banedUsers.length === 0) // Exclude rooms where user is banned
+            .filter((userRoom) => userRoom.chatRoom.banedUsers.length === 0 && userRoom.status === true) // Exclude rooms where user is banned
             .map((userRoom) => {
                 const chatRoom = userRoom.chatRoom;
                 const membersCount = chatRoom.members.length;
