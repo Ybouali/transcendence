@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { UserType } from "../types";
 import { getUserInfo } from "../utils/utils";
-import UserContext from "./UserContext";
+import { UserContext } from "./UserContext";
 
 interface UserProviderProps {
     children: React.ReactNode;
@@ -9,22 +9,25 @@ interface UserProviderProps {
 
 export const UserProvider: React.FC<UserProviderProps> = ( { children } ) => {
 
-    const [user, setUser] = useState< UserType | null >(null);
+    const [user, setUser] = useState< UserType | null>(null);
 
-    useEffect( () => { initDataUser()  })
+    const fetchUser = useCallback( async () => {
 
-
-    const initDataUser = async () => {
         const userData: UserType | null = await getUserInfo();
-        
-        if (userData) { 
-            setUser(userData);
+
+        if (userData) {
+            setUser(userData)
         }
-    }
+        
+    }, [setUser]);
+
+    useEffect(() => {
+        fetchUser();
+    }, [fetchUser])
 
 
 
-    return <UserContext.Provider value={user} > 
+    return <UserContext.Provider value={{ user, fetchUser  }} > 
         { children }
     </UserContext.Provider>
 }

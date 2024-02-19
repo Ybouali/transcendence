@@ -98,8 +98,10 @@ export async function getUserInfo(): Promise<UserType | null> {
             'refresh_token': tokens.refresh_token,
         }
     })
+    .then(response => response)
+    .catch(err => {});
 
-    if (!resData.data) {
+    if (!resData) {
         return null;
     }
 

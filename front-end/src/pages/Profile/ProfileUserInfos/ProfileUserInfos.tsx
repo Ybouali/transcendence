@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import "./ProfileUserInfosStyle.css"
 import { Tokens, UserType } from '../../../types';
 import { getNumberGamePlayedByUserId, getTokensFromCookie, getUserById, getUserInfo } from '../../../utils/utils';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useUser } from '../../../context/UserContext';
 
 function ProfileUserInfos() {
 
@@ -10,28 +11,36 @@ function ProfileUserInfos() {
 
   const { userId } = useParams();
 
-  const [userData, setUserData] = useState<UserType | null>(null);
+  const { user, fetchUser } = useUser()
 
   const [numberGamePlayed, setNumberGamePlayed] = useState<number>(0);
 
+  const [desplayedUser, setDesplayedUser] = useState<UserType | null>(null);
+
   useEffect(() => {
+ 
+    fetchUser()
 
-    setTimeout(() => initUserinfos(), 1000);
+    initUserinfos()
 
-  }, [])
+  }, [fetchUser])
 
   
 
   
   const initUserinfos = async () => {
-
-    let userData: UserType | null = null;
-    userData = await getUserInfo();
+    
+    console.log({
+      user
+    })
 
     // make sure there is a user logged in
-    if (userData === null) {
-      navigate('/noauth');
-    } else {
+    // if (user === null) {
+    //   navigate('/notauth');
+    // } else {
+
+      setDesplayedUser(user);
+
       // get the tokens
       const tokens: Tokens | null = await getTokensFromCookie();
   
@@ -39,16 +48,17 @@ function ProfileUserInfos() {
     
         if (userId) {
           // the will be called because the url contains a user id
-          userData = await getUserById(userId, tokens);
+
+          const userById = await getUserById(userId, tokens);
+
+          if (userById) {
+            setDesplayedUser(userById);
+          }
+
         }
 
-        if (!userData) {
-          // this will be called because the url dose not contain a user id
-          // and this is the default one aka display the user logged in info
-          userData = await getUserInfo();
-        }
         // get the number of game played by the player
-        const numberOfGames: number | null = await getNumberGamePlayedByUserId(userData?.id)
+        const numberOfGames: number | null = await getNumberGamePlayedByUserId(desplayedUser?.id)
     
         if (!numberOfGames) {
           setNumberGamePlayed(0);
@@ -57,16 +67,16 @@ function ProfileUserInfos() {
         }
     
     
-        if (userData === undefined) {
-          navigate('/');
-          return;
-        }
+        // if (userData === undefined) {
+        //   navigate('/');
+        //   return;
+        // }
     
-        setUserData(userData);
+        // setUserData(userData);
       }
 
 
-    }
+    // }
   }
 
   
@@ -74,13 +84,13 @@ function ProfileUserInfos() {
   return (
     <div className="profile-user-infos">
       <div className="profile-user-image">
-        <img src={ `http://localhost:3333` + userData?.avatarNameUrl} alt="user image" />
+        <img src={ `http://localhost:3333` + desplayedUser?.avatarNameUrl} alt="user image" />
       </div>
 
       <div className="profile-user-description">
-        <div className="profile-user-fullname">{userData?.fullName}</div>
-        <p className="profile-user-username">{userData?.username}</p>
-        <p className="profile-user-status">{userData?.isOnLine ? "Online" : "Offline"}</p>
+        <div className="profile-user-fullname">{desplayedUser?.fullName}</div>
+        <p className="profile-user-username">{desplayedUser?.username}</p>
+        <p className="profile-user-status">{desplayedUser?.isOnLine ? "Online" : "Offline"}</p>
       </div>
 
       <div className="profile-user-stats">
@@ -94,7 +104,7 @@ function ProfileUserInfos() {
           <p className="stats-title">Played games</p>
         </div>
         <div className="stats-infos" id="level">
-          <div className="stats-number">{userData?.levelGame}</div>
+          <div className="stats-number">{desplayedUser?.levelGame}</div>
           <p className="stats-title">Level</p>
         </div>
       </div>

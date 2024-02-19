@@ -3,71 +3,37 @@ import React, { useContext, useEffect, useState } from 'react'
 import "./HeaderStyle.css"
 
 import { Link, useNavigate } from 'react-router-dom';
-import { LoginType, Tokens, UserType } from '../../types';
-import { getTokensFromCookie, getUserInfo } from '../../utils/utils';
+import { LoginType, Tokens } from '../../types';
+import { getTokensFromCookie } from '../../utils/utils';
 import axios from 'axios';
-import UserContext from '../../context/UserContext';
+import { useUser } from '../../context/UserContext';
 
 function Header(props: LoginType) {
 
-  const userData = useContext(UserContext);
+  const  { user, fetchUser  } = useUser();
 
   const navigate = useNavigate();
 
   const [openMenu, setOpenMenu] = useState<boolean>(false);
 
-  // const [user, setUser] = useState<UserType | null>(null);
-
   
   useEffect( () => {
+    fetchUser();
 
-    if (props.isConnected) {
-      
-      if (!userData) {
-        navigate('/');
-      }
-    }
+    console.log(user);
 
-      // this code will run just if the header shoud be online
-      
-      // set the time to give the chat components time to set the tokens in the local storge
-      // const delayedTask = setTimeout( async () => {
+    // if (props.isConnected) {
+
+    //   setTimeout(() => {
         
-        // initDataHeader();
-        
-        
-      // }, 1000);
-      
-      // Cleanup function to clear the timeout in case the component unmounts before the delay
-    //   return () => clearTimeout(delayedTask);
-    // }
-
-  }, [])
-
-
-    // const initDataHeader = async () => {
-
-    //   try {
-        
-    //     const userData: UserType | null = await getUserInfo();
-
-    //     if (!userData) {
-
-    //       navigate("/");
-
-    //       return;
+    //     if (!user) {
+    //       navigate('/');
     //     }
-
-
-    //     setUser(userData);
-
-    //   } catch (error) {
-    //     return ;
-    //   }
+    //   }, 1000) 
     // }
 
+  }, [fetchUser])
   
-
   const logoutFromServer = async () => {
 
     // get the tokens
@@ -178,8 +144,8 @@ function Header(props: LoginType) {
                 className="user-image dropdown-button"
               >
                 <img
-                  src={`http://localhost:3333` + userData?.avatarNameUrl}
-                  alt={userData?.username}
+                  src={`http://localhost:3333` + user?.avatarNameUrl}
+                  alt={user?.username}
                 />
               </button>
               <button
@@ -190,15 +156,15 @@ function Header(props: LoginType) {
                     <li className="dropdown-item user-profile-item">
                       <div className="user-image dropdown-item-user-image">
                         <img
-                          src={`http://localhost:3333` + userData?.avatarNameUrl}
-                          alt={userData?.username}
+                          src={`http://localhost:3333` + user?.avatarNameUrl}
+                          alt={user?.username}
                         />
                       </div>
                       <div className="user-infos">
                         <div className="username">
-                          {userData?.username}
+                          {user?.username}
                         </div>
-                        <div className="user-status">{userData?.isOnLine ? "On Line" : "Off Line"}</div>
+                        <div className="user-status">{user?.isOnLine ? "On Line" : "Off Line"}</div>
                       </div>
                     </li>
                     <li className="dropdown-item">
