@@ -38,6 +38,10 @@ export class UserService {
 
     const checkUser = await this.prisma.user.findFirst({ where: { id: dataUser.id } });
 
+    if (!checkUser) {
+      throw new NotAcceptableException();
+    }
+
     if (!dataUser) {
       throw new NotFoundException();
     }
@@ -47,52 +51,19 @@ export class UserService {
       throw new NotAcceptableException();
     }
 
-    // check if the url avatar is images url
-
-    // split the url by the .
-    const resSplit: string[] = dataUser.avatarNameUrl.split(".")
-
-    // get the last element
-    const exeFile: string = resSplit[resSplit.length - 1];
-
-    // if the exeFile is not one of this 3 exe throw a error
-    if (exeFile !== "png" && exeFile !== "jpg" && exeFile !== "jpeg") {
-      throw new NotAcceptableException();
-    }
-
     const user = this.prisma.user.update(
       {
         where: { id: userId},
         data: {
           username: dataUser.username,
           fullName: dataUser.fullName,
-          avatarNameUrl: dataUser.avatarNameUrl
+          avatarName: dataUser.avatarName,
+          Status: dataUser.Status
         }
       }
     )
 
     return user;
-  }
-
-  async search(username: string) {
-    try {
-      const users = await this.prisma.user.findMany({
-        where: { username: { startsWith: username } },
-        select: {
-          username: true,
-          avatarNameUrl: true,
-          isOnLine: true,
-        },
-      });
-
-      if (!users) {
-        throw new NotFoundException();
-      }
-
-      return users;
-    } catch (error) {
-      throw new NotFoundException();
-    }
   }
 
   // async updateAvatar(user: User, @UploadedFile() file: Express.Multer.File) {

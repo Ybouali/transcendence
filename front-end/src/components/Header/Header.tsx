@@ -7,6 +7,7 @@ import { LoginType, Tokens } from '../../types';
 import { getTokensFromCookie } from '../../utils/utils';
 import axios from 'axios';
 import { useUser } from '../../context/UserContext';
+import Spinner from '../Spinner/Spinner';
 
 function Header(props: LoginType) {
 
@@ -19,19 +20,6 @@ function Header(props: LoginType) {
   
   useEffect( () => {
     fetchUser();
-
-    console.log(user);
-
-    // if (props.isConnected) {
-
-    //   setTimeout(() => {
-        
-    //     if (!user) {
-    //       navigate('/');
-    //     }
-    //   }, 1000) 
-    // }
-
   }, [fetchUser])
   
   const logoutFromServer = async () => {
@@ -144,7 +132,7 @@ function Header(props: LoginType) {
                 className="user-image dropdown-button"
               >
                 <img
-                  src={`http://localhost:3333` + user?.avatarNameUrl}
+                  src={`http://localhost:3333` + user?.avatarName}
                   alt={user?.username}
                 />
               </button>
@@ -156,7 +144,7 @@ function Header(props: LoginType) {
                     <li className="dropdown-item user-profile-item">
                       <div className="user-image dropdown-item-user-image">
                         <img
-                          src={`http://localhost:3333` + user?.avatarNameUrl}
+                          src={`http://localhost:3333` + user?.avatarName}
                           alt={user?.username}
                         />
                       </div>
@@ -164,7 +152,7 @@ function Header(props: LoginType) {
                         <div className="username">
                           {user?.username}
                         </div>
-                        <div className="user-status">{user?.isOnLine ? "On Line" : "Off Line"}</div>
+                        <div className="user-status">{user?.Status}</div>
                       </div>
                     </li>
                     <li className="dropdown-item">
@@ -286,9 +274,9 @@ function Header(props: LoginType) {
               </button>
             </div>
           </div>
-        </header>
+        </header> 
       )}
-
+      
       {!isConnected && (
         <header className="primary-header">
           <div className="container">

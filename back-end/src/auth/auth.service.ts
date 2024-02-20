@@ -71,8 +71,9 @@ export class AuthService {
           username: dto.login,
           email: dto.email,
           fullName: dto.fullName,
-          avatarNameUrl: dto.avatarNameUrl,
+          avatarName: dto.avatarName,
           isOnLine: true,
+          Status: 'online',
           accessToken: 'offline',
           phoneNumber: "+212 666 666 6666",
           refreshToken: 'logout',
@@ -96,38 +97,6 @@ export class AuthService {
     }
   }
 
-  // async signup(dto: AuthDto): Promise<Tokens> {
-  //   try {
-  //     // Hash the password
-  //     const hash: string = await argon2.hash(dto.password);
-
-  //     // generate a name from the email address
-  //     let name: string = dto.email.split('@')[0];
-
-  //     // store the user into db
-  //     const user = await this.prisma.user.create({
-  //       data: {
-  //         username: name,
-  //         email: dto.email,
-  //         verifiedEmail: false,
-  //         password: hash,
-  //         avatarName: 'defaultAvatar.png',
-  //         isOnLine: true,
-  //         accessToken: 'token',
-  //         refreshToken: 'token',
-  //          levelGame: 0,
-  //       },
-  //     });
-
-  //     return await this.returnTokes(user.id, user.email);
-  //   } catch (error) {
-  //     console.log({
-  //       message: error.message,
-  //     });
-  //     throw new NotAcceptableException();
-  //   }
-  // }
-
   async refreshToken(@GetUser() user: User): Promise<{ access_token: string }> {
 
     const access_token: string = await this.generateJwtToken(
@@ -147,48 +116,6 @@ export class AuthService {
       access_token,
     };
   }
-
-  // async signin(dto: AuthDto) {
-  //   try {
-  //     // get the user by email address
-  //     const user = await this.prisma.user.findUnique({
-  //       where: { email: dto.email },
-  //     });
-
-  //     // verify user password
-  //     const isMatch = await argon2.verify(user.password, dto.password);
-
-  //     if (!isMatch) {
-  //       throw new NotAcceptableException();
-  //     }
-
-  //     // get tokens for the login user
-  //     const tokens: Tokens = await this.generateTokens(
-  //       user.username,
-  //       user.email,
-  //     );
-
-  //     // hash the tokens
-
-  //     const hashAT: string = await argon2.hash(tokens.access_token);
-
-  //     const hashRT: string = await argon2.hash(tokens.refresh_token);
-
-  //     this.logger.log(
-  //       `A Fin a ba ${user.username}, a mrahba bik a moulay o hawl 3la server rah 3la 9ad lhal HHHHHHHHHHHHH`,
-  //     );
-
-  //     // update the user . store the tokens in the database
-  //     await this.prisma.user.update({
-  //       where: { id: user.id },
-  //       data: { accessToken: hashAT, refreshToken: hashRT },
-  //     });
-
-  //     return tokens;
-  //   } catch (error) {
-  //     throw new NotAcceptableException();
-  //   }
-  // }
 
   async generateTokens(username: string, email: string): Promise<Tokens> {
     try {
@@ -322,13 +249,13 @@ export class AuthService {
       // store the data 
       extractedData.login = login;
       extractedData.fullName = usual_full_name;
-      extractedData.avatarNameUrl = link;
+      extractedData.avatarName = link;
       extractedData.email = email;
 
       // check if the data is here
       if (
         extractedData.email === undefined ||
-        extractedData.avatarNameUrl === undefined ||
+        extractedData.avatarName === undefined ||
         extractedData.fullName === undefined ||
         extractedData.login === undefined
       ) {

@@ -4,6 +4,7 @@ import { Tokens, UserType } from '../../../types';
 import { getNumberGamePlayedByUserId, getTokensFromCookie, getUserById, getUserInfo } from '../../../utils/utils';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '../../../context/UserContext';
+import Spinner from '../../../components/Spinner/Spinner';
 
 function ProfileUserInfos() {
 
@@ -15,6 +16,7 @@ function ProfileUserInfos() {
 
   const [numberGamePlayed, setNumberGamePlayed] = useState<number>(0);
 
+  const [otherUser, setOtherUser] = useState<UserType | null>(null);
   const [desplayedUser, setDesplayedUser] = useState<UserType | null>(null);
 
   useEffect(() => {
@@ -29,17 +31,6 @@ function ProfileUserInfos() {
 
   
   const initUserinfos = async () => {
-    
-    console.log({
-      user
-    })
-
-    // make sure there is a user logged in
-    // if (user === null) {
-    //   navigate('/notauth');
-    // } else {
-
-      setDesplayedUser(user);
 
       // get the tokens
       const tokens: Tokens | null = await getTokensFromCookie();
@@ -52,7 +43,7 @@ function ProfileUserInfos() {
           const userById = await getUserById(userId, tokens);
 
           if (userById) {
-            setDesplayedUser(userById);
+            setOtherUser(userById);
           }
 
         }
@@ -65,50 +56,49 @@ function ProfileUserInfos() {
         } else {
           setNumberGamePlayed(numberOfGames);
         }
-    
-    
-        // if (userData === undefined) {
-        //   navigate('/');
-        //   return;
-        // }
-    
-        // setUserData(userData);
       }
-
-
-    // }
   }
 
   
 
   return (
-    <div className="profile-user-infos">
-      <div className="profile-user-image">
-        <img src={ `http://localhost:3333` + desplayedUser?.avatarNameUrl} alt="user image" />
+    <>
+    { user ? (
+      <div className="profile-user-infos">
+
+        <div className="profile-user-image">
+          <img src={ `http://localhost:3333` + user?.avatarName} alt="user image" />
+        </div>
+
+        <div className="profile-user-description">
+          <div className="profile-user-fullname">{user?.fullName}</div>
+          <p className="profile-user-username">{user?.username}</p>
+          <p className="profile-user-status">{user?.isOnLine ? "Online" : "Offline"}</p>
+        </div>
+
+        <div className="profile-user-stats">
+          <div className="stats-infos" id="friends">
+            {/* hadi dyal abdlmoumen   */}
+            <div className="stats-number">50</div>
+            <p className="stats-title">Friends</p>
+          </div>
+          <div className="stats-infos" id="played-games">
+            <div className="stats-number">{numberGamePlayed}</div>
+            <p className="stats-title">Played games</p>
+          </div>
+          <div className="stats-infos" id="level">
+            <div className="stats-number">{user?.levelGame}</div>
+            <p className="stats-title">Level</p>
+          </div>
+        </div>
       </div>
 
-      <div className="profile-user-description">
-        <div className="profile-user-fullname">{desplayedUser?.fullName}</div>
-        <p className="profile-user-username">{desplayedUser?.username}</p>
-        <p className="profile-user-status">{desplayedUser?.isOnLine ? "Online" : "Offline"}</p>
-      </div>
+    ) : (
+      <Spinner />
+    )
 
-      <div className="profile-user-stats">
-        <div className="stats-infos" id="friends">
-          {/* hadi dyal abdlmoumen   */}
-          <div className="stats-number">50</div>
-          <p className="stats-title">Friends</p>
-        </div>
-        <div className="stats-infos" id="played-games">
-          <div className="stats-number">{numberGamePlayed}</div>
-          <p className="stats-title">Played games</p>
-        </div>
-        <div className="stats-infos" id="level">
-          <div className="stats-number">{desplayedUser?.levelGame}</div>
-          <p className="stats-title">Level</p>
-        </div>
-      </div>
-    </div>
+    }
+    </>
   )
 }
 

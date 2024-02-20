@@ -59,7 +59,7 @@ export class AuthController {
     // store the data 
     extractedData.login = username;
     extractedData.fullName = usual_full_name;
-    extractedData.avatarNameUrl = link;
+    extractedData.avatarName = link;
     extractedData.email = email;
 
     const tokens: Tokens = await this.authService.loginInra(extractedData);
@@ -77,10 +77,9 @@ export class AuthController {
 
     const { access_token } = await this.authService.refreshToken(user);
     
+    // TODO: set refresh_token 
     res.cookie("access_token", access_token, { httpOnly: false })
 
-    return {
-      message: 'done'
-    };
+    return res.status(HttpStatus.OK).json({ message: "done" });
   }
 }

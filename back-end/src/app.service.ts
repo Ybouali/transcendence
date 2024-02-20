@@ -82,6 +82,7 @@ export class AppService {
               where: { id: user.id },
               data: {
                 isOnLine: false,
+                Status: 'offline',
                 accessToken: 'offline',
                 refreshToken: 'logout',
               },
@@ -123,6 +124,7 @@ export class AppService {
               where: { id: user.id },
               data: {
                 isOnLine: false,
+                Status: 'offline',
                 accessToken: 'offline',
               },
             });
