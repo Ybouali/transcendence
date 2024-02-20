@@ -30,11 +30,6 @@ export class UserController {
     return await this.userService.getUser(userId);
   }
 
-  @Get('/:toFind')
-  async search(@Param('toFind') toFind: string) {
-    return this.userService.search(toFind);
-  }
-
   @Put('/update')
   async updateUser(dataUser: UpdateUserData, @GetUser('id') userId: string) {
     return this.userService.updateUser(dataUser, userId);

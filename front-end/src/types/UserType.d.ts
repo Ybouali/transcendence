@@ -3,8 +3,9 @@ export interface UserType {
     username: string;
     email: string;
     fullName: string;
-    avatarNameUrl: string;
+    avatarName: string;
     isOnLine: boolean;
+    Status: string;
     levelGame: number;
     phoneNumber: string;
     twoFactor: boolean;

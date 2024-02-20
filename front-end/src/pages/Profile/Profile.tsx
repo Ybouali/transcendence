@@ -4,10 +4,31 @@ import "./ProfileStyle.css"
 import ProfileUserInfos from './ProfileUserInfos/ProfileUserInfos'
 import ProfileButtonActions from './ProfileButtonActions/ProfileButtonActions'
 import ProfileAchievements from './ProfileAchievements/ProfileAchievements'
-import { HistoryGameReturnedType } from '../../types'
+import { HistoryGameReturnedType, Tokens } from '../../types'
 import GamesHistory from './GamesHistory/GamesHistory'
+import { useNavigate } from 'react-router-dom'
+import { getTokensFromCookie } from '../../utils/utils'
+
 
 function Profile() {
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    gaurd();
+  })
+  
+  const gaurd = async () => {
+
+    // if there is no tokens the user will be redirected to not auth page this will be the Gaurd
+
+    const tokens: Tokens | null = await getTokensFromCookie();
+
+    if (!tokens) {
+      navigate("/notauth")
+    }
+
+  }
 
   // const gamesLog: HistoryGameReturnedType [] = 
 

@@ -32,12 +32,15 @@ export async function getTokensFromCookie(): Promise<Tokens | null> {
 
         if (resData.data.message !== "done") return null;
     }
+    
     if (gat) {
 
         const tokensRet: Tokens = {
             access_token: gat,
             refresh_token: grt
         }
+
+        // need to make a request to make sure the tokens is valid before return them
 
         return tokensRet;
     }
@@ -98,8 +101,10 @@ export async function getUserInfo(): Promise<UserType | null> {
             'refresh_token': tokens.refresh_token,
         }
     })
+    .then(response => response)
+    .catch(err => {});
 
-    if (!resData.data) {
+    if (!resData) {
         return null;
     }
 
@@ -107,7 +112,8 @@ export async function getUserInfo(): Promise<UserType | null> {
         id: resData.data.id,
         username: resData.data.username,
         email: resData.data.email,
-        avatarNameUrl: resData.data.avatarNameUrl,
+        avatarName: resData.data.avatarName,
+        Status: resData.data.Status,
         fullName: resData.data.fullName,
         isOnLine: resData.data.isOnLine,
         levelGame: resData.data.levelGame,
@@ -143,7 +149,8 @@ export async function getUserInfo(): Promise<UserType | null> {
         id: resData.data.id,
         username: resData.data.username,
         email: resData.data.email,
-        avatarNameUrl: resData.data.avatarNameUrl,
+        Status: resData.data.Status,
+        avatarName: resData.data.avatarName,
         fullName: resData.data.fullName,
         isOnLine: resData.data.isOnLine,
         levelGame: resData.data.levelGame,

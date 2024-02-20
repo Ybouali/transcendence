@@ -18,8 +18,9 @@ model User {
   username        String  @unique
   email           String  @unique
   fullName        String
-  avatarNameUrl   String
+  avatarName      String
   isOnLine        Boolean
+  Status          String
   accessToken     String
   phoneNumber     String
   refreshToken    String

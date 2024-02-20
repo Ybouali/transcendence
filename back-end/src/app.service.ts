@@ -82,6 +82,7 @@ export class AppService {
               where: { id: user.id },
               data: {
                 isOnLine: false,
+                Status: 'offline',
                 accessToken: 'offline',
                 refreshToken: 'logout',
               },
@@ -123,6 +124,7 @@ export class AppService {
               where: { id: user.id },
               data: {
                 isOnLine: false,
+                Status: 'offline',
                 accessToken: 'offline',
               },
             });
@@ -145,22 +147,22 @@ export class AppService {
 
       // decode the token
       const tokenDecoded: Jwts | null = verify(tokenToVerify, secret) as Jwts;
-    
+      
       if (tokenDecoded !== null) {
-
+        
         // check the expiration date of the token
-
+        
         // get the current date
         // divide by 1000 to convert to seconds
         const dateNow: number = Math.floor(Date.now() / 1000);
-
+        
         // check expiration
         if (dateNow >= tokenDecoded.exp) return true;
       }
 
       return false;
     } catch (error) {
-      throw new InternalServerErrorException();
+      return true;
     }
   }
 

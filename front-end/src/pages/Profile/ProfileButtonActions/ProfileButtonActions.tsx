@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import "./ProfileButtonActionsStyle.css"
 import { useNavigate, useParams } from 'react-router-dom';
 import { Tokens, UserType } from '../../../types';
 import {  getTokensFromCookie, getUserById, getUserInfo } from '../../../utils/utils';
+import { useUser } from '../../../context/UserContext';
 
 
 function ProfileButtonActions() {
@@ -13,40 +14,48 @@ function ProfileButtonActions() {
 
   const [friend, setFriend] = useState<boolean>(false);
 
+  const { user, fetchUser } = useUser()
+
+  const [userData, setUserData] = useState<UserType | null>();
+
   const [personal, setPersonal] = useState<boolean>(true);
 
   useEffect(() => {
 
-    initData();
+    initData()
 
   }, [])
 
   const initData = async () => {
-    let userData: UserType | null = null;
 
-    const tokens: Tokens | null = await getTokensFromCookie();
+    // setUserData(userDataCon);
 
-    if (tokens === null) {
-      navigate('/');
-      return ;
-    }
+    // console.log({ userData})
+
+    // if (!userData) {
+    //   navigate("/notauth")
+    // }
+
+    // const tokens: Tokens | null = await getTokensFromCookie();
+
+    // if (tokens === null) {
+    //   navigate('/notauth');
+    //   return ;
+    // }
     
-    if (userId) {
-      // the will be called because the url contains a user id
-      userData = await getUserById(userId, tokens);
-      setPersonal(false);
-      // here need to check if the user is a friend if is a friend so
-      // setFriend(true);
-      // if not a friend 
-      // setFriend(false);
-    }
+    // if (userId) {
+    //   // the will be called because the url contains a user id
+    //   setUserData(await getUserById(userId, tokens))
+    //   setPersonal(false);
+    //   // here need to check if the user is a friend if is a friend so
+    //   // setFriend(true);
+    //   // if not a friend 
+    //   // setFriend(false);
+    // }
+    // else {
+    //   setPersonal(true);
+    // }
     
-    if (userData === undefined) {
-      // this will be called because the url dose not contain a user id
-      // and this is the default one aka display the user logged in info
-      userData = await getUserInfo();
-      setPersonal(true);
-    }
   }
 
 
