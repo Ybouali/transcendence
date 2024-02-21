@@ -64,7 +64,7 @@ function ProfileAchievements() {
         return (
           <ProfileAchievement
             key={stage}
-            stage={level}
+            stage={stage}
             title={title}
             isActive={isActive}
           />

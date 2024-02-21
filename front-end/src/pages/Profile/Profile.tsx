@@ -289,8 +289,8 @@ function Profile() {
         <div className="container">
           <div className="profile-content" data-status="online">
             <ProfileUserInfos />
-            {/* <ProfileButtonActions /> */}
-            {/* <ProfileAchievements /> */}
+            <ProfileButtonActions />
+            <ProfileAchievements />
             {/* <GamesHistory /> */}
           </div>
         </div>

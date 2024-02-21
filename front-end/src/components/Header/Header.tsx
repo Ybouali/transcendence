@@ -1,15 +1,17 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import "./HeaderStyle.css"
 
 import { Link, useNavigate } from 'react-router-dom';
-import { LoginType, Tokens } from '../../types';
+import { LoginType, SearchType, Tokens } from '../../types';
 import { getTokensFromCookie } from '../../utils/utils';
 import axios from 'axios';
 import { useUser } from '../../context/UserContext';
-import Spinner from '../Spinner/Spinner';
+import SearchResults from '../SearchResults/SearchResults';
 
 function Header(props: LoginType) {
+
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const  { user, fetchUser  } = useUser();
 
@@ -17,10 +19,43 @@ function Header(props: LoginType) {
 
   const [openMenu, setOpenMenu] = useState<boolean>(false);
 
+  const [search, setSearch] = useState<string>("");
+
+  const [searchOpen, setSearchOpen ] = useState<boolean>(false);
+
+  const [searchJustOpened, setSearchJustOpened ] = useState<boolean>(false);
+
+  const [value, setValue] = useState<SearchType | null>(null);
+
+  const [loading, setLoading] = useState<boolean>(false);
+
   
   useEffect( () => {
     fetchUser();
-  }, [fetchUser])
+
+      const searchInput = searchInputRef.current;
+      if (searchInput) {
+        searchInput.addEventListener("click", () => {
+          setSearchOpen((previousValue) => !previousValue);
+          setSearchJustOpened(true);
+        });
+      }
+
+      if(searchOpen){
+        if(searchInputRef?.current){
+          searchInputRef?.current.focus()
+        }
+
+      }
+
+    if (!searchOpen) {
+        if(searchInputRef?.current){
+          searchInputRef?.current.blur()
+        }
+        
+      }
+
+  }, [fetchUser, searchInputRef])
   
   const logoutFromServer = async () => {
 
@@ -64,13 +99,18 @@ function Header(props: LoginType) {
 
   const isConnected: boolean = props.isConnected;
 
+  const openSearch = () => {
+    setSearchOpen(true);
+    setSearchJustOpened(true);
+  }
+
   return (
     <>
       {isConnected && (
         <header className="primary-header identified" data-status="online">
           <div className="container">
             <div className="primary-header-content">
-              <a href="#" aria-label="home" className="logo">
+              <Link to="/profile" aria-label="home" className="logo">
                 <svg
                   width="84"
                   height="40"
@@ -117,14 +157,34 @@ function Header(props: LoginType) {
                   />
                 </svg>
                 <p className="sub-logo">Ping-ball</p>
-              </a>
-              <div className="search-bar">
-                <i className="fa-solid fa-magnifying-glass fa-2x"></i>
+              </Link>
+              <div
+                className="search-bar"
+                onClick={openSearch}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                  <path
+                    opacity="1"
+                    d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
+                  />
+                </svg>
                 <input
+                  ref={searchInputRef}
                   type="text"
                   name="search"
                   id="search"
-                  placeholder="Search users, friends"
+                  placeholder="Search users, groups"
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <SearchResults
+                  results={value}
+                  searchOpen={searchOpen}
+                  searchJustOpened={searchJustOpened}
+                  setSearchJustOpened={setSearchJustOpened}
+                  setSearchOpen={setSearchOpen}
+                  loading={loading}
+                  setSearch={setSearch}
+                  
                 />
               </div>
               <button
