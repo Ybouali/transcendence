@@ -15,12 +15,22 @@ export class RoomsController {
     constructor(private readonly roomsService: RoomsService,
         private eventEmitter: EventEmitter2) {}
 
+    // @Get('search/:userId/')
+    // // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // async getSearchResults1(@Param('que') que: string, @Param('userId') userId: string): Promise<any> {
+    //     try {
+    //         return {};
+    //     } catch (error) {
+    //         return {users: [], groups:[]};
+    //     }
+    // }
+
     @Get('search/:userId/:que')
     async getSearchResults(@Param('que') que: string, @Param('userId') userId: string): Promise<any> {
         try {
             return this.roomsService.getSearchResults(que, userId);
         } catch (error) {
-            throw error;
+            return {users: [], groups:[]};
         }
     }
 
@@ -38,9 +48,14 @@ export class RoomsController {
 
     @Get('/:userId/:roomId')
     async getRoomInfo(@Param('userId') userId: string, @Param('roomId') roomId: string): Promise<RoomDto[]> {
-        console.log('get info of a room.')
-        const res = this.roomsService.getRoomInfo(roomId, userId);
-        return res;
+        try {
+            console.log('get info of a room.')
+            const res = await this.roomsService.getRoomInfo(roomId, userId);
+            console.log(res);
+            return res;
+        } catch (error) {
+            throw error
+        }
     }
 
     @UseGuards(RolesGuard)
@@ -57,7 +72,7 @@ export class RoomsController {
             console.log('everythings okay')
             return {...infoUser, role: (eventName === 'removeMember' ? 'members' : 'admins')};
         } catch (error) {
-            throw error;
+            return error.response;
         }
     }
 
@@ -107,11 +122,14 @@ export class RoomsController {
     @Delete('/:userId/:roomId/delete')
     async removeRoom(@Body() room: { roomId: string }): Promise<any> {
         try{
+            console.log('====================== DELETE ROOM ============================')
             const membersIds = await this.roomsService.removeRoom(room.roomId);
             this.eventEmitter.emit('deleteRoom', room.roomId, membersIds);
             return true
         } catch (error) {
-            throw error
+            console.log('hetetetetetette')
+            // return error.response;
+            return '';
         }
     }
 
@@ -129,6 +147,7 @@ export class RoomsController {
                 adminId: undefined
             });
         } catch (error) {
+            console.log('leaveRoom here here here');
             throw error;
         }
     }
@@ -203,7 +222,7 @@ export class RoomsController {
             };
         } catch (error) {
             console.log(error);
-            throw error;
+            return error.response;
         }
     }
 
@@ -227,8 +246,7 @@ export class RoomsController {
                 role
             };
         } catch (error) {
-            console.log(error);
-            throw error;
+            return error.response;
         }
     }
 
@@ -237,6 +255,7 @@ export class RoomsController {
     @Post(':userId/:roomId/setAdmin')
 	async setAdminToRoom(@Body() room: { adminId: string; roomId: string; newAdmin: string }) {
         try {
+            console.log('============================== set admin ================================');
             const infoUser = await this.roomsService.getUserInfo(room.newAdmin);
             await this.roomsService.addAdminToRoomHTTP(room.adminId, room.roomId, room.newAdmin);
             return {
@@ -245,7 +264,8 @@ export class RoomsController {
                 name: infoUser.name
             };
         } catch (error) {
-            throw error;
+            console.log(error.response)
+            return error.response;
         }
     }
 
@@ -274,7 +294,7 @@ export class RoomsController {
             return newRoom
         } catch (error) {
             console.log(error)
-            throw error
+            return error.response
         }
     }
 
@@ -292,7 +312,7 @@ export class RoomsController {
             const images = await this.roomsService.getImagesOfRoom(newRoom?.id);
             this.eventEmitter.emit('addRoom', {newRoom, ownerID: createRoomDto.ownerID, images});
         } catch (error) {
-            throw error;
+            return error.response;
         }
 	}
 
@@ -312,7 +332,7 @@ export class RoomsController {
                 role
             };
         } catch (error) {
-            throw error;
+            return error.response;
         }
 	}
 }

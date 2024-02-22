@@ -33,10 +33,12 @@ export class FriendController{
     @Post(':userId/block/:friendId')
     async blockFriend(@Param('userId') userId: string, @Param('friendId') friendId: string) {
         try {
+            console.log('block block')
             await this.friendService.blockFriend(userId, friendId);
             this.eventEmitter.emit('blockFriend', {userId, friendId});
+            return {statusCode: undefined}
         } catch (error) {
-            throw new BadRequestException('Failed to block friend');
+            return error.response;
         }
     }
 

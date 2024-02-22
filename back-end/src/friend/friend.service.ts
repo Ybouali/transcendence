@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 // import { FriendshipDto } from "./dto/friendship.dto";
 
@@ -93,8 +93,7 @@ export class FriendService{
                 });
                 return true;
         } catch (error) {
-                console.error('Error blocking user:', error.message);
-                throw new Error;
+                throw new BadRequestException('Failed to block user.');
         }
     }
 

@@ -1092,6 +1092,14 @@ export class RoomsService {
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             async getRoomInfo(roomId: string, userId: string): Promise<any> {
+                const findRoom = await this.prisma.chatRoom.findUnique({
+                    where: {
+                        id: roomId
+                    }
+                });
+                if (!findRoom) {
+                    throw new NotFoundException('room not found');
+                }
                 const room = await this.prisma.chatRoom.findUnique({
                     where: { id: roomId },
                     include: {
@@ -1508,6 +1516,17 @@ export class RoomsService {
             if (!isMember) {
                 throw new BadRequestException('User is not a member of this room.');
             }
+
+            const isBanned = await this.prisma.banedUsers.findFirst({
+                where: {
+                    userId: bannedId,
+                    roomId: roomId,
+                },
+            });
+    
+            if (!isBanned) {
+                throw new BadRequestException('User is not banned in this room.');
+            }
     
             const isAdmin = await this.prisma.admins.findFirst({
                 where: {
@@ -1542,6 +1561,19 @@ export class RoomsService {
 
 
         async addAdminToRoomHTTP(ownerId: string, roomId: string, adminId: string): Promise<void> {
+
+            const isBanned = await this.prisma.banedUsers.findFirst({
+                where: {
+                    userId: adminId,
+                    roomId: roomId
+                }
+            });
+
+            console.log(isBanned)
+            if (isBanned) {
+                throw new BadRequestException('User is Banned in this room');
+            }
+
             const existingAdmin = await this.prisma.admins.findFirst({
                 where: {
                     userId: adminId,
@@ -1802,6 +1834,17 @@ export class RoomsService {
             if (!isMember){
                 throw new NotFoundException();
             }
+
+            const isBanned = await this.prisma.banedUsers.findFirst({
+                where: {
+                    userId: userId,
+                    roomId: roomId
+                }
+            });
+
+            if (isBanned) {
+                throw new BadRequestException('This user banned in this room.');
+            }
             const isAdmin = await this.prisma.admins.findFirst({
                 where: {
                     userId,
@@ -1971,8 +2014,8 @@ export class RoomsService {
 
         
             const userResults = filteredUsers.map((user) => ({
-                id: user.id,
-                name: user.username,
+                id:     user.id,
+                name:   user.username,
                 status: user.Status,
                 images: [user.avatarUrl],
             }));

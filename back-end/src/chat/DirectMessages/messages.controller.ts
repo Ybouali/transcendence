@@ -19,6 +19,7 @@ export class MessagesController {
         @Param('userId') userId: string,
     ): Promise<ConversationDto[]> {
         const conversation = await this.messagesService.getConversation(userId);
+        console.log(conversation);
         return conversation;
     }
 
