@@ -85,6 +85,44 @@ export async function getHisGamesByUserId(userId: string | null): Promise<Histor
 
 }
 
+export async function updateUser(user: UserType): Promise<UserType | null> {
+
+    const tokens: Tokens | null = await getTokensFromCookie();
+
+    if (!tokens) return null;
+
+    const resData = await axios.put('http://127.0.0.1:3333/users/update', user, {
+        headers: {
+            'access_token': tokens.access_token,
+            'refresh_token': tokens.refresh_token,
+        },
+    })
+    .then(response => response)
+    .catch(err => {});
+
+    if (!resData) {
+        return null;
+    }
+
+    const userData: UserType = {
+        id: resData.data.id,
+        username: resData.data.username,
+        email: resData.data.email,
+        avatarName: resData.data.avatarName,
+        Status: resData.data.Status,
+        fullName: resData.data.fullName,
+        isOnLine: resData.data.isOnLine,
+        levelGame: resData.data.levelGame,
+        phoneNumber: resData.data.phoneNumber,
+        twoFactor: resData.data.twoFactor,
+        qrCodeFileName: resData.data.qrCodeFileName,
+    }
+
+    // return the user data
+    return userData;
+
+}
+
 export async function getUserInfo(): Promise<UserType | null> {
 
     const tokens: Tokens | null = await getTokensFromCookie();
@@ -129,7 +167,7 @@ export async function getUserInfo(): Promise<UserType | null> {
   export async function getUserById(id: string, tokens: Tokens): Promise<UserType | null> {
 
     // url
-    const url: string = "http://localhost:3333/users/" + id;
+    const url: string = "http://127.0.0.1:3333/users/" + id;
 
     let resData = null;
 

@@ -7,6 +7,7 @@ import {
   UseGuards,
   Put,
   Logger,
+  Body,
 } from '@nestjs/common';
 import { GetUser } from 'src/decorators';
 import { AccessGuard, LoginGuard } from 'src/auth/guard';
@@ -31,7 +32,7 @@ export class UserController {
   }
 
   @Put('/update')
-  async updateUser(dataUser: UpdateUserData, @GetUser('id') userId: string) {
+  async updateUser(@Body() dataUser: UpdateUserData, @GetUser('id') userId: string) {
     return this.userService.updateUser(dataUser, userId);
   }
   
