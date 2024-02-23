@@ -1562,6 +1562,12 @@ export class RoomsService {
 
         async addAdminToRoomHTTP(ownerId: string, roomId: string, adminId: string): Promise<void> {
 
+            const isAdmin = await this.isUserAdmin(ownerId, roomId);
+
+            if (!isAdmin) {
+                throw new BadRequestException('This user is not an admin in this room');
+            }
+
             const isBanned = await this.prisma.banedUsers.findFirst({
                 where: {
                     userId: adminId,
@@ -1593,7 +1599,6 @@ export class RoomsService {
             });
         
             if (!isMember) {
-                console.log('User is not a member of this room');
                 throw new BadRequestException('User is not a member of this room');
             }
 
@@ -1605,8 +1610,70 @@ export class RoomsService {
             });
         }
 
+        async unsetAdminFromRoomHTTP(ownerId: string, roomId: string, unsetadminId: string): Promise<void> {
+
+            const isAdmin = await this.isUserAdmin(ownerId, roomId);
+
+            if (!isAdmin) {
+                console.log('This user is not an admin in this room')
+                throw new BadRequestException('This user is not an admin in this room');
+            }
+
+            const isBanned = await this.prisma.banedUsers.findFirst({
+                where: {
+                    userId: unsetadminId,
+                    roomId: roomId
+                }
+            });
+
+            if (isBanned) {
+                console.log('User is Banned in this room')
+                throw new BadRequestException('User is Banned in this room');
+            }
+
+            const existingAdmin = await this.prisma.admins.findFirst({
+                where: {
+                    userId: unsetadminId,
+                    roomId: roomId,
+                },
+            });
+        
+            if (!existingAdmin) {
+                console.log('User is not an admin in this room')
+                throw new BadRequestException('User is not an admin in this room');
+            }        
+
+            const isMember = await this.prisma.member.findFirst({
+                where: {
+                    userId: unsetadminId,
+                    chatRoomId: roomId,
+                },
+            });
+        
+            if (!isMember) {
+                console.log('User is not a member of this room')
+                throw new BadRequestException('User is not a member of this room');
+            }
+
+            await this.prisma.admins.deleteMany({
+                where: {
+                    userId: unsetadminId, 
+                    roomId: roomId
+                }
+            });
+        }
         async leaveRoomHTTP(data: { userId: string, roomId: string }): Promise<void> {
             const { userId, roomId } = data;
+            const isAMember = await this.prisma.member.findFirst({
+                where: {
+                    AND: [
+                        {chatRoomId: roomId}, {userId: userId}, {status: true}
+                    ]
+                }
+            });
+            if (!isAMember) {
+                throw new BadRequestException('This user is not a member in this room.');
+            }
             const isOwner = await this.isRoomOwner(userId, roomId);
             const isAdmin = await this.isUserAdmin(userId, roomId);
             
@@ -1728,9 +1795,34 @@ export class RoomsService {
         }
 
 
-        async updateRoomHTTP(roomId: string, updateRoom: { roomName: string, password: string, roomType: string, admins: string[] }): Promise<any> {
+        async updateRoomHTTP(roomId: string, userId: string, updateRoom: { roomName: string, password: string, roomType: string, admins: string[] }): Promise<any> {
             let room: any;
             
+            const isAMember = await this.prisma.member.findFirst({
+                where: {
+                    AND: [
+                        {chatRoomId: roomId}, {userId: userId}, {status: true}
+                    ]
+                }
+            });
+
+
+            if (!isAMember) {
+                throw new BadRequestException('This user is not a member in this room.');
+            }
+
+            const isAAdmin = await this.prisma.admins.findFirst({
+                where: {
+                    AND: [
+                        {roomId: roomId}, {userId: userId}
+                    ]
+                }
+            });
+
+            if (!isAAdmin) {
+                throw new BadRequestException('This user is not a admin in this room.');
+            }
+
             const existingAdmins = await this.prisma.admins.findMany({
                 where: {
                 roomId: roomId,
@@ -1741,7 +1833,6 @@ export class RoomsService {
             });
             const newAdmins = updateRoom.admins.filter(admin => !existingAdmins.some(existingAdmin => existingAdmin.userId === admin));
                 
-            console.log(newAdmins)
             if (updateRoom.roomType === 'protected') {
                 const hashedPassword = await this.hashPassword(updateRoom.password);
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1822,9 +1913,18 @@ export class RoomsService {
             }
         }
     
-        async handleMuteUser(data: { userId: string, roomId: string, duration : number }): Promise<any> {
+        async handleMuteUser( adminId: string ,data: { userId: string, roomId: string, duration : number }): Promise<any> {
             // eslint-disable-next-line prefer-const
             let { userId, roomId, duration } = data;
+            const isAAdmin = await this.prisma.admins.findFirst({
+                where: {
+                    roomId: data.roomId,
+                    userId: adminId
+                }
+            });
+            if (!isAAdmin){
+                throw new BadRequestException('This user in not an admin in this room');
+            }
             const isMember = await this.prisma.member.findFirst({
                 where: {
                     userId: userId,
@@ -1832,7 +1932,7 @@ export class RoomsService {
                 }
             });
             if (!isMember){
-                throw new NotFoundException();
+                throw new BadRequestException('This user in not a member in this room');
             }
 
             const isBanned = await this.prisma.banedUsers.findFirst({
@@ -2027,6 +2127,22 @@ export class RoomsService {
         }
 
         async AcceptRequestRoomHTTP(adminId: string, roomId: string, userId: string ) {
+            const isAdmin = await this.isUserAdmin(adminId, roomId);
+            if (!isAdmin) {
+                throw new BadRequestException('This user is not admin in this room');
+            }
+
+            const isAMember = await this.prisma.member.findFirst({
+                where: {
+                    AND: [
+                        {chatRoomId: roomId}, {userId: userId}, {status: true}
+                    ]
+                }
+            });
+
+            if (isAMember) {
+                throw new BadRequestException('This user is already member in this room.');
+            }
             await this.prisma.member.update({
                 where: {
                     userId_chatRoomId: {
@@ -2041,6 +2157,22 @@ export class RoomsService {
         }
 
         async declineRequestRoomHTTP(adminId: string, roomId: string, userId: string ) {
+            const isAdmin = await this.isUserAdmin(adminId, roomId);
+            if (!isAdmin) {
+                throw new BadRequestException('This user is not admin in this room');
+            }
+
+            const isAMember = await this.prisma.member.findFirst({
+                where: {
+                    AND: [
+                        {chatRoomId: roomId}, {userId: userId}, {status: true}
+                    ]
+                }
+            });
+
+            if (isAMember) {
+                throw new BadRequestException('This user is already member in this room.');
+            }
             await this.prisma.member.delete({
                 where: {
                     userId_chatRoomId: {

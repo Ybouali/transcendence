@@ -1,12 +1,12 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Get, Param, Post, UseGuards, Delete} from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Delete} from "@nestjs/common";
 import { RoomsService } from "./rooms.service";
 import { RoomDto } from "./dto/room-conv.dto";
 import { RoomMessageDto } from "./dto/room-message.dto";
 // import { error } from "console";
-import { RolesGuard } from "./guards/roles.guard";
-import { Role } from "./guards/role.enum";
-import { Roles } from "./guards/roles";
+// import { RolesGuard } from "./guards/roles.guard";
+// import { Role } from "./guards/role.enum";
+// import { Roles } from "./guards/roles";
 import { CreateRoomDto } from "./dto/create-room.dto";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 
@@ -15,15 +15,15 @@ export class RoomsController {
     constructor(private readonly roomsService: RoomsService,
         private eventEmitter: EventEmitter2) {}
 
-    // @Get('search/:userId/')
-    // // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    // async getSearchResults1(@Param('que') que: string, @Param('userId') userId: string): Promise<any> {
-    //     try {
-    //         return {};
-    //     } catch (error) {
-    //         return {users: [], groups:[]};
-    //     }
-    // }
+    @Get('search/:userId/')
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async getSearchResults1(@Param('que') que: string, @Param('userId') userId: string): Promise<any> {
+        try {
+            return "";
+        } catch (error) {
+            return "";
+        }
+    }
 
     @Get('search/:userId/:que')
     async getSearchResults(@Param('que') que: string, @Param('userId') userId: string): Promise<any> {
@@ -58,8 +58,8 @@ export class RoomsController {
         }
     }
 
-    @UseGuards(RolesGuard)
-    @Roles(Role.Admin, Role.Owner)
+    // @UseGuards(RolesGuard)
+    // @Roles(Role.Admin, Role.Owner)
     @Post(':userId/:roomId/kick')
     async kickMember(@Param('userId') userId: string ,@Body() room1: { adminId: string; roomId: string; userId: string })
     {
@@ -69,19 +69,17 @@ export class RoomsController {
             const eventName = await this.roomsService.kickUserfromRoomHTTP(room1.adminId, room1.roomId, room1.userId);
             // this.eventEmitter.emit('kickMember', {roomId: room1.roomId, userId: room1.userId});
             this.eventEmitter.emit('roomUpdate', {roomId: room1.roomId, userId: room1.userId, eventName: 'leaveRoom', adminId: room1.adminId});
-            console.log('everythings okay')
             return {...infoUser, role: (eventName === 'removeMember' ? 'members' : 'admins')};
         } catch (error) {
             return error.response;
         }
     }
 
-    @UseGuards(RolesGuard)
-    @Roles(Role.Admin, Role.Owner)
+    // @UseGuards(RolesGuard)
+    // @Roles(Role.Admin, Role.Owner)
     @Post(':userId/:roomId/accept')
     async acceptRequest(@Param('userId') userId: string ,@Body() room1: { adminId: string; roomId: string; userTwo: string })
     {
-        console.log('accept request')
         try {
             const infoUser = await this.roomsService.getUserInfo(room1.userTwo);
             await this.roomsService.AcceptRequestRoomHTTP(room1.adminId, room1.roomId, room1.userTwo);
@@ -94,12 +92,12 @@ export class RoomsController {
                 name: infoUser.name,
             }
         } catch (error) {
-            throw error;
+            return error.response;
         }
     }
 
-    @UseGuards(RolesGuard)
-    @Roles(Role.Admin, Role.Owner)
+    // @UseGuards(RolesGuard)
+    // @Roles(Role.Admin, Role.Owner)
     @Post(':userId/:roomId/decline')
     async declineRequest(@Param('userId') userId: string ,@Body() room1: { adminId: string; roomId: string; userTwo: string })
     {
@@ -113,32 +111,28 @@ export class RoomsController {
                 name: infoUser.name,
             }
         } catch (error) {
-            throw error;
+            return error.response;
         }
     }
 
-    @UseGuards(RolesGuard)
-    @Roles(Role.Owner)
+    // @UseGuards(RolesGuard)
+    // @Roles(Role.Owner)
     @Delete('/:userId/:roomId/delete')
     async removeRoom(@Body() room: { roomId: string }): Promise<any> {
         try{
-            console.log('====================== DELETE ROOM ============================')
             const membersIds = await this.roomsService.removeRoom(room.roomId);
             this.eventEmitter.emit('deleteRoom', room.roomId, membersIds);
-            return true
+            return {statusCode: undefined}
         } catch (error) {
-            console.log('hetetetetetette')
-            // return error.response;
-            return '';
+            return {statusCode: 400};
         }
     }
 
-    @UseGuards(RolesGuard)
-    @Roles(Role.Owner, Role.Admin, Role.Member)
+    // @UseGuards(RolesGuard)
+    // @Roles(Role.Owner, Role.Admin, Role.Member)
     @Post(':userId/:roomId/leaveROOM')
-    async leaveRoom(@Body() data: { userId: string, roomId: string }): Promise<void> {
+    async leaveRoom(@Body() data: { userId: string, roomId: string }): Promise<any> {
         try {
-            console.log(data)
             await this.roomsService.leaveRoomHTTP(data);
             this.eventEmitter.emit('roomUpdate', {
                 roomId: data.roomId, 
@@ -146,21 +140,24 @@ export class RoomsController {
                 eventName: 'leaveRoom', 
                 adminId: undefined
             });
+            return {statusCode: undefined};
         } catch (error) {
-            console.log('leaveRoom here here here');
-            throw error;
+            return error.response;
         }
     }
 
-    @UseGuards(RolesGuard)
-    @Roles(Role.Owner)
+    // @UseGuards(RolesGuard)
+    // @Roles(Role.Owner)
     @Post(':userId/:roomId/updateRoom')
-    async updateRoom(@Param('roomId') roomId: string,@Body() updateRoom: {roomName: string, password: string, roomType: string, admins: string[]}) {
+    async updateRoom(
+        @Param('roomId') roomId: string, 
+        @Param('userId') userId: string,
+        @Body() updateRoom: {roomName: string, password: string, roomType: string, admins: string[]}) {
         try {
-            console.log(updateRoom)
-            return await this.roomsService.updateRoomHTTP(roomId, updateRoom);
+            console.log('updare updare updare updare')
+            return await this.roomsService.updateRoomHTTP(roomId, userId, updateRoom);
         } catch (error) {
-            throw error;
+            return error.response;
         }
 	}
 
@@ -199,13 +196,12 @@ export class RoomsController {
 
     
 
-    @UseGuards(RolesGuard)
-    @Roles(Role.Admin, Role.Owner)
+    // @UseGuards(RolesGuard)
+    // @Roles(Role.Admin, Role.Owner)
     @Post(':userId/:roomId/ban')
     async banMember(@Param('userId') userId: string ,@Body() room1: { adminId: string; roomId: string; bannedId: string })
     {
         try {
-            console.log('ban user here')
             const infoUser = await this.roomsService.getUserInfo(room1.bannedId);
             console.log(infoUser)
             await  this.roomsService.banUserInRoomHTTP(room1.adminId, room1.roomId, room1.bannedId);
@@ -221,20 +217,18 @@ export class RoomsController {
                 name: infoUser.name
             };
         } catch (error) {
-            console.log(error);
             return error.response;
         }
     }
 
 
-    @UseGuards(RolesGuard)
-    @Roles(Role.Admin, Role.Owner)
+    // @UseGuards(RolesGuard)
+    // @Roles(Role.Admin, Role.Owner)
     @Post(':userId/:roomId/unban')
     async unbanMember(@Param('userId') userId: string ,@Body() room1: { adminId: string; roomId: string; unbannedId: string })
     {
         try {
             const infoUser = await this.roomsService.getUserInfo(room1.unbannedId);
-            console.log(infoUser)
             const role = await  this.roomsService.unbanUserInRoomHTTP(room1.adminId, room1.roomId, room1.unbannedId);
             const images = await this.roomsService.getImagesOfRoom(room1?.roomId);
             const newRoom = await this.roomsService.getInfosOfRoom(room1?.roomId);
@@ -250,8 +244,8 @@ export class RoomsController {
         }
     }
 
-    @UseGuards(RolesGuard)
-    @Roles(Role.Owner)
+    // @UseGuards(RolesGuard)
+    // @Roles(Role.Owner)
     @Post(':userId/:roomId/setAdmin')
 	async setAdminToRoom(@Body() room: { adminId: string; roomId: string; newAdmin: string }) {
         try {
@@ -264,7 +258,23 @@ export class RoomsController {
                 name: infoUser.name
             };
         } catch (error) {
-            console.log(error.response)
+            return error.response;
+        }
+    }
+
+    @Post(':userId/:roomId/unsetAdmin')
+	async unSetAdminToRoom(@Body() room: { adminId: string; roomId: string; unsetAdmin: string }) {
+        try {
+            console.log('============================== unset admin ================================');
+            console.log(room.unsetAdmin);
+            const infoUser = await this.roomsService.getUserInfo(room.unsetAdmin);
+            await this.roomsService.unsetAdminFromRoomHTTP(room.adminId, room.roomId, room.unsetAdmin);
+            return {
+                id: infoUser.id,
+                images: [infoUser.avatarUrl],
+                name: infoUser.name
+            };
+        } catch (error) {
             return error.response;
         }
     }
@@ -293,7 +303,6 @@ export class RoomsController {
             }
             return newRoom
         } catch (error) {
-            console.log(error)
             return error.response
         }
     }
@@ -311,19 +320,20 @@ export class RoomsController {
             const newRoom = await this.roomsService.createRoomHTTP(createRoomDto);
             const images = await this.roomsService.getImagesOfRoom(newRoom?.id);
             this.eventEmitter.emit('addRoom', {newRoom, ownerID: createRoomDto.ownerID, images});
+            return {statusCode: undefined};
         } catch (error) {
             return error.response;
         }
 	}
 
-	@UseGuards(RolesGuard)
-	@Roles(Role.Owner, Role.Admin)
+	// @UseGuards(RolesGuard)
+	// @Roles(Role.Owner, Role.Admin)
 	@Post(':userId/:roomId/mute')
-	async muteUser(@Body() data: { userId: string, roomId: string, duration : number }) {
+	async muteUser(@Param(':userId') userId: string, @Body() data: { userId: string, roomId: string, duration : number }) {
         console.log('this line for muted user');            
         try {
             const infoUser = await this.roomsService.getUserInfo(data.userId);
-            const role = await this.roomsService.handleMuteUser(data) ? 'admins' : 'members';
+            const role = await this.roomsService.handleMuteUser(userId, data) ? 'admins' : 'members';
             this.eventEmitter.emit('muteMember', {roomId: data.roomId, userMuted: data.userId});
             return {
                 id: infoUser.id,
