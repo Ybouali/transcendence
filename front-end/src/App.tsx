@@ -11,12 +11,12 @@ import Leaderboard from './pages/Leaderboard/Leaderboard';
 import Profile from './pages/Profile/Profile';
 import Settings from './pages/Settings/Settings';
 import NotAuth from './pages/NotAuth/NotAuth';
-import { UserProvider } from './context/UserContextProvider';
+import ConnectedProvider from './context/ConnectedContextProvider';
 
 function App() {
 
   return (
-    <UserProvider>
+    <ConnectedProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -32,7 +32,7 @@ function App() {
         </Routes>
         <Footer />
       </BrowserRouter>
-    </UserProvider>
+    </ConnectedProvider>
   );
 }
 

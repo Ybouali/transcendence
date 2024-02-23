@@ -1,113 +1,161 @@
-import React, { useEffect, useRef, useState } from 'react'
-
-import "./HeaderStyle.css"
-
-import { Link, useNavigate } from 'react-router-dom';
-import { LoginType, SearchType, Tokens } from '../../types';
-import { getTokensFromCookie } from '../../utils/utils';
+import { useDeferredValue, useEffect, useRef, useState, useContext } from "react";
+import "./HeaderStyle.css";
+import { Link, useNavigate } from "react-router-dom";
+import { useConnectedUser } from "../../context/ConnectedContext";
+import useClickOutside from "../../utils/hooks/useClickOutside";
+import useFetch from "../../utils/hooks/useFetch";
+import SearchResults from "../SearchResults/SearchResults";
 import axios from 'axios';
-import { useUser } from '../../context/UserContext';
-import SearchResults from '../SearchResults/SearchResults';
+import { LoginType, Tokens, UserType } from "../../types";
+import { getTokensFromCookie, updateUser } from "../../utils/utils";
+import StaticHeaderHome from "./comp/StaticHeaderHome";
 
-function Header(props: LoginType) {
 
-  const searchInputRef = useRef<HTMLInputElement>(null);
+const Header = (props: LoginType) => {
 
-  const  { user, fetchUser  } = useUser();
+    const navigate = useNavigate();
 
-  const navigate = useNavigate();
+    const { connectedUser, setConnectedUser } = useConnectedUser();
 
-  const [openMenu, setOpenMenu] = useState<boolean>(false);
+    const [justOpened, setJustOpened] = useState(false);
 
-  const [search, setSearch] = useState<string>("");
+    // const dropDownButtonRef = useRef<any>(null);
+    
+    const dropDownMenuRef = useRef<HTMLDivElement>(null);
 
-  const [searchOpen, setSearchOpen ] = useState<boolean>(false);
+    const [openMenu, setOpenMenu] = useState(false);
 
-  const [searchJustOpened, setSearchJustOpened ] = useState<boolean>(false);
+    useClickOutside(dropDownMenuRef, () => {
+        // CHECK IF THE MODAL JUST OPENED
+        if (justOpened) {
+        setJustOpened(false);
+        return;
+        }
+    });
 
-  const [value, setValue] = useState<SearchType | null>(null);
+    // HANDLING SEARCH INPUT
+    const searchInputRef = useRef<HTMLInputElement>(null);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchJustOpened, setSearchJustOpened] = useState(false);
+    const [search, setSearch] = useState("");
+    // const defferedSearch = useDeferredValue(search);
+    const searchResultsRef = useRef<HTMLDivElement>(null);
 
-  const [loading, setLoading] = useState<boolean>(false);
+    const { loading, error, value } = useFetch(
+        // `http://localhost:3001/room/search/${connectedUser?.id}/${search}`,
+        {},
+        [search]
+    );
 
-  
-  useEffect( () => {
-    fetchUser();
-
-      const searchInput = searchInputRef.current;
-      if (searchInput) {
+    useEffect(() => {
+        const searchInput = searchInputRef.current;
+        if (searchInput) {
         searchInput.addEventListener("click", () => {
-          setSearchOpen((previousValue) => !previousValue);
-          setSearchJustOpened(true);
+            setSearchOpen((previousValue) => !previousValue);
+            setSearchJustOpened(true);
         });
-      }
+        }
+    }, [searchInputRef]);
 
-      if(searchOpen){
+    useClickOutside(searchResultsRef, () => {
+        setSearchOpen(false)
+    });
+
+    useEffect(() => {
+        if(searchOpen){
         if(searchInputRef?.current){
-          searchInputRef?.current.focus()
+            searchInputRef?.current.focus()
         }
 
-      }
-
+        if (!searchResultsRef?.current?.classList.contains("opened")) {
+            searchResultsRef?.current?.classList.add("opened");
+        }
+        
+        if (!searchInputRef?.current?.parentElement?.classList.contains("is-clicked"))
+        searchInputRef?.current?.parentElement?.classList.add("is-clicked");
+    }
     if (!searchOpen) {
         if(searchInputRef?.current){
-          searchInputRef?.current.blur()
+            searchInputRef?.current.blur()
         }
+
+        if (searchResultsRef?.current?.classList.contains("opened")) {
+            searchResultsRef?.current?.classList.remove("opened");
+        }
+
+        if (searchInputRef?.current?.parentElement?.classList.contains("is-clicked"))
+            searchInputRef.current.parentElement.classList.remove("is-clicked");
         
-      }
+        }
+    }, [searchOpen]);
 
-  }, [fetchUser, searchInputRef])
-  
-  const logoutFromServer = async () => {
+    const logoutFromServer = async () => {
 
-    // get the tokens
-    const tokens: Tokens | null = await getTokensFromCookie();
+        // get the tokens
+        const tokens: Tokens | null = await getTokensFromCookie();
 
-    if (!tokens) {
-      navigate("/notauth");
+        if (!tokens) {
+        navigate("/notauth");
+        }
+
+        if (tokens) {
+
+        try {
+            
+            // logout from the server
+            const res = await axios.get('http://localhost:3333/auth/logout/', {
+            headers: {
+                'access_token': tokens.access_token,
+                'refresh_token': tokens.refresh_token
+            }
+            })
+            
+            if (res.data.message === "done") {
+            
+            // remove tokens from the cookie
+            document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+            // navigate to home page
+            navigate("/")
+            }
+            else {
+            navigate("/notauth");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+        }
+
     }
 
-    if (tokens) {
+    const updateNewUser = async (status: string) => {
+      if (connectedUser) {
+        
+        const newDataUser: UserType = connectedUser;
+        
+        newDataUser.Status = status;
+        
+        // need to send request to server to store the new user
+        const toSetUser: UserType | null =  await updateUser(newDataUser);
 
-      try {
-        
-        // logout from the server
-        const res = await axios.get('http://localhost:3333/auth/logout/', {
-          headers: {
-            'access_token': tokens.access_token,
-            'refresh_token': tokens.refresh_token
-          }
-        })
-        
-        if (res.data.message === "done") {
-        
-          // remove tokens from the cookie
-          document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-          document.cookie = "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-
-          // navigate to home page
-          navigate("/")
+        if (toSetUser) {
+          setConnectedUser(toSetUser);
         }
         else {
-          navigate("/notauth");
+          // error on update so good bye from the app
+
+          logoutFromServer();
         }
-      } catch (error) {
-        console.log(error);
       }
     }
-
-  }
-
-  const isConnected: boolean = props.isConnected;
-
-  const openSearch = () => {
-    setSearchOpen(true);
-    setSearchJustOpened(true);
-  }
 
   return (
     <>
-      {isConnected && (
-        <header className="primary-header identified" data-status="online">
+      <StaticHeaderHome isConnected={props.isConnected} logInFunc={props.logInFunc}  />
+
+      {props.isConnected && (
+        <header className="primary-header identified" data-status={connectedUser?.isOnLine}>
           <div className="container">
             <div className="primary-header-content">
               <Link to="/profile" aria-label="home" className="logo">
@@ -160,7 +208,12 @@ function Header(props: LoginType) {
               </Link>
               <div
                 className="search-bar"
-                onClick={openSearch}
+                onClick={(e) =>{
+
+                  setSearchOpen(true);
+                  setSearchJustOpened(true);
+                }}
+
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                   <path
@@ -174,9 +227,11 @@ function Header(props: LoginType) {
                   name="search"
                   id="search"
                   placeholder="Search users, groups"
+                  // onKeyDown={(e) => setSearch(e.target.value)}
                   onChange={(e) => setSearch(e.target.value)}
                 />
                 <SearchResults
+                  // ref={searchReseultsRef}
                   results={value}
                   searchOpen={searchOpen}
                   searchJustOpened={searchJustOpened}
@@ -187,16 +242,14 @@ function Header(props: LoginType) {
                   
                 />
               </div>
-              <button
-                onClick={() => setOpenMenu(!openMenu)}
+              <div
                 className="user-image dropdown-button"
+                onClick={() => setOpenMenu(!openMenu)}
               >
-                <img
-                  src={`http://localhost:3333` + user?.avatarName}
-                  alt={user?.username}
-                />
-              </button>
-              <button
+                <img src={'http://localhost:3333' + connectedUser?.avatarName} alt="user iimage" />
+              </div>
+              <div
+                
                 className={`dropdown-menu ${openMenu ? "open" : ""}`}
               >
                 <div className="dropdown-menu-content">
@@ -204,30 +257,43 @@ function Header(props: LoginType) {
                     <li className="dropdown-item user-profile-item">
                       <div className="user-image dropdown-item-user-image">
                         <img
-                          src={`http://localhost:3333` + user?.avatarName}
-                          alt={user?.username}
+                          src={'http://localhost:3333' + connectedUser?.avatarName}
+                          alt="user iimage"
                         />
                       </div>
                       <div className="user-infos">
-                        <div className="username">
-                          {user?.username}
-                        </div>
-                        <div className="user-status">{user?.Status}</div>
+                        <div className="username">{connectedUser?.username}</div>
+                        <div className="user-status">{connectedUser?.Status}</div>
                       </div>
+                      <select
+                        className="user-edit-status"
+                        name="status"
+                        id="status"
+                        defaultValue={connectedUser?.Status}
+                        onChange={(e) => updateNewUser(e.target.value)}
+                      >
+                        <option value="online">Online</option>
+                        <option value="busy">Busy</option>
+                      </select>
                     </li>
                     <li className="dropdown-item">
-                      <Link to="/profile">
+                      <Link to={""}>
                         <div className="dropdown-item-icon">
-                          <svg xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 448 512">
-                            <path opacity="1" fill="#1E3050" d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z" />
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 448 512"
+                          >
+                            <path
+                              opacity="1"
+                              d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"
+                            />
                           </svg>
                         </div>
                         <div className="dropdown-item-title">profile</div>
                       </Link>
                     </li>
                     <li className="dropdown-item">
-                      <Link to="/friends">
+                      <Link to={"/friends"}>
                         <div className="dropdown-item-icon">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -243,7 +309,23 @@ function Header(props: LoginType) {
                       </Link>
                     </li>
                     <li className="dropdown-item">
-                      <Link to="/chat">
+                      <Link to={"/groups"}>
+                        <div className="dropdown-item-icon">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 640 512"
+                          >
+                            <path
+                              opacity="1"
+                              d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3zM609.3 512H471.4c5.4-9.4 8.6-20.3 8.6-32v-8c0-60.7-27.1-115.2-69.8-151.8c2.4-.1 4.7-.2 7.1-.2h61.4C567.8 320 640 392.2 640 481.3c0 17-13.8 30.7-30.7 30.7zM432 256c-31 0-59-12.6-79.3-32.9C372.4 196.5 384 163.6 384 128c0-26.8-6.6-52.1-18.3-74.3C384.3 40.1 407.2 32 432 32c61.9 0 112 50.1 112 112s-50.1 112-112 112z"
+                            />
+                          </svg>
+                        </div>
+                        <div className="dropdown-item-title">groups</div>
+                      </Link>
+                    </li>
+                    <li className="dropdown-item">
+                      <Link to={"/chat"} >
                         <div className="dropdown-item-icon">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -259,7 +341,7 @@ function Header(props: LoginType) {
                       </Link>
                     </li>
                     <li className="dropdown-item">
-                      <Link to="/game">
+                      <Link to={""}>
                         <div className="dropdown-item-icon">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -272,12 +354,12 @@ function Header(props: LoginType) {
                           </svg>
                         </div>
                         <div className="dropdown-item-title">
-                          Game
+                          play ping-pong
                         </div>
                       </Link>
                     </li>
                     <li className="dropdown-item">
-                      <Link to="/leaderboard" >
+                      <Link to={""} >
                         <div className="dropdown-item-icon">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -295,7 +377,7 @@ function Header(props: LoginType) {
                     </li>
 
                     <li className="dropdown-item">
-                      <Link to="/settings">
+                      <Link to={"/profile-settings"}>
                         <div className="dropdown-item-icon">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -307,11 +389,12 @@ function Header(props: LoginType) {
                             />
                           </svg>
                         </div>
-                        <div className="dropdown-item-title">settings</div>
+                        <div className="dropdown-item-title">Settings</div>
                       </Link>
                     </li>
-                    <li className="dropdown-item">
-                      <a>
+                    <li className="dropdown-item"
+                        onClick={logoutFromServer}
+                    >
                         <div className="dropdown-item-icon">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -323,120 +406,17 @@ function Header(props: LoginType) {
                             />
                           </svg>
                         </div>
-                        <div
-                          onClick={logoutFromServer}
-                          className="dropdown-item-title" 
-                        >logout</div>
-                      </a>
+                        <div className="dropdown-item-title">logout</div>
                     </li>
                   </ul>
                 </div>
-              </button>
-            </div>
-          </div>
-        </header> 
-      )}
-      
-      {!isConnected && (
-        <header className="primary-header">
-          <div className="container">
-            <div className="nav-wrapper">
-              <a href="chat.html" aria-label="home" className="logo">
-                <svg
-                  width="84"
-                  height="40"
-                  viewBox="0 0 84 52"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  id="logo"
-                >
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M31.1308 51.9852C31.0706 45.986 28.9865 40.0795 25.286 35.404C21.6127 30.7115 16.3763 27.2841 10.637 25.8258L11.4055 25.9275C10.9253 25.9232 10.452 25.8132 10.0195 25.6054L10.6223 25.8281C10.4241 25.7747 10.2276 25.7151 10.0332 25.6495L12.1127 20.1295C12.0979 20.1164 12.0792 20.1085 12.0594 20.1069L12.6633 20.3285C12.2757 20.1301 11.8458 20.0277 11.4101 20.0301L12.1797 20.1318C19.1483 22.0547 25.379 26.3379 29.6733 32.0545C34.0015 37.7519 36.3433 44.8895 36.265 51.9852H31.1308Z"
-                    fill="#979797"
-                  />
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M24.7059 14.501C31.3312 18.2966 36.8276 23.7734 40.6353 30.3734C44.4266 36.9175 46.3915 44.4756 46.3223 51.9851H41.1881C41.1211 45.3596 39.272 38.7997 35.8643 33.1588C32.4535 27.497 27.6013 22.833 21.7988 19.6388L24.7059 14.501Z"
-                    fill="#979797"
-                  />
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M17.313 0.769775C28.5463 3.7903 38.6343 10.6396 45.6074 19.8357C49.1098 24.431 51.8317 29.5673 53.6646 35.04C55.4874 40.5041 56.4037 46.2276 56.3776 51.9852H51.2434C51.204 46.7973 50.316 41.6505 48.6144 36.747C46.9112 31.8563 44.4137 27.2771 41.2213 23.1919C38.0351 19.1123 34.2021 15.5774 29.8733 12.7264C25.5534 9.88528 20.7939 7.77068 15.7852 6.46717L17.313 0.769775Z"
-                    fill="#979797"
-                  />
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M7.45811 13.2927C7.44753 12.4373 7.60765 11.5884 7.92919 10.7951C8.25074 10.0019 8.72729 9.28019 9.33119 8.67186C9.9351 8.06353 10.6543 7.58072 11.4471 7.25145C12.2399 6.92217 13.0905 6.753 13.9495 6.75375C14.8084 6.7545 15.6587 6.92515 16.4509 7.25581C17.2431 7.58646 17.9615 8.07053 18.5643 8.67991C19.1672 9.28929 19.6425 10.0118 19.9626 10.8056C20.2828 11.5994 20.4414 12.4486 20.4293 13.304C20.4053 15.0021 19.7107 16.6226 18.4958 17.8145C17.2809 19.0064 15.6435 19.6738 13.9381 19.6724C12.2327 19.6709 10.5965 19.0006 9.38371 17.8065C8.17092 16.6125 7.47913 14.9909 7.45811 13.2927ZM26.7202 10.8328C26.2576 8.44639 25.1302 6.2377 23.4667 4.45918C21.8032 2.68067 19.6709 1.4041 17.3134 0.775359C15.6632 0.329274 13.9406 0.213583 12.2452 0.434983C10.5498 0.656383 8.91542 1.21048 7.43655 2.06518C5.9511 2.91606 4.64882 4.05045 3.60433 5.40336C2.56183 6.75249 1.8018 8.29624 1.36925 9.94318C-0.440158 16.6523 3.42498 23.5841 10.0281 25.6528C10.1177 25.6879 10.2074 25.7094 10.2857 25.732C10.2971 25.7421 10.3187 25.7421 10.3414 25.7421C10.4197 25.7761 10.4969 25.7975 10.5763 25.8213H10.6092L10.6206 25.8326C10.6433 25.8428 10.6649 25.8428 10.6989 25.8428C10.7103 25.8541 10.7216 25.8541 10.7318 25.8541C10.7736 25.8755 10.8199 25.8868 10.8669 25.8868H10.8771C11.8942 26.1321 12.9227 26.2554 13.9386 26.2554C16.5085 26.2554 18.9888 25.4867 21.0786 24.1177C22.3186 23.3193 23.4079 22.3099 24.2967 21.1356C25.328 19.8023 26.0835 18.2784 26.5193 16.6523C27.0349 14.7537 27.1036 12.7622 26.7202 10.8328ZM83.9764 24.8932C80.4235 24.8593 76.8274 25.5364 73.5264 26.859C70.199 28.2063 67.1678 30.1877 64.6031 32.6921C62.0316 35.2089 59.9794 38.2023 58.5619 41.5038C57.1527 44.8218 56.4104 48.3828 56.3768 51.9852H51.2425C51.2103 47.6978 52.0233 43.4458 53.6354 39.4701C56.9326 31.4162 63.2946 24.9879 71.3333 21.5878C75.3357 19.9049 79.632 19.0241 83.9764 18.9957V24.8932Z"
-                    fill="black"
-                  />
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M74.3273 16.1356C66.4631 18.1546 59.2629 22.8459 54.2581 29.2747C51.7348 32.495 49.7574 36.1046 48.4042 39.9607C47.052 43.8278 46.3483 47.8903 46.3212 51.9851H41.187C41.1483 47.3209 41.8808 42.6821 43.3551 38.2548C44.8359 33.8187 47.0357 29.6538 49.8674 25.9252C55.5158 18.4496 63.6922 12.9116 72.7994 10.4382L74.3273 16.1356Z"
-                    fill="black"
-                  />
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M60.3209 11.1664C53.0855 15.2686 47.0529 21.1834 42.8216 28.3242C38.6035 35.438 36.3196 43.6845 36.2651 51.9853H31.1309C31.0503 42.8039 33.4431 33.5795 38.0336 25.5659C42.6515 17.4951 49.3128 10.7705 57.3536 6.0625L60.3209 11.1664Z"
-                    fill="black"
-                  />
-                </svg>
-
-                <p className="sub-logo">Ping-ball</p>
-              </a>
-
-              <button
-                className="mobile-nav-toggle"
-                aria-controls="primary-navigation"
-                aria-expanded="false"
-              >
-                <img
-                  className="icon-hamburger"
-                  src="images/icon-hamburger.svg"
-                  alt="Icon Hamburger"
-                  aria-hidden="true"
-                />
-                <img
-                  className="icon-close"
-                  src="images/icon-close.svg"
-                  alt="Icon Close"
-                  aria-hidden="true"
-                />
-                <span className="visually-hidden">Menu</span>
-              </button>
-
-              <nav id="primary-navigation" className="primary-navigation">
-                <ul role="list" aria-label="Primary" className="nav-list">
-                  <li>
-                    <a href="/">Home</a>
-                  </li>
-                  <li>
-                    <a href="#about">About the game</a>
-                  </li>
-                  <li>
-                    <a href="#team">Team</a>
-                  </li>
-                </ul>
-              </nav>
-
-              <button
-                onClick={props.logInFunc}
-                className="button | display-sm-none display-md-inline-flex"
-              >
-                Login with intra
-              </button>
+              </div>
             </div>
           </div>
         </header>
       )}
     </>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

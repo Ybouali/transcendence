@@ -3,8 +3,8 @@ import "./ProfileUserInfosStyle.css"
 import { Tokens, UserType } from '../../../types';
 import { getNumberGamePlayedByUserId, getTokensFromCookie, getUserById, getUserInfo } from '../../../utils/utils';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useUser } from '../../../context/UserContext';
 import Spinner from '../../../components/Spinner/Spinner';
+import { useConnectedUser } from '../../../context/ConnectedContext';
 
 function ProfileUserInfos() {
 
@@ -12,7 +12,7 @@ function ProfileUserInfos() {
 
   const { userId } = useParams();
 
-  const { user, fetchUser } = useUser()
+  const { connectedUser } = useConnectedUser()
 
   const [numberGamePlayed, setNumberGamePlayed] = useState<number>(0);
 
@@ -20,12 +20,10 @@ function ProfileUserInfos() {
   const [desplayedUser, setDesplayedUser] = useState<UserType | null>(null);
 
   useEffect(() => {
- 
-    fetchUser()
 
     initUserinfos()
 
-  }, [fetchUser])
+  })
 
   
 
@@ -63,17 +61,17 @@ function ProfileUserInfos() {
 
   return (
     <>
-    { user ? (
+    { connectedUser ? (
       <div className="profile-user-infos">
 
         <div className="profile-user-image">
-          <img src={ `http://localhost:3333` + user?.avatarName} alt="user image" />
+          <img src={ `http://localhost:3333` + connectedUser?.avatarName} alt="user image" />
         </div>
 
         <div className="profile-user-description">
-          <div className="profile-user-fullname">{user?.fullName}</div>
-          <p className="profile-user-username">{user?.username}</p>
-          <p className="profile-user-status">{user?.isOnLine ? "Online" : "Offline"}</p>
+          <div className="profile-user-fullname">{connectedUser?.fullName}</div>
+          <p className="profile-user-username">{connectedUser?.username}</p>
+          <p className="profile-user-status">{connectedUser.isOnLine ? connectedUser?.Status : 'offline'}</p>
         </div>
 
         <div className="profile-user-stats">
@@ -87,7 +85,7 @@ function ProfileUserInfos() {
             <p className="stats-title">Played games</p>
           </div>
           <div className="stats-infos" id="level">
-            <div className="stats-number">{user?.levelGame}</div>
+            <div className="stats-number">{connectedUser?.levelGame}</div>
             <p className="stats-title">Level</p>
           </div>
         </div>

@@ -5,3 +5,9 @@ export interface UserContextType {
     fetchUser: () => Promise<void>;
     // getUser: React.Dispatch<React.SetStateAction<any>>;
 }
+
+export interface ConnectedUserContextType {
+    connectedUser: UserType | null;
+    setConnectedUser: (user: UserType) => Promise<void>;
+    // getUser: React.Dispatch<React.SetStateAction<any>>;
+}

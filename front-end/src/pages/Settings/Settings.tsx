@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
-import Header from '../../components/Header/Header'
 import { useNavigate } from 'react-router-dom';
 import { Tokens } from '../../types';
 import { getTokensFromCookie } from '../../utils/utils';
+import Header from '../../components/Header/Header';
 
 function Settings() {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ function Settings() {
 
   return (
     <div>
-        {/* <Header isConnected={true}  /> */}
+        <Header isConnected={true}  />
         Settings
     </div>
   )

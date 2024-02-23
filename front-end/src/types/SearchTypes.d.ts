@@ -15,7 +15,7 @@ export interface SearchType {
 }
 
 export interface SearchTypeComp {
-    results: SearchType | null;
+    results: SearchType | any;
     searchOpen: boolean;
     searchJustOpened: boolean;
     setSearchJustOpened: (open: boolean) => void;

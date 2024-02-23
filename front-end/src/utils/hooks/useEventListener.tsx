@@ -1,6 +1,6 @@
-import { MouseEvent, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
-const useEventListener = (eventType: string, callback: (e: any) => void, element = window) => {
+const useEventListener = (eventType: any, callback:any, element = window) => {
   const callbackRef = useRef(callback);
 
   // MAKE SURE THAT WE DON'T HAVE ANY ADDITIONAL RERENDERS THAT WE DON'T NEED
@@ -11,7 +11,7 @@ const useEventListener = (eventType: string, callback: (e: any) => void, element
   useEffect(() => {
     if (element == null) return;
 
-    const handler = (e: Event) => callbackRef.current;
+    const handler = (e:any) => callbackRef.current(e);
     element.addEventListener(eventType, handler);
 
     return () => element.removeEventListener(eventType, handler);

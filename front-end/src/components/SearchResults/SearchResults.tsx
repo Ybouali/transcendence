@@ -2,12 +2,15 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom';
 import { SearchTypeComp } from '../../types';
 import "./SearchResultStyle.css"
-import useClickOutside from '../../utils/useClickOutside';
+import useClickOutside from '../../utils/hooks/useClickOutside';
+import { useConnectedUser } from '../../context/ConnectedContext';
 
 function SearchResults(props: SearchTypeComp) {
 
   const searchResultsRef = useRef<HTMLDivElement | null>(null);
 
+  const { connectedUser } = useConnectedUser()
+ 
   const [noInput, setNoInput] = useState<boolean>(false);
 
   useClickOutside(searchResultsRef, () => {
@@ -17,8 +20,6 @@ function SearchResults(props: SearchTypeComp) {
       return;
     }
     if (props.searchOpen) props.setSearchOpen(false);
-
-    console.log("hello search")
   });
 
   useEffect(( ) => {
@@ -69,7 +70,7 @@ function SearchResults(props: SearchTypeComp) {
         {!props.loading && ( props.results &&  ( props.results?.users?.length > 0 || props.results?.groups?.length > 0 ))  && <ul>
         
           {props.results?.users &&
-            props.results?.users.map((user, index) => {
+            props.results?.users.map((user: any, index: any) => {
               const key = `key-${index}`;
               return (
                 <li key={key}>
@@ -82,7 +83,7 @@ function SearchResults(props: SearchTypeComp) {
                       <div className="search-card-body">
                         <div className="search-card-infos">
                           <div className="search-card-images">
-                            {user?.images?.map((image, index) => (
+                            {user?.images?.map((image: any, index: any) => (
                               <img key={`key-${index}`} src={process.env.PUBLIC_URL + image} alt="person avatar" />
                             ))}
                           </div>
@@ -100,7 +101,7 @@ function SearchResults(props: SearchTypeComp) {
               );
             })}
           {props.results?.groups &&
-            props.results?.groups.map((group, index) => {
+            props.results?.groups.map((group: any, index: any) => {
               const key = `key-${index}`;
 
               return (

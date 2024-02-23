@@ -20,13 +20,7 @@ export const UserProvider: React.FC<UserProviderProps> = ( { children } ) => {
         }
         
     }, [setUser]);
-
-    const logoutUser = useCallback( async () => {
-
-        
-
-    }, []);
-
+    
     return <UserContext.Provider value={{ user, fetchUser  }} > 
         { children }
     </UserContext.Provider>

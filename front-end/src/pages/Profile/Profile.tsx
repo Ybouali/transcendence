@@ -8,15 +8,19 @@ import { HistoryGameReturnedType, Tokens } from '../../types'
 import GamesHistory from './GamesHistory/GamesHistory'
 import { useNavigate } from 'react-router-dom'
 import { getTokensFromCookie } from '../../utils/utils'
+import { useConnectedUser } from '../../context/ConnectedContext'
 
 
 function Profile() {
 
   const navigate = useNavigate();
 
+  const { connectedUser } = useConnectedUser()
+
   useEffect(() => {
+
     gaurd();
-  })
+  });
   
   const gaurd = async () => {
 
@@ -291,7 +295,7 @@ function Profile() {
             <ProfileUserInfos />
             <ProfileButtonActions />
             <ProfileAchievements />
-            {/* <GamesHistory /> */}
+            {/* <GamesHistory />  */}
           </div>
         </div>
       </section>

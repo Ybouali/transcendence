@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react'
-import Header from '../../components/Header/Header'
 import "./LeaderboardStyle.css"
 import Podum from './Podum/Podum'
 import LeaderboardTable from './LeaderboardTable/LeaderboardTable'
 import { useNavigate } from 'react-router-dom'
 import { Tokens } from '../../types'
 import { getTokensFromCookie } from '../../utils/utils'
+import Header from '../../components/Header/Header'
 
 function Leaderboard() {
 

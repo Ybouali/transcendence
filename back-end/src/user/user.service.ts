@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotAcceptableException,
   NotFoundException,
   Req,
@@ -15,6 +16,9 @@ import { UpdateUserData } from './dto';
 
 @Injectable()
 export class UserService {
+
+  private logger = new Logger();
+
   constructor(
     private prisma: PrismaService,
   ) {}
@@ -35,7 +39,6 @@ export class UserService {
   async updateUser(dataUser: UpdateUserData, userId: string): Promise<User> {
 
     // make sure the user is existing in db
-
     const checkUser = await this.prisma.user.findFirst({ where: { id: dataUser.id } });
 
     if (!checkUser) {
