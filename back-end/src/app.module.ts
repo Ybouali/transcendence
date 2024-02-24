@@ -9,6 +9,8 @@ import { TowFactorAuthModule } from './tow-factor-auth/tow-factor-auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EncryptionModule } from './encryption/encryption.module';
 import { HistoryGameModule } from './history-game/history-game.module';
+import { FriendModule } from './friend/friend.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { HistoryGameModule } from './history-game/history-game.module';
     TowFactorAuthModule,
     EncryptionModule,
     HistoryGameModule,
+    FriendModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtService],

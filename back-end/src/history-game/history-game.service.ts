@@ -71,12 +71,13 @@ export class HistoryGameService {
             if (dataGame.scoreWinner < 0 || dataGame.scoreLoser < 0 ) {
                 throw new NotAcceptableException();
             }
-
             // create the history game 
             const hGame = await this.prisma.historyGame.create({ 
                 data: {
                     winnerId: dataGame.winnerId,
                     loserId: dataGame.loserId,
+                    startTimeGame: dataGame.startTimeGame,
+                    endTimeGame: dataGame.endTimeGame,
                     scoreWinner: dataGame.scoreWinner,
                     scoreLoser: dataGame.scoreLoser,
                 }

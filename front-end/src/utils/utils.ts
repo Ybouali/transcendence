@@ -1,5 +1,5 @@
-import axios from "axios";
-import { HistoryGameReturnedType, Tokens, UserType } from "../types"
+import axios from 'axios';
+import { HistoryGameReturnedType, Tokens, UserType } from '../types';
 
 function getCookie(name: string) {
     const cookies = document.cookie.split(';');
@@ -13,7 +13,6 @@ function getCookie(name: string) {
 }
 
 export async function getTokensFromCookie(): Promise<Tokens | null> {
-
     let gat = getCookie('access_token');
     const grt = getCookie('refresh_token');
 
@@ -22,34 +21,33 @@ export async function getTokensFromCookie(): Promise<Tokens | null> {
     if (!grt) return null;
 
     if (!gat) {
-
-        // refresh the access token 
+        // refresh the access token
         resData = await axios.get('http://localhost:3333/auth/refresh/', {
             headers: {
-                'refresh_token': grt,
-            }
-        })
+                refresh_token: grt,
+            },
+        });
 
-        if (resData.data.message !== "done") return null;
+        if (resData.data.message !== 'done') return null;
     }
-    
-    if (gat) {
 
+    if (gat) {
         const tokensRet: Tokens = {
             access_token: gat,
-            refresh_token: grt
-        }
+            refresh_token: grt,
+        };
 
         // need to make a request to make sure the tokens is valid before return them
 
         return tokensRet;
     }
-    
+
     return null;
 }
 
-export async function getHisGamesByUserId(userId: string | null): Promise<HistoryGameReturnedType [] | null> {
-
+export async function getHisGamesByUserId(
+    userId: string | null
+): Promise<HistoryGameReturnedType[] | null> {
     const tokens: Tokens | null = await getTokensFromCookie();
 
     if (!tokens) {
@@ -57,7 +55,6 @@ export async function getHisGamesByUserId(userId: string | null): Promise<Histor
     }
 
     if (!userId) {
-
         const user: UserType | null = await getUserInfo();
 
         if (!user) {
@@ -71,34 +68,33 @@ export async function getHisGamesByUserId(userId: string | null): Promise<Histor
 
     const resData = await axios.get(url, {
         headers: {
-            'access_token': tokens.access_token,
-            'refresh_token': tokens.refresh_token
-        }    
-    })
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
+        },
+    });
 
     if (!resData.data) {
         return null;
     }
-    const rHisgame: HistoryGameReturnedType [] = resData.data;
+    const rHisgame: HistoryGameReturnedType[] = resData.data;
 
     return rHisgame;
-
 }
 
 export async function updateUser(user: UserType): Promise<UserType | null> {
-
     const tokens: Tokens | null = await getTokensFromCookie();
 
     if (!tokens) return null;
 
-    const resData = await axios.put('http://127.0.0.1:3333/users/update', user, {
-        headers: {
-            'access_token': tokens.access_token,
-            'refresh_token': tokens.refresh_token,
-        },
-    })
-    .then(response => response)
-    .catch(err => {});
+    const resData = await axios
+        .put('http://127.0.0.1:3333/users/update', user, {
+            headers: {
+                access_token: tokens.access_token,
+                refresh_token: tokens.refresh_token,
+            },
+        })
+        .then((response) => response)
+        .catch((err) => {});
 
     if (!resData) {
         return null;
@@ -108,23 +104,20 @@ export async function updateUser(user: UserType): Promise<UserType | null> {
         id: resData.data.id,
         username: resData.data.username,
         email: resData.data.email,
-        avatarName: resData.data.avatarName,
+        avatarUrl: resData.data.avatarUrl,
         Status: resData.data.Status,
         fullName: resData.data.fullName,
         isOnLine: resData.data.isOnLine,
         levelGame: resData.data.levelGame,
-        phoneNumber: resData.data.phoneNumber,
         twoFactor: resData.data.twoFactor,
         qrCodeFileName: resData.data.qrCodeFileName,
-    }
+    };
 
     // return the user data
     return userData;
-
 }
 
 export async function getUserInfo(): Promise<UserType | null> {
-
     const tokens: Tokens | null = await getTokensFromCookie();
 
     if (!tokens) return null;
@@ -133,14 +126,15 @@ export async function getUserInfo(): Promise<UserType | null> {
 
     // send the request
 
-    resData = await axios.get('http://127.0.0.1:3333/users/me', {
-        headers: {
-            'access_token': tokens.access_token,
-            'refresh_token': tokens.refresh_token,
-        }
-    })
-    .then(response => response)
-    .catch(err => {});
+    resData = await axios
+        .get('http://127.0.0.1:3333/users/me', {
+            headers: {
+                access_token: tokens.access_token,
+                refresh_token: tokens.refresh_token,
+            },
+        })
+        .then((response) => response)
+        .catch((err) => {});
 
     if (!resData) {
         return null;
@@ -150,32 +144,33 @@ export async function getUserInfo(): Promise<UserType | null> {
         id: resData.data.id,
         username: resData.data.username,
         email: resData.data.email,
-        avatarName: resData.data.avatarName,
+        avatarUrl: resData.data.avatarUrl,
         Status: resData.data.Status,
         fullName: resData.data.fullName,
         isOnLine: resData.data.isOnLine,
         levelGame: resData.data.levelGame,
-        phoneNumber: resData.data.phoneNumber,
         twoFactor: resData.data.twoFactor,
         qrCodeFileName: resData.data.qrCodeFileName,
-    }
+    };
 
     // return the user data
     return userData;
-  }
+}
 
-  export async function getUserById(id: string, tokens: Tokens): Promise<UserType | null> {
-
+export async function getUserById(
+    id: string,
+    tokens: Tokens
+): Promise<UserType | null> {
     // url
-    const url: string = "http://127.0.0.1:3333/users/" + id;
+    const url: string = 'http://127.0.0.1:3333/users/' + id;
 
     let resData = null;
 
     // get data from the server
     resData = await axios.get(url, {
         headers: {
-            'access_token': tokens.access_token,
-            'refresh_token': tokens.refresh_token
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
         },
     });
 
@@ -188,28 +183,27 @@ export async function getUserInfo(): Promise<UserType | null> {
         username: resData.data.username,
         email: resData.data.email,
         Status: resData.data.Status,
-        avatarName: resData.data.avatarName,
+        avatarUrl: resData.data.avatarUrl,
         fullName: resData.data.fullName,
         isOnLine: resData.data.isOnLine,
         levelGame: resData.data.levelGame,
-        phoneNumber: resData.data.phoneNumber,
         twoFactor: resData.data.twoFactor,
         qrCodeFileName: resData.data.qrCodeFileName,
-    }
+    };
 
     // return the user data
     return userData;
+}
 
-  }
-
-  export async function getNumberOfWinnedGames(userId: string | undefined): Promise<number | null> {
-
+export async function getNumberOfWinnedGames(
+    userId: string | undefined
+): Promise<number | null> {
     if (userId === undefined) {
         return null;
     }
 
-    // the url 
-    let url: string = "http://localhost:3333/history-game/winnedgame/" + userId;
+    // the url
+    let url: string = 'http://localhost:3333/history-game/winnedgame/' + userId;
 
     const tokens: Tokens | null = await getTokensFromCookie();
 
@@ -220,10 +214,10 @@ export async function getUserInfo(): Promise<UserType | null> {
     // make the req to the server
     resData = await axios.get(url, {
         headers: {
-            'access_token': tokens.access_token,
-            'refresh_token': tokens.refresh_token
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
         },
-    })
+    });
 
     if (!resData.data) {
         return null;
@@ -231,20 +225,18 @@ export async function getUserInfo(): Promise<UserType | null> {
 
     let win: number;
 
-
     if (resData.data.numberWinnedGame === undefined) {
         win = 0;
-    }
-    else {
+    } else {
         win = resData.data.numberWinnedGame;
     }
 
     return win;
+}
 
-  }
-
-  export async function getNumberGamePlayedByUserId(userId: string | undefined): Promise<number | null> {
-
+export async function getNumberGamePlayedByUserId(
+    userId: string | undefined
+): Promise<number | null> {
     if (userId === undefined) {
         return 0;
     }
@@ -255,26 +247,26 @@ export async function getUserInfo(): Promise<UserType | null> {
     if (tokens === null) {
         return null;
     }
-    
+
     // get the number of game winned by the player
-    
+
     const win: number | null = await getNumberOfWinnedGames(userId);
 
     if (win === null) {
         return null;
     }
 
-    // the url 
-    const url = "http://localhost:3333/history-game/losedgame/" + userId;
+    // the url
+    const url = 'http://localhost:3333/history-game/losedgame/' + userId;
 
     let resData = null;
 
     // make the req to the server
     resData = await axios.get(url, {
         headers: {
-            'access_token': tokens.access_token,
-            'refresh_token': tokens.refresh_token        
-        }
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
+        },
     });
 
     if (!resData.data) {
@@ -285,10 +277,9 @@ export async function getUserInfo(): Promise<UserType | null> {
 
     if (resData.data.numberWinnedGame === undefined) {
         lose = 0;
-    }
-    else {
+    } else {
         lose = resData.data.numberWinnedGame;
     }
 
     return win + lose;
-  }
+}

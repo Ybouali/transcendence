@@ -6,6 +6,8 @@ import { IntraDto } from '../dto';
 @Injectable()
 export class FortyTwoStrategy extends PassportStrategy(Strategy, '42auth') {
 
+    private logger = new Logger(FortyTwoStrategy.name);
+
     constructor () { 
         super({
             clientID: process.env.INTRA_CLIENT_ID,
@@ -21,7 +23,6 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42auth') {
     }
 
     async validate ( accessToken: string, refreshToken: string, profile: IntraDto ) {
-
         return profile;
     }
 }
