@@ -1,6 +1,6 @@
 import React from 'react'
-import "./GameHistoryItemStyle.css"
 import { HistoryGameReturnedType } from '../../../../types';
+import { Link } from 'react-router-dom';
 
 function GameHistoryItem(props: HistoryGameReturnedType) {
     const { player1, player2, timestamp } = props;
@@ -11,11 +11,15 @@ function GameHistoryItem(props: HistoryGameReturnedType) {
   
     return (
       <tr>
-        <td data-label="Player 1">{player1.username}</td>
-        <td data-label="Player 1 Score">{player1.score}</td>
-        <td data-label="Player 2 Score">{player2.score}</td>
-        <td data-label="Player 2">{player2.username}</td>
-        <td data-label="Date"> {day-month-year} </td>
+        <td className={`${player1.score >= player2.score ? "winner" : ""}`}>
+          <Link to={""} >{player1.username}</Link>
+        </td>
+        <td>{player1.score}</td>
+        <td>{player2.score}</td>
+        <td className={`${player2.score >= player1.score ? "winner" : ""}`}>
+          <a href="http://example.com/58">{player2.username}</a>
+        </td>
+        <td>{`${year}-${month}-${day}`}</td>
       </tr>
     );
 }

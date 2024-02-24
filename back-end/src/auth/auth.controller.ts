@@ -19,7 +19,6 @@ import { IntraUserDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
-
   private logger = new Logger(AuthController.name);
 
   constructor(private authService: AuthService) {}
@@ -27,16 +26,15 @@ export class AuthController {
   @UseGuards(LoginGuard, AccessGuard)
   @HttpCode(HttpStatus.ACCEPTED)
   @Get('/logout')
-  async logout(@GetUser() user: User, @Res() res: Response): Promise< any > {
-
+  async logout(@GetUser() user: User, @Res() res: Response): Promise<any> {
     // logout from the server
 
     this.authService.logout(user);
 
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');
-    
-    return res.status(HttpStatus.OK).json({ message: "done" });
+
+    return res.status(HttpStatus.OK).json({ message: 'done' });
   }
 
   @UseGuards(IntraGuard)
@@ -52,34 +50,43 @@ export class AuthController {
 
     const { usual_full_name, username, email } = req.user;
 
-    const link = "/public/images/default.png"
+    this.logger.debug({
+      usual_full_name,
+      username,
+      email,
+    });
+
+    if (!usual_full_name || !username || !email) {
+      res.redirect('http://localhost:3000/');
+    }
+
+    const link = '/public/images/default.png';
 
     const extractedData: IntraUserDto = new IntraUserDto();
 
-    // store the data 
+    // store the data
     extractedData.login = username;
     extractedData.fullName = usual_full_name;
-    extractedData.avatarName = link;
+    extractedData.avatarUrl = link;
     extractedData.email = email;
 
     const tokens: Tokens = await this.authService.loginInra(extractedData);
 
-    res.cookie("access_token", tokens.access_token, { httpOnly: false })
-    res.cookie("refresh_token", tokens.refresh_token, { httpOnly: false })
+    res.cookie('access_token', tokens.access_token, { httpOnly: false });
+    res.cookie('refresh_token', tokens.refresh_token, { httpOnly: false });
 
-    return ;
+    return;
   }
 
   @UseGuards(LoginGuard)
   @HttpCode(HttpStatus.OK)
   @Get('refresh')
   async refresh(@Res() res: Response, @GetUser() user: User) {
-
     const { access_token } = await this.authService.refreshToken(user);
-    
-    // TODO: set refresh_token 
-    res.cookie("access_token", access_token, { httpOnly: false })
 
-    return res.status(HttpStatus.OK).json({ message: "done" });
+    // TODO: set refresh_token
+    res.cookie('access_token', access_token, { httpOnly: false });
+
+    return res.status(HttpStatus.OK).json({ message: 'done' });
   }
 }

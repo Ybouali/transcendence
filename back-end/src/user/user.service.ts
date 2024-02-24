@@ -16,30 +16,26 @@ import { UpdateUserData } from './dto';
 
 @Injectable()
 export class UserService {
-
   private logger = new Logger();
 
-  constructor(
-    private prisma: PrismaService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   // get user by id
   async getUser(id: string): Promise<User> {
-
-    const user = await this.prisma.user.findUnique({ where: { id: id }});
+    const user = await this.prisma.user.findUnique({ where: { id: id } });
 
     if (!user) {
       throw new NotFoundException();
     }
 
     return user;
-
   }
 
   async updateUser(dataUser: UpdateUserData, userId: string): Promise<User> {
-
     // make sure the user is existing in db
-    const checkUser = await this.prisma.user.findFirst({ where: { id: dataUser.id } });
+    const checkUser = await this.prisma.user.findFirst({
+      where: { id: dataUser.id },
+    });
 
     if (!checkUser) {
       throw new NotAcceptableException();
@@ -54,17 +50,15 @@ export class UserService {
       throw new NotAcceptableException();
     }
 
-    const user = this.prisma.user.update(
-      {
-        where: { id: userId},
-        data: {
-          username: dataUser.username,
-          fullName: dataUser.fullName,
-          avatarName: dataUser.avatarName,
-          Status: dataUser.Status
-        }
-      }
-    )
+    const user = this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        username: dataUser.username,
+        fullName: dataUser.fullName,
+        avatarUrl: dataUser.avatarUrl,
+        Status: dataUser.Status,
+      },
+    });
 
     return user;
   }
@@ -77,19 +71,19 @@ export class UserService {
   //     }
 
   //     // check if user has already updated avatar if not change we need to change the name avatar in db
-  //     if (user.avatarName === 'defaultAvatar.png') {
+  //     if (user.avatarNameUrl === 'defaultAvatar.png') {
   //       // create the avatar name
-  //       const avatarName =
+  //       const avatarNameUrl =
   //         user.username + '_avatar.' + file.mimetype.split('/')[1];
 
   //       user = await this.prisma.user.update({
   //         where: { id: user.id },
-  //         data: { avatarName },
+  //         data: { avatarNameUrl },
   //       });
   //     }
 
   //     // path of the avatar file
-  //     const pathAvatar = process.env.PATH_AVATAR_USERS + user.avatarName;
+  //     const pathAvatar = process.env.PATH_AVATAR_USERS + user.avatarNameUrl;
 
   //     // store the avatar
   //     fs.writeFileSync(pathAvatar, file.buffer);
@@ -113,7 +107,6 @@ export class UserService {
   // }
 
   async getRefreshToken(@Req() req?: Request): Promise<string> {
-    
     const refresh_token = (req.headers['refresh_token'] as string).trim();
 
     return refresh_token;

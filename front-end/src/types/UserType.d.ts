@@ -3,11 +3,10 @@ export interface UserType {
     username: string;
     email: string;
     fullName: string;
-    avatarName: string;
+    avatarUrl: string;
     isOnLine: boolean;
     Status: string;
     levelGame: number;
-    phoneNumber: string;
     twoFactor: boolean;
     qrCodeFileName: string;
 }

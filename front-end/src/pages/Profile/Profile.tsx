@@ -295,7 +295,7 @@ function Profile() {
             <ProfileUserInfos />
             <ProfileButtonActions />
             <ProfileAchievements />
-            {/* <GamesHistory />  */}
+            <GamesHistory /> 
           </div>
         </div>
       </section>
