@@ -16,6 +16,7 @@ enum UserStatus {
   BUSY
 }
 
+
 model User {
   id                String           @id @default(cuid())
   createdAt         DateTime         @default(now())
@@ -25,6 +26,12 @@ model User {
   fullName          String
   twoFactor         Boolean
   levelGame         Int
+  isOnLine          Boolean
+  accessToken       String
+  phoneNumber       String
+  refreshToken      String
+  qrCodeFileName    String
+  towFactorSecret   String
 
 
   verifiedEmail     Boolean
