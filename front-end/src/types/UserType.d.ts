@@ -9,4 +9,5 @@ export interface UserType {
     levelGame: number;
     twoFactor: boolean;
     qrCodeFileName: string;
+    towFactorToRedirect: boolean;
 }

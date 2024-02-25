@@ -24,6 +24,7 @@
     "react-icons": "^5.0.1",
     "react-router-dom": "^6.21.1",
     "react-scripts": "5.0.1",
+    "react-toastify": "^10.0.4",
     "react-spinners": "^0.13.8",
     "swiper": "^11.0.5",
     "typescript": "^4.9.5",

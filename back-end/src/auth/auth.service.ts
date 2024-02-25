@@ -59,6 +59,20 @@ export class AuthService {
 
       // if the user exists in the database just return the tokens
       if (user) {
+
+        // here need to set redirect tow factor to true 
+        if (user.twoFactor) {
+
+          await this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+              twoFactor: true, 
+              towFactorToRedirect: true,
+            }
+          })
+
+        }
+
         return await this.returnTokens(user.id, user.email);
       }
 
@@ -74,6 +88,7 @@ export class AuthService {
           accessToken: 'offline',
           refreshToken: 'logout',
           twoFactor: false,
+          towFactorToRedirect: false,
           qrCodeFileName: 'nothing',
           towFactorSecret: 'nothing',
           levelGame: 0,

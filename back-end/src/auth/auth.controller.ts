@@ -50,16 +50,6 @@ export class AuthController {
 
     const { usual_full_name, username, email } = req.user;
 
-    this.logger.debug({
-      usual_full_name,
-      username,
-      email,
-    });
-
-    if (!usual_full_name || !username || !email) {
-      res.redirect('http://localhost:3000/');
-    }
-
     const link = '/public/images/default.png';
 
     const extractedData: IntraUserDto = new IntraUserDto();
