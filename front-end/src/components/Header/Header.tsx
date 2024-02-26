@@ -246,7 +246,7 @@ const Header = (props: LoginType) => {
                 className="user-image dropdown-button"
                 onClick={() => setOpenMenu(!openMenu)}
               >
-                <img src={'http://localhost:3333' + connectedUser?.avatarUrl} alt="user iimage" />
+                <img src={'http://localhost:3333/' + connectedUser?.avatarUrl} alt="user iimage" />
               </div>
               <div
                 
@@ -257,7 +257,7 @@ const Header = (props: LoginType) => {
                     <li className="dropdown-item user-profile-item">
                       <div className="user-image dropdown-item-user-image">
                         <img
-                          src={'http://localhost:3333' + connectedUser?.avatarUrl}
+                          src={'http://localhost:3333/' + connectedUser?.avatarUrl}
                           alt="user iimage"
                         />
                       </div>
@@ -277,7 +277,7 @@ const Header = (props: LoginType) => {
                       </select>
                     </li>
                     <li className="dropdown-item">
-                      <Link to={""}>
+                      <Link to={"/profile"}>
                         <div className="dropdown-item-icon">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -377,7 +377,7 @@ const Header = (props: LoginType) => {
                     </li>
 
                     <li className="dropdown-item">
-                      <Link to={"/profile-settings"}>
+                      <Link to={"/settings"}>
                         <div className="dropdown-item-icon">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"

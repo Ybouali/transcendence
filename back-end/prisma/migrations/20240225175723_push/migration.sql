@@ -12,6 +12,7 @@ CREATE TABLE "User" (
     "accessToken" TEXT NOT NULL,
     "refreshToken" TEXT NOT NULL,
     "twoFactor" BOOLEAN NOT NULL,
+    "towFactorToRedirect" BOOLEAN NOT NULL,
     "qrCodeFileName" TEXT NOT NULL,
     "towFactorSecret" TEXT NOT NULL,
     "levelGame" INTEGER NOT NULL,

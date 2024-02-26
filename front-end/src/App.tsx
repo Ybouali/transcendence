@@ -12,6 +12,7 @@ import Profile from './pages/Profile/Profile';
 import Settings from './pages/Settings/Settings';
 import NotAuth from './pages/NotAuth/NotAuth';
 import ConnectedProvider from './context/ConnectedContextProvider';
+import TwoFactorValidation from './pages/TowFactor/TwoFactorValidation';
 
 function App() {
 
@@ -28,6 +29,7 @@ function App() {
           <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/notauth" element={<NotAuth />} />
+          <Route path="/tow-factor" element={<TwoFactorValidation />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />

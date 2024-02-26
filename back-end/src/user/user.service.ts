@@ -31,6 +31,25 @@ export class UserService {
     return user;
   }
 
+  async updateUserAvatarName(userId: string, avatarUrl: string): Promise<User | null> {
+
+    try {
+      
+      const userUpdated: User = await this.prisma.user.update(
+        { 
+          where: { id: userId },
+          data: { avatarUrl: avatarUrl }, 
+        }
+      )
+
+      return userUpdated;
+
+    } catch (error) {
+      return null;
+    }
+
+  }
+
   async updateUser(dataUser: UpdateUserData, userId: string): Promise<User> {
     // make sure the user is existing in db
     const checkUser = await this.prisma.user.findFirst({
@@ -57,6 +76,8 @@ export class UserService {
         fullName: dataUser.fullName,
         avatarUrl: dataUser.avatarUrl,
         Status: dataUser.Status,
+        email: dataUser.email,
+        twoFactor: dataUser.twoFactor,
       },
     });
 

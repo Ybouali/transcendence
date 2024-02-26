@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotAcceptableException, Res } from '@nestjs/common';
+import { HttpCode, HttpStatus, Injectable, InternalServerErrorException, NotAcceptableException, Res } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/decorators';
 import * as speakeasy from "speakeasy";
@@ -37,7 +37,7 @@ export class TowFactorAuthService {
                 fileName = user.id + '_RQCODE.png';
                 
                 // Note: file name based on the user id 
-                const path_file = process.env.PATH_QR_CODES + fileName;
+                const path_file = '/public/qrcodes/' + fileName;
                 
                 fs.writeFile(path_file, data, (err) => {
                     if (err)
@@ -54,6 +54,8 @@ export class TowFactorAuthService {
                     data: {
                         qrCodeFileName: fileName,
                         towFactorSecret: secret.base32,
+                        towFactorToRedirect: true,
+                        twoFactor: true,
                     }
                 })
             }
@@ -62,10 +64,8 @@ export class TowFactorAuthService {
             {
                 fileName = user.qrCodeFileName;
             }
-
-            const pathFile: string = process.env.PATH_QR_CODES + fileName;
-
-            res.sendFile(pathFile);
+            
+            return res.status(HttpStatus.OK).json({ message: "done" });
 
         } catch (error) {
             throw new InternalServerErrorException();
@@ -94,7 +94,7 @@ export class TowFactorAuthService {
             // set the user tow factor to true 
             await this.prisma.user.update({
                 where: { id: user.id },
-                data: { twoFactor: true },
+                data: { twoFactor: true, towFactorToRedirect: false },
             });
 
             return { message: 'confirm' };
