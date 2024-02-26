@@ -65,7 +65,7 @@ function ProfileUserInfos() {
       <div className="profile-user-infos">
 
         <div className="profile-user-image">
-          <img src={ `http://localhost:3333` + connectedUser?.avatarUrl} alt="user image" />
+          <img src={ `http://localhost:3333/` + connectedUser?.avatarUrl} alt="user image" />
         </div>
 
         <div className="profile-user-description">

@@ -4,7 +4,7 @@ import { ArchievementsType } from '../../../../types';
 
 function ProfileAchievement(props: ArchievementsType) {
 
-    const imageSrc = `./images/achievements/trophy-${props.stage}.svg`;
+    const imageSrc = `http://localhost:3000/images/achievements/trophy-${props.stage}.svg`;
 
   return (
     <div className={`achievement ${props.isActive ? "active" : ""}`}>

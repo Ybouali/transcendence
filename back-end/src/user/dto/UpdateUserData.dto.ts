@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 
 export class UpdateUserData {
   @IsNotEmpty()
@@ -15,4 +15,11 @@ export class UpdateUserData {
 
   @IsNotEmpty()
   avatarUrl: string;
+  
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  twoFactor: boolean;
 }

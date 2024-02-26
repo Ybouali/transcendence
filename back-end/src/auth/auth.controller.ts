@@ -50,7 +50,7 @@ export class AuthController {
 
     const { usual_full_name, username, email } = req.user;
 
-    const link = '/public/images/default.png';
+    const link = 'public/images/default.png';
 
     const extractedData: IntraUserDto = new IntraUserDto();
 

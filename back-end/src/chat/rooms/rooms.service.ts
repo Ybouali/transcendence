@@ -7,7 +7,7 @@ import { RoomDto } from "./dto/room-conv.dto";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { RoomMessageDto } from "./dto/room-message.dto";
 import { CreateMessageDto } from "./dto/create-message.dto";
-import * as bcrypt from 'bcrypt';
+// import * as bcrypt from 'bcrypt';
 import { SharedService } from "../shared/shared.service";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 
@@ -1763,17 +1763,18 @@ export class RoomsService {
                 return room;
         }
 
-        async compareRoomPassword(room: ChatRoom, enteredPassword: string): Promise<boolean> {
+        async compareRoomPassword(room: ChatRoom, enteredPassword: string): Promise<any> {
             try {
-                return await bcrypt.compare(enteredPassword, room.password || '');
+
+                // return await bcrypt.compare(enteredPassword, room.password || '');
             } catch (error) {
                 throw new InternalServerErrorException('Error comparing room password');
             }
         }
 
-        async hashPassword(password: string): Promise<string> {
-            const hashedPassword = await bcrypt.hash(password, 10);
-            return hashedPassword;
+        async hashPassword(password: string): Promise<any> {
+            // const hashedPassword = await bcrypt.hash(password, 10);
+            // return hashedPassword;
         }
 
         async createRoomHTTP (createRoom: CreateRoomDto) {

@@ -111,7 +111,7 @@ function GamesHistory( ) {
           </tr>
         </thead>
         <tbody>
-          {dataHisGame?.length &&
+          {dataHisGame?.length !== 0 &&
             dataHisGame?.map((gameLog: HistoryGameReturnedType, index: number) => {
               const key = `game-${index}`;
               return <GameHistoryItem key={index} player1={gameLog.player1} player2={gameLog.player2} timestamp={gameLog.timestamp} />;
