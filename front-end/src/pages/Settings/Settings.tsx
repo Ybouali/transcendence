@@ -249,7 +249,7 @@ function Settings() {
 		console.log(blob)
 
 		if (blob) {
-			
+
 			const tokens: Tokens | null = await getTokensFromCookie();
 
 			if (tokens) {
@@ -299,6 +299,10 @@ function Settings() {
     if (!tokens) {
       navigate("/notauth")
     }
+
+	if (connectedUser?.twoFactor && connectedUser.towFactorToRedirect) {
+		navigate("/tow-factor")
+	}
 
   }
 

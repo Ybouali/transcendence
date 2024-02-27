@@ -1,10 +1,41 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import "./TwoFactorValidationStyle.css"
 import TowFactorForm from './TowFactorForm/TowFactorForm'
 import Header from '../../components/Header/Header'
+import { useConnectedUser } from '../../context/ConnectedContext'
+import { UserType } from '../../types'
+import { generateTowFactorQrCode } from '../../utils/utils'
+import { useNavigate } from 'react-router-dom'
 
 function TwoFactorValidation() {
+
+    const { connectedUser, setConnectedUser } = useConnectedUser();
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+
+        initData();
+
+    }, [setConnectedUser])
+
+    const initData = async () => {
+        const userData: UserType | null = await generateTowFactorQrCode();
+
+        console.log({
+            userData
+        })
+
+        if (!userData) {
+            navigate("/notauth")
+        } else {
+            setConnectedUser(userData)
+        }
+
+        
+    }
+
   return (
     <>
         <Header isConnected={true} />
@@ -17,7 +48,7 @@ function TwoFactorValidation() {
                 </div>
                 <div className="two-factor-validation-body">
                     <div className="qr-code-image">
-                        <img src={process.env.PUBLIC_URL + "/images/qr-code.png"} alt="QR code" />
+                        <img src={"http://localhost:3333/" + connectedUser?.qrCodeFileName} alt="QR code" />
                     </div>
                     <TowFactorForm />
                 </div>
