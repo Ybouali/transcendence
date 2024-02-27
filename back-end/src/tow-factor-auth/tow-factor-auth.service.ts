@@ -1,4 +1,4 @@
-import { HttpCode, HttpStatus, Injectable, InternalServerErrorException, NotAcceptableException, Res } from '@nestjs/common';
+import { HttpCode, HttpStatus, Injectable, InternalServerErrorException, Logger, NotAcceptableException, Res } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/decorators';
 import * as speakeasy from "speakeasy";
@@ -10,20 +10,28 @@ import { Response }  from 'express'
 @Injectable()
 export class TowFactorAuthService {
 
+    private logger = new Logger(TowFactorAuthService.name);
+
     constructor(
         private prisma: PrismaService
     ) { }
 
     // validate will return the QC code image to the user
-    async validate(user: User, res: Response) {
+    async validate(user: User, res: Response): Promise<User> {
 
         try {
             
             let fileName: string;
 
+            this.logger.debug({
+                user
+            });
+
             // check if the user has already been generated a QR Code
-            if (user.qrCodeFileName === "nothing" && !user.twoFactor)
+            if (user.qrCodeFileName === "nothing" && user.twoFactor)
             {
+                this.logger.debug("hello from here");
+                
                 const secret = speakeasy.generateSecret({
                     name: 'transcendence'
                 });
@@ -37,7 +45,7 @@ export class TowFactorAuthService {
                 fileName = user.id + '_RQCODE.png';
                 
                 // Note: file name based on the user id 
-                const path_file = '/public/qrcodes/' + fileName;
+                const path_file = 'public/qrcodes/' + fileName;
                 
                 fs.writeFile(path_file, data, (err) => {
                     if (err)
@@ -47,7 +55,7 @@ export class TowFactorAuthService {
                 })
 
                 // set the file name of the QR Code file
-                const tmp = await this.prisma.user.update({
+                const tmp: User = await this.prisma.user.update({
                     where: {
                         id: user.id,
                     },
@@ -58,14 +66,14 @@ export class TowFactorAuthService {
                         twoFactor: true,
                     }
                 })
-            }
 
-            if (fileName === undefined)
-            {
-                fileName = user.qrCodeFileName;
+                delete tmp.accessToken;
+                delete tmp.refreshToken;
+
+                return tmp;
             }
             
-            return res.status(HttpStatus.OK).json({ message: "done" });
+            return user;
 
         } catch (error) {
             throw new InternalServerErrorException();

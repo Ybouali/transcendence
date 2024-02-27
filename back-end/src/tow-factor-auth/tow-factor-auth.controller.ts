@@ -7,6 +7,7 @@ import {
   Param,
   HttpCode,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { User } from '@prisma/client';
@@ -17,10 +18,14 @@ import { AccessStrategy, RefreshStrategy } from 'src/auth/strategy';
 @UseGuards(RefreshStrategy, AccessStrategy)
 @Controller('tow-factor-auth')
 export class TowFactorAuthController {
+  private logger = new Logger(TowFactorAuthController.name);
   constructor(private towFactorAuthService: TowFactorAuthService) {}
 
   @Get('/validated')
   async validate(@GetUser() user: User, @Res() res: Response) {
+    this.logger.debug({
+      user
+    })
     return this.towFactorAuthService.validate(user, res);
   }
 

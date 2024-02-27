@@ -45,7 +45,7 @@ export class AuthController {
 
   @UseGuards(IntraGuard)
   @Get('42/callback')
-  @Redirect('http://localhost:3000/profile/')
+  @Redirect('http://localhost:3000/settings/')
   async loginIntraNew(@Request() req, @Res() res: Response) {
 
     const { usual_full_name, username, email } = req.user;
