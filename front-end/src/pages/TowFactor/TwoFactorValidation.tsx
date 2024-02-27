@@ -23,17 +23,11 @@ function TwoFactorValidation() {
     const initData = async () => {
         const userData: UserType | null = await generateTowFactorQrCode();
 
-        console.log({
-            userData
-        })
-
         if (!userData) {
             navigate("/notauth")
         } else {
             setConnectedUser(userData)
         }
-
-        
     }
 
   return (

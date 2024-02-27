@@ -17,28 +17,25 @@ export class TowFactorAuthService {
     ) { }
 
     // validate will return the QC code image to the user
-    async validate(user: User, res: Response): Promise<User> {
+    async validate(userId: string): Promise<User | null> {
 
         try {
+
+            const user: User = await this.prisma.user.findFirst({where: {id: userId} });
+
+            if (!user) {
+                return null;
+            }
             
             let fileName: string;
-
-            this.logger.debug({
-                user
-            });
 
             // check if the user has already been generated a QR Code
             if (user.qrCodeFileName === "nothing" && user.twoFactor)
             {
-                this.logger.debug("hello from here");
                 
                 const secret = speakeasy.generateSecret({
                     name: 'transcendence'
                 });
-        
-                // console.log({secret});
-        
-                console.log({secret_url: secret.otpauth_url});
         
                 const data = await QRCode.toBuffer(secret.otpauth_url);
 
@@ -48,9 +45,10 @@ export class TowFactorAuthService {
                 const path_file = 'public/qrcodes/' + fileName;
                 
                 fs.writeFile(path_file, data, (err) => {
-                    if (err)
-                    {
-                        throw new InternalServerErrorException("Could not write QR Code file");
+                    if (err) {
+
+                        this.logger.debug("hello world ERROR")
+                        return null;
                     }
                 })
 
@@ -60,7 +58,7 @@ export class TowFactorAuthService {
                         id: user.id,
                     },
                     data: {
-                        qrCodeFileName: fileName,
+                        qrCodeFileName: path_file,
                         towFactorSecret: secret.base32,
                         towFactorToRedirect: true,
                         twoFactor: true,
@@ -76,15 +74,15 @@ export class TowFactorAuthService {
             return user;
 
         } catch (error) {
-            throw new InternalServerErrorException();
+            return null;
         }
     }
 
-    async confirm(user: User, code: string) {
+    async confirm(userId: string, code: string): Promise<{ message: string } | User>  {
 
         try {
-            
-            // console.log(user.towFactorSecret)
+
+            const user: User = await this.prisma.user.findFirst({where: {id: userId} });
 
             // verify the user tow factor using speakeasy 
             const verify = speakeasy.totp.verify({
@@ -96,19 +94,19 @@ export class TowFactorAuthService {
             // if is not verified throw an Not Acceptable Exception 
             if (!verify)
             {
-                throw new NotAcceptableException();
+                return { message: 'error' };
             }
 
             // set the user tow factor to true 
-            await this.prisma.user.update({
+            const tmpUser: User = await this.prisma.user.update({
                 where: { id: user.id },
                 data: { twoFactor: true, towFactorToRedirect: false },
             });
 
-            return { message: 'confirm' };
+            return tmpUser;
 
         } catch (error) {
-            throw new InternalServerErrorException();
+            return { message: 'error' };
         }
 
     }

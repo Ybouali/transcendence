@@ -81,6 +81,40 @@ export async function getHisGamesByUserId(
     return rHisgame;
 }
 
+export async function validateTowFactor(code: number): Promise<UserType | null> {
+
+    const tokens: Tokens | null = await getTokensFromCookie();
+
+    if (!tokens) return null;
+
+    const resData = await axios.get(`http://localhost:3333/tow-factor-auth/confirm/${code}`, {
+        headers: {
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
+        }
+    })
+    .then((response) => response)
+    .catch((err) => {});
+
+    if (!resData || resData.data.message ) return null;
+
+    const userData: UserType = {
+        id: resData.data.id,
+        username: resData.data.username,
+        email: resData.data.email,
+        avatarUrl: resData.data.avatarUrl,
+        towFactorToRedirect: resData.data.towFactorToRedirect,
+        Status: resData.data.Status,
+        fullName: resData.data.fullName,
+        isOnLine: resData.data.isOnLine,
+        levelGame: resData.data.levelGame,
+        twoFactor: resData.data.twoFactor,
+        qrCodeFileName: resData.data.qrCodeFileName,
+    };
+
+    return userData;
+}
+
 export async function generateTowFactorQrCode(): Promise<UserType | null> {
 
     const tokens: Tokens | null = await getTokensFromCookie();
@@ -95,8 +129,6 @@ export async function generateTowFactorQrCode(): Promise<UserType | null> {
     })
     .then((response) => response)
     .catch((err) => {});
-
-    console.log(resData)
 
     if (!resData) return null;
 

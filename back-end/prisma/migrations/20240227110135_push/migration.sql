@@ -4,6 +4,7 @@ CREATE TABLE "User" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "username" TEXT NOT NULL,
+    "usernameOld" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "fullName" TEXT NOT NULL,
     "avatarUrl" TEXT NOT NULL,
@@ -129,6 +130,9 @@ CREATE TABLE "BlockedUsers" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_usernameOld_key" ON "User"("usernameOld");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");

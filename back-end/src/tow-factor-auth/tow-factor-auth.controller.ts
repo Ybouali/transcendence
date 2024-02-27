@@ -13,25 +13,22 @@ import { Response } from 'express';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/decorators';
 import { TowFactorAuthService } from './tow-factor-auth.service';
-import { AccessStrategy, RefreshStrategy } from 'src/auth/strategy';
+import { AccessGuard, LoginGuard } from 'src/auth/guard';
 
-@UseGuards(RefreshStrategy, AccessStrategy)
+@UseGuards(AccessGuard, LoginGuard)
 @Controller('tow-factor-auth')
 export class TowFactorAuthController {
   private logger = new Logger(TowFactorAuthController.name);
   constructor(private towFactorAuthService: TowFactorAuthService) {}
 
   @Get('/validated')
-  async validate(@GetUser() user: User, @Res() res: Response) {
-    this.logger.debug({
-      user
-    })
-    return this.towFactorAuthService.validate(user, res);
+  async validate(@GetUser('id') userId: string) {
+    return this.towFactorAuthService.validate(userId);
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('/confirm/:code')
-  async confirm(@GetUser() user: User, @Param('code') code: string) {
-    return this.towFactorAuthService.confirm(user, code);
+  @Get('/confirm/:code')
+  async confirm(@GetUser('id') userId: string, @Param('code') code: string): Promise<{ message: string } | User> {
+    return this.towFactorAuthService.confirm(userId, code);
   }
 }
