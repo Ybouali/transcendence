@@ -16,6 +16,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   username            String  @unique
+  usernameOld         String  @unique
   email               String  @unique
   fullName            String
   avatarUrl           String

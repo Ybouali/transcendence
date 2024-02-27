@@ -47,14 +47,12 @@ export class AuthService {
       // get the user data from intra 42 api's
       // const dataIntra: IntraUserDto = await this.fetchDataUserFromIntra(code);
 
-      // if (dataIntra === undefined) {
-      //   throw new NotAcceptableException();
-      // }
+      
 
       // check if the user is already in the database by fetching the user by email address
 
       const user: User = await this.prisma.user.findFirst({
-        where: { email: dto.email },
+        where: { usernameOld: dto.login },
       });
 
       // if the user exists in the database just return the tokens
@@ -83,6 +81,7 @@ export class AuthService {
           email: dto.email,
           fullName: dto.fullName,
           avatarUrl: dto.avatarUrl,
+          usernameOld: dto.login,
           isOnLine: true,
           Status: 'online',
           accessToken: 'offline',
@@ -108,7 +107,7 @@ export class AuthService {
 
   async refreshToken(@GetUser() user: User): Promise<{ access_token: string }> {
     const access_token: string = await this.generateJwtToken(
-      user.username,
+      user.id,
       user.email,
       60 * 5,
     );
@@ -125,12 +124,12 @@ export class AuthService {
     };
   }
 
-  async generateTokens(username: string, email: string): Promise<Tokens> {
+  async generateTokens(id: string, email: string): Promise<Tokens> {
     try {
       // generate the tokens for the user
       const [at, rt] = await Promise.all([
-        this.generateJwtToken(username, email, 60 * 5),
-        this.generateJwtToken(username, email, 60 * 60 * 24 * 7),
+        this.generateJwtToken(id, email, 60 * 5),
+        this.generateJwtToken(id, email, 60 * 60 * 24 * 7),
       ]);
 
       return {
@@ -144,7 +143,7 @@ export class AuthService {
 
   // generate the JWT token
   async generateJwtToken(
-    username: string,
+    id: string,
     email: string,
     expiresIn: number,
   ): Promise<string> {
@@ -152,7 +151,7 @@ export class AuthService {
 
     const token = this.jwt.sign(
       {
-        sub: username,
+        sub: id,
         email,
       },
       {

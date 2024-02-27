@@ -32,14 +32,6 @@ function Profile() {
       navigate("/notauth")
     }
 
-    // here need to check if the user acctivate the tow factor if yes so we should redirect the user to the tow factor page
-
-    console.log(connectedUser?.twoFactor, connectedUser?.towFactorToRedirect)
-
-    if (connectedUser?.twoFactor && connectedUser.towFactorToRedirect) {
-      navigate("/tow-factor")
-    }
-
   }
 
   // const gamesLog: HistoryGameReturnedType [] = 

@@ -1,22 +1,31 @@
 import React, { useEffect, useRef, KeyboardEvent, ClipboardEvent} from 'react'
-import { ToastContainer, toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import "./TowFactorFormStyle.css"
+import { validateTowFactor } from '../../../utils/utils';
+import { useNavigate } from 'react-router-dom';
+import { UserType } from '../../../types';
+import { useConnectedUser } from '../../../context/ConnectedContext';
 
 function TowFactorForm() {
 
+    const { setConnectedUser } = useConnectedUser();
+
     const inputs = useRef<HTMLInputElement[]>([]);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         inputs.current.forEach((input, index) => {
             if (index === 0) input.focus();
-            input.addEventListener("keydown", handleKeyDown as unknown as EventListener);
-            input.addEventListener("paste", handlePaste as unknown as EventListener);
+            input?.addEventListener("keydown", handleKeyDown as unknown as EventListener);
+            input?.addEventListener("paste", handlePaste as unknown as EventListener);
         });
 
         return () => {
             inputs.current.forEach((input) => {
-                input.removeEventListener("keydown", handleKeyDown as unknown as EventListener);
-                input.removeEventListener("paste", handlePaste as unknown as EventListener);
+                input?.removeEventListener("keydown", handleKeyDown as unknown as EventListener);
+                input?.removeEventListener("paste", handlePaste as unknown as EventListener);
             });
         };
     }, []);
@@ -138,14 +147,25 @@ function TowFactorForm() {
         currentInput.selectionEnd = addedCharacters;
     };
 
-    const handleSubmit = () => {
-        const number = inputs.current.reduce((acc, input) => acc + input.value, "");
+    const handleSubmit = async () => {
+        const code: string = inputs.current.reduce((acc, input) => acc + input.value, "");
 
-        if (number.length < 6) {
+        if (code.length < 6) {
             toast.warning("The two factor validation code length must be 6 characters");
         } else {
-            console.log(number);
-            if (parseInt(number) === 123456) {
+            
+
+            const newUser: UserType | null = await validateTowFactor(parseInt(code));
+
+            if (newUser) {
+                toast.success("Your two-factor authentication has been successfully verified");
+                setConnectedUser(newUser);
+                navigate("/profile")
+            } else {
+                toast.warning("Your two-factor authentication code is not correct");
+            }
+
+            if (parseInt(code) === 123456) {
                 toast.success("Your two-factor authentication has been successfully verified");
             } else {
                 toast.warning("Your two-factor authentication code is not correct");
@@ -155,27 +175,32 @@ function TowFactorForm() {
 
 
   return (
-    <section className="two-factor-form">
-        <div className="two-factor-inputs" data-connected-inputs>
-            {[...Array(6)].map((_, index) => (
+
+    <>
+        <ToastContainer />
+        <section className="two-factor-form">
+            <div className="two-factor-inputs" data-connected-inputs>
+                {[...Array(6)].map((_, index) => (
+                    <input
+                        key={`key-${index}`}
+                        maxLength={1}
+                        type="text"
+                        ref={(el) => (inputs.current[index] = el as HTMLInputElement)}
+                        className="two-factor-input"
+                    />
+                ))}
+            </div>
+            <div className="actions-buttons">
                 <input
-                    key={`key-${index}`}
-                    maxLength={1}
-                    type="text"
-                    ref={(el) => (inputs.current[index] = el as HTMLInputElement)}
-                    className="two-factor-input"
+                    className="action-button button-active"
+                    type="submit"
+                    value="Submit"
+                    onClick={() => handleSubmit()}
                 />
-            ))}
-        </div>
-        <div className="actions-buttons">
-            <input
-                className="action-button button-active"
-                type="submit"
-                value="Submit"
-                onClick={() => handleSubmit()}
-            />
-        </div>
-    </section>
+            </div>
+        </section>
+    
+    </>
   )
 }
 

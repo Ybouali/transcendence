@@ -12,6 +12,8 @@ export class RefreshStrategy extends PassportStrategy(
   'refresh_token',
 ) {
 
+  private logger = new Logger(RefreshStrategy.name);
+
   constructor(
     private prisma: PrismaService,
     private encrypt: EncryptionService,
@@ -33,14 +35,21 @@ export class RefreshStrategy extends PassportStrategy(
     });
 
     // if the user is not found
-    if (!user) throw new ForbiddenException('Access denied');
+    if (!user) {
+      // this.logger.debug("hello 1")
+      // this.logger.debug(payload.sub)
+      throw new ForbiddenException('Access denied');
+    }
 
     // extract the access token from the user
     const refreshToken: string = (await this.encrypt.decrypt(user.refreshToken)).toString();
 
     // check if the refresh token is matched against the refresh token that comes from request
-    if (refreshToken !== refresh_token)
+    if (refreshToken !== refresh_token) {
+      // this.logger.debug("hello 2")
+      // this.logger.debug(payload.sub)
       throw new ForbiddenException('Access denied');
+    }
 
     delete user.accessToken;
     delete user.refreshToken;

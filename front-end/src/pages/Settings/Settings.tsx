@@ -6,9 +6,9 @@ import Header from '../../components/Header/Header';
 import "./SettingsStyle.css"
 import { useConnectedUser } from '../../context/ConnectedContext';
 import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import Resizer from "react-image-file-resizer";
 import { useDropzone } from "react-dropzone";
-import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 
 interface ISizes {
@@ -300,7 +300,7 @@ function Settings() {
       navigate("/notauth")
     }
 
-	if (connectedUser?.twoFactor && connectedUser.towFactorToRedirect) {
+	if (connectedUser?.twoFactor && connectedUser?.towFactorToRedirect) {
 		navigate("/tow-factor")
 	}
 
@@ -310,7 +310,8 @@ function Settings() {
     <>
 		<ToastContainer />
 		<Header isConnected={true}  />
-		<div ref={profileSettingsRef} className="profile-settings container">
+		{ connectedUser && 
+			<div ref={profileSettingsRef} className="profile-settings container">
 				{/* 4.375 */}
 			<div className="profile-settings-content">
 			<div className="profile-settings-header">
@@ -410,7 +411,8 @@ function Settings() {
 				</form>
 				</div>
 			</div>
-		</div>  
+		</div> 
+		}  
     </>
   )
 }

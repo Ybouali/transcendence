@@ -8,6 +8,8 @@ import { EncryptionService } from 'src/encryption/encryption.service';
 @Injectable()
 export class AccessStrategy extends PassportStrategy(Strategy, 'access') {
 
+  private logger = new Logger(AccessStrategy.name);
+
   constructor(
     private prisma: PrismaService,
     private encrypt: EncryptionService,
@@ -29,15 +31,23 @@ export class AccessStrategy extends PassportStrategy(Strategy, 'access') {
     });
 
     // if the user is not found
-    if (!user) throw new ForbiddenException('Access denied');
+    if (!user) {
+      // this.logger.debug("hello 3")
+      // this.logger.debug(payload.sub)  
+      throw new ForbiddenException('Access denied');
+    
+    }
 
 
     // extract the access token from the user
     const accessToken: string = (await this.encrypt.decrypt(user.accessToken));
 
     // check if the refresh token is matched against the refresh token that comes from request
-    if (accessToken !== access_token)
+    if (accessToken !== access_token) {
+      // this.logger.debug("hello 4")
+      // this.logger.debug(payload.sub)
       throw new ForbiddenException('Access denied');
+    }
 
     delete user.accessToken;
     delete user.refreshToken;
