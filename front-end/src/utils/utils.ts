@@ -1,6 +1,16 @@
 import axios from 'axios';
 import { HistoryGameReturnedType, Tokens, UserType } from '../types';
 
+export function prepareUrl(url: string): string {
+
+    let host: string = `http://${process.env.REACT_APP_PUBLIC_IP}:${process.env.REACT_APP_BACK_END_PORT}/`;
+
+    host += url;
+
+    return host;
+
+}
+
 function getCookie(name: string) {
     const cookies = document.cookie.split(';');
     for (let cookie of cookies) {
@@ -21,8 +31,11 @@ export async function getTokensFromCookie(): Promise<Tokens | null> {
     if (!grt) return null;
 
     if (!gat) {
+
+        const url: string = prepareUrl("auth/refresh/");
+
         // refresh the access token
-        resData = await axios.get('http://localhost:3333/auth/refresh/', {
+        resData = await axios.get(url, {
             headers: {
                 refresh_token: grt,
             },
@@ -64,7 +77,7 @@ export async function getHisGamesByUserId(
         userId = user.id;
     }
 
-    const url = 'http://localhost:3333/history-game/games/' + userId;
+    const url: string = prepareUrl("history-game/games/") + userId;
 
     const resData = await axios.get(url, {
         headers: {
@@ -87,7 +100,9 @@ export async function validateTowFactor(code: number): Promise<UserType | null> 
 
     if (!tokens) return null;
 
-    const resData = await axios.get(`http://localhost:3333/tow-factor-auth/confirm/${code}`, {
+    const url: string = prepareUrl("tow-factor-auth/confirm/") + code;
+
+    const resData = await axios.get(url, {
         headers: {
             access_token: tokens.access_token,
             refresh_token: tokens.refresh_token,
@@ -121,7 +136,9 @@ export async function generateTowFactorQrCode(): Promise<UserType | null> {
 
     if (!tokens) return null;
 
-    const resData = await axios.get('http://localhost:3333/tow-factor-auth/validated', {
+    const url: string = prepareUrl("tow-factor-auth/validated")
+
+    const resData = await axios.get(url, {
         headers: {
             access_token: tokens.access_token,
             refresh_token: tokens.refresh_token,
@@ -154,8 +171,10 @@ export async function updateUser(user: UserType): Promise<UserType | null> {
 
     if (!tokens) return null;
 
+    const url: string = prepareUrl("users/update")
+
     const resData = await axios
-        .put('http://127.0.0.1:3333/users/update', user, {
+        .put(url, user, {
             headers: {
                 access_token: tokens.access_token,
                 refresh_token: tokens.refresh_token,
@@ -195,8 +214,10 @@ export async function getUserInfo(): Promise<UserType | null> {
 
     // send the request
 
+    const url: string = prepareUrl("users/me")
+
     resData = await axios
-        .get('http://127.0.0.1:3333/users/me', {
+        .get(url, {
             headers: {
                 access_token: tokens.access_token,
                 refresh_token: tokens.refresh_token,
@@ -232,7 +253,7 @@ export async function getUserById(
     tokens: Tokens
 ): Promise<UserType | null> {
     // url
-    const url: string = 'http://127.0.0.1:3333/users/' + id;
+    const url: string = prepareUrl("users/") + id;
 
     let resData = null;
 
@@ -274,7 +295,7 @@ export async function getNumberOfWinnedGames(
     }
 
     // the url
-    let url: string = 'http://localhost:3333/history-game/winnedgame/' + userId;
+    let url: string = prepareUrl("history-game/winnedgame/") + userId;
 
     const tokens: Tokens | null = await getTokensFromCookie();
 
@@ -328,7 +349,7 @@ export async function getNumberGamePlayedByUserId(
     }
 
     // the url
-    const url = 'http://localhost:3333/history-game/losedgame/' + userId;
+    const url = prepareUrl("history-game/losedgame/") + userId;
 
     let resData = null;
 

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import "./ProfileUserInfosStyle.css"
 import { Tokens, UserType } from '../../../types';
-import { getNumberGamePlayedByUserId, getTokensFromCookie, getUserById, getUserInfo } from '../../../utils/utils';
+import { getNumberGamePlayedByUserId, getTokensFromCookie, getUserById, getUserInfo, prepareUrl } from '../../../utils/utils';
 import { useNavigate, useParams } from 'react-router-dom';
 import Spinner from '../../../components/Spinner/Spinner';
 import { useConnectedUser } from '../../../context/ConnectedContext';
@@ -65,7 +65,7 @@ function ProfileUserInfos() {
       <div className="profile-user-infos">
 
         <div className="profile-user-image">
-          <img src={ `http://localhost:3333/` + connectedUser?.avatarUrl} alt="user image" />
+          <img src={ prepareUrl("") + connectedUser?.avatarUrl} alt="user image" />
         </div>
 
         <div className="profile-user-description">

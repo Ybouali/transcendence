@@ -29,7 +29,7 @@ services:
     image: front-end:front-end
     restart: unless-stopped
     depends_on:
-      - dev-db
+      - back-end
     ports:
       - "3000:3000"
     env_file:

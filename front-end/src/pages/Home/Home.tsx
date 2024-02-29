@@ -5,7 +5,7 @@ import Team from './Team/Team'
 import Header from '../../components/Header/Header'
 import { Tokens } from '../../types'
 import { useNavigate } from 'react-router-dom'
-import { getTokensFromCookie } from '../../utils/utils'
+import { getTokensFromCookie, prepareUrl } from '../../utils/utils'
 import axios from 'axios'
 
 function Home() {
@@ -40,7 +40,7 @@ function Home() {
 
     try {
       
-      const url = `http://localhost:3333/auth/42/`;
+      const url = prepareUrl("auth/42/");
     
       // make call to server to login with the intra 42
       window.location.href = url;
