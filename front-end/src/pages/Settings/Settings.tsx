@@ -1,7 +1,7 @@
 import React, { FormEvent, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { Tokens, UserType } from '../../types';
-import { getTokensFromCookie, updateUser } from '../../utils/utils';
+import { getTokensFromCookie, prepareUrl, updateUser } from '../../utils/utils';
 import Header from '../../components/Header/Header';
 import "./SettingsStyle.css"
 import { useConnectedUser } from '../../context/ConnectedContext';
@@ -19,10 +19,6 @@ interface ISizes {
 function Settings() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    gaurd();
-  })
-
   const { connectedUser, setConnectedUser } = useConnectedUser();
 	// const { width, height } = useWindowSize();
 	const profileSettingsRef = useRef<HTMLDivElement>(null);
@@ -35,6 +31,10 @@ function Settings() {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [sizes, setSizes] = useState<ISizes>({ original: null, resized: null });
 	const [file, setFile] = useState<any>(null);
+
+	useEffect(() => {
+		gaurd();
+	})
 
 
 	const onDrop = async (acceptedFiles: File[]) => {
@@ -254,8 +254,10 @@ function Settings() {
 
 			if (tokens) {
 
+				const url: string = prepareUrl("users/upload/avatar")
+
 				try {
-					const response = await axios.post('http://localhost:3333/users/upload/avatar', formData, {
+					const response = await axios.post(url, formData, {
 						headers: {
 							'Content-Type': 'multipart/form-data',
 							'access_token': tokens.access_token,
@@ -293,17 +295,15 @@ function Settings() {
   const gaurd = async () => {
 
     // if there is no tokens the user will be redirected to not auth page this will be the Gaurd
+	const tokens: Tokens | null = await getTokensFromCookie();
 
-    const tokens: Tokens | null = await getTokensFromCookie();
-
-    if (!tokens) {
-      navigate("/notauth")
-    }
+	if (!tokens) {
+		navigate("/notauth")
+	}
 
 	if (connectedUser?.twoFactor && connectedUser?.towFactorToRedirect) {
 		navigate("/tow-factor")
 	}
-
   }
 
   return (
@@ -326,7 +326,7 @@ function Settings() {
 						src={
 						file
 							? file
-							: `http://localhost:3333/${connectedUser?.avatarUrl}`
+							: `${prepareUrl("") + connectedUser?.avatarUrl}`
 						}
 						alt="Uploaded"
 					/>
@@ -350,7 +350,7 @@ function Settings() {
 							ref={firstnameRef}
 							type="text"
 							className="user-firstname"
-							defaultValue={`${connectedUser?.fullName?.split(' ')[0]}`}
+							defaultValue={connectedUser.fullName?.split(' ')[0]}
 						/>
 						</div>
 					</div>
@@ -362,7 +362,7 @@ function Settings() {
 							ref={lastnameRef}
 							type="text"
 							className="user-lastname"
-							defaultValue={`${connectedUser?.fullName?.split(' ')[1]}`}
+							defaultValue={connectedUser.fullName?.split(' ')[1]}
 						/>
 						</div>
 					</div>
@@ -374,7 +374,7 @@ function Settings() {
 							ref={usernameRef}
 							type="text"
 							className="user-username"
-							defaultValue={`${connectedUser?.username}`}
+							defaultValue={connectedUser.username}
 						/>
 						</div>
 					</div>
@@ -386,7 +386,7 @@ function Settings() {
 							ref={emailRef}
 							type="email"
 							className="user-email"
-							defaultValue={`${connectedUser?.email}`}
+							defaultValue={connectedUser.email}
 						/>
 						</div>
 					</div>
@@ -396,7 +396,7 @@ function Settings() {
 						ref={twoFactorRef}
 						type="checkbox"
 						className="active-2fa"
-						defaultChecked={connectedUser?.twoFactor}
+						defaultChecked={connectedUser.twoFactor}
 						/>
 						<label htmlFor="active-2fa">Activate Two Factor(2FA)</label>
 					</div>

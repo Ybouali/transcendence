@@ -25,13 +25,15 @@ function Profile() {
   const gaurd = async () => {
 
     // if there is no tokens the user will be redirected to not auth page this will be the Gaurd
-
     const tokens: Tokens | null = await getTokensFromCookie();
 
     if (!tokens) {
       navigate("/notauth")
     }
 
+    if (connectedUser?.twoFactor && connectedUser?.towFactorToRedirect) {
+      navigate("/tow-factor")
+    }
   }
 
   // const gamesLog: HistoryGameReturnedType [] = 

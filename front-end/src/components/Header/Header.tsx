@@ -7,7 +7,7 @@ import useFetch from "../../utils/hooks/useFetch";
 import SearchResults from "../SearchResults/SearchResults";
 import axios from 'axios';
 import { LoginType, Tokens, UserType } from "../../types";
-import { getTokensFromCookie, updateUser } from "../../utils/utils";
+import { getTokensFromCookie, prepareUrl, updateUser } from "../../utils/utils";
 import StaticHeaderHome from "./comp/StaticHeaderHome";
 
 
@@ -101,9 +101,11 @@ const Header = (props: LoginType) => {
         if (tokens) {
 
         try {
+
+            const url: string = prepareUrl("/auth/logout/");
             
             // logout from the server
-            const res = await axios.get('http://localhost:3333/auth/logout/', {
+            const res = await axios.get(url, {
             headers: {
                 'access_token': tokens.access_token,
                 'refresh_token': tokens.refresh_token
@@ -246,7 +248,7 @@ const Header = (props: LoginType) => {
                 className="user-image dropdown-button"
                 onClick={() => setOpenMenu(!openMenu)}
               >
-                <img src={'http://localhost:3333/' + connectedUser?.avatarUrl} alt="user iimage" />
+                <img src={prepareUrl("") + connectedUser?.avatarUrl} alt="user iimage" />
               </div>
               <div
                 
@@ -257,7 +259,7 @@ const Header = (props: LoginType) => {
                     <li className="dropdown-item user-profile-item">
                       <div className="user-image dropdown-item-user-image">
                         <img
-                          src={'http://localhost:3333/' + connectedUser?.avatarUrl}
+                          src={prepareUrl("") + connectedUser?.avatarUrl}
                           alt="user iimage"
                         />
                       </div>

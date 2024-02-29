@@ -5,7 +5,7 @@ import TowFactorForm from './TowFactorForm/TowFactorForm'
 import Header from '../../components/Header/Header'
 import { useConnectedUser } from '../../context/ConnectedContext'
 import { UserType } from '../../types'
-import { generateTowFactorQrCode } from '../../utils/utils'
+import { generateTowFactorQrCode, prepareUrl } from '../../utils/utils'
 import { useNavigate } from 'react-router-dom'
 
 function TwoFactorValidation() {
@@ -42,7 +42,7 @@ function TwoFactorValidation() {
                 </div>
                 <div className="two-factor-validation-body">
                     <div className="qr-code-image">
-                        <img src={"http://localhost:3333/" + connectedUser?.qrCodeFileName} alt="QR code" />
+                        <img src={prepareUrl("") + connectedUser?.qrCodeFileName} alt="QR code" />
                     </div>
                     <TowFactorForm />
                 </div>
