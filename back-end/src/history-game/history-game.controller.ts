@@ -36,7 +36,7 @@ export class HistoryGameController {
     @HttpCode(HttpStatus.OK)
     @Get('/leaderbord')
     async leaderboard() {
-        return await this.leaderboard();
+        return await this.historyGameService.leaderboard();
     }
     
 }

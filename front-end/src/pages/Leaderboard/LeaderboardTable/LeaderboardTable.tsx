@@ -1,6 +1,9 @@
 import React from 'react'
 
 function LeaderboardTable() {
+
+  
+
   return (
     <table id="example" className="display" style={{width: '100%'}}>
       <thead>

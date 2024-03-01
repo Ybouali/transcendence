@@ -9,8 +9,11 @@ import DataTable from "datatables.net-dt";
 import "datatables.net-buttons"
 import "datatables.net-responsive"
 import "datatables.net-dt/css/dataTables.dataTables.css";
+import $ from 'jquery';
 
 function GamesHistory( ) {
+
+  const [tableInitialized, setTableInitialized] = useState<boolean>(false);
 
   const { userId } = useParams();
 
@@ -29,6 +32,15 @@ function GamesHistory( ) {
   const tableRef = useRef<any>();
 
   useEffect(() => {
+
+
+    if (!tableInitialized) {
+      
+      $('#example').DataTable();
+
+      setTableInitialized(true);
+    }
+
     const table: any = new DataTable(tableRef.current, {
       dom: "Bfrtip",
       buttons: ["copy", "csv", "excel", "pdf", "print"],
