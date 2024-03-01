@@ -14,7 +14,7 @@ export class HistoryGameService {
     ) {}
 
     async leaderboard (): Promise<LeaderBoardType []> {
-        const board: LeaderBoardType [] = [];
+        let board: LeaderBoardType [] = [];
 
         // get all levels of users in db sorted the level
         const users: User[] = await this.prisma.user.findMany({
@@ -24,7 +24,7 @@ export class HistoryGameService {
         })
 
         // loop through all users
-        users.map( async (user: User) => {
+        board = await Promise.all(users.map( async (user: User) => {
 
             // get number of winned and lost games
             const { numberWinnedLosed } = await this.numberGameLosed(user.id);
@@ -37,12 +37,13 @@ export class HistoryGameService {
             const lBoard: LeaderBoardType = {
                 id: user.id,
                 username: user.fullName,
+                avatarUrl: user.avatarUrl,
                 numberGamesPlayed: numberOfgames,
                 level: user.levelGame,
             }
 
-            board.push(lBoard);
-        })
+            return lBoard;
+        }))
 
         return board;
     }

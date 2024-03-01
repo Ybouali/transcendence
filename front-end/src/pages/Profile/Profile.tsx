@@ -4,7 +4,7 @@ import "./ProfileStyle.css"
 import ProfileUserInfos from './ProfileUserInfos/ProfileUserInfos'
 import ProfileButtonActions from './ProfileButtonActions/ProfileButtonActions'
 import ProfileAchievements from './ProfileAchievements/ProfileAchievements'
-import { HistoryGameReturnedType, Tokens } from '../../types'
+import { Tokens } from '../../types'
 import GamesHistory from './GamesHistory/GamesHistory'
 import { useNavigate } from 'react-router-dom'
 import { getTokensFromCookie } from '../../utils/utils'

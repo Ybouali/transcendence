@@ -30,6 +30,7 @@ services:
     restart: unless-stopped
     depends_on:
       - back-end
+      - dev-db
     ports:
       - "3000:3000"
     env_file:

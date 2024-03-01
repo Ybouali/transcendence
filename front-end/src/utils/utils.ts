@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { HistoryGameReturnedType, Tokens, UserType } from '../types';
+import { HistoryGameReturnedType, LeaderBoardType, Tokens, UserType } from '../types';
 
 export function prepareUrl(url: string): string {
 
@@ -324,6 +324,37 @@ export async function getNumberOfWinnedGames(
     }
 
     return win;
+}
+
+export async function getLeaderboardOfPlayers() : Promise< LeaderBoardType [] | null > {
+
+    const tokens: Tokens | null = await getTokensFromCookie();
+
+    if (tokens === null) {
+        return null;
+    }
+
+    const url: string = prepareUrl("history-game/leaderbord");
+
+    // Get the leaderboard  of the players
+    const resData = await axios.get(url, {
+        headers: {
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
+        },
+    })
+
+    if (!resData) {
+        return null;
+    }
+
+    const rData: LeaderBoardType [] = resData.data.slice();
+
+    if (rData.length === 0) {
+        return null;
+    }
+
+    return rData;
 }
 
 export async function getNumberGamePlayedByUserId(
