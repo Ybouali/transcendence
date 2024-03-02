@@ -49,7 +49,7 @@ export class UserController {
         
         if (file) {
           
-          const uploadFolder = 'public/images/';
+          const uploadFolder = 'public/avatars/';
           
           const uniqueFileName = `${userId}-tran.png`;
           
