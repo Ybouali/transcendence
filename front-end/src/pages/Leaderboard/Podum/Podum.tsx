@@ -4,40 +4,27 @@ import { LeaderBoardType } from '../../../types'
 import { getLeaderboardOfPlayers, prepareUrl } from '../../../utils/utils';
 import { Link } from 'react-router-dom';
 
-function Podum() {
+interface data {
+  dataLeaderboard: LeaderBoardType [] | null;
+}
 
-  const [ dataLeaderBoard, setDataLeaderBoard ] = useState< LeaderBoardType [] | null>(null);
-
-  useEffect(() => {
-    
-    initData();
-
-  }, [setDataLeaderBoard])
-
-  const initData = async () => {
-
-    const data: LeaderBoardType [] | null = await getLeaderboardOfPlayers()
-
-    console.log(data);
-    
-    setDataLeaderBoard(data);
-  }
+function Podum(props: data) {
 
   return (
     <> 
         <div className="podium">
-      { dataLeaderBoard && (
+      { props.dataLeaderboard && (
           <>
-            { dataLeaderBoard.length >= 2 && (
+            { props.dataLeaderboard.length >= 2 && (
               <div className="level-2">
                 <div className="leadboard-card">
                   <div className="leadboard-card-content">
                     <div className="leadboard-image">
-                      <img src={prepareUrl("") + dataLeaderBoard[1].avatarUrl} alt={dataLeaderBoard[1].username} /> 
+                      <img src={prepareUrl("") + props.dataLeaderboard[1].avatarUrl} alt={props.dataLeaderboard[1].username} /> 
                     </div>
                     <div className="leadboard-infos">
-                      <Link to={`/profile/${dataLeaderBoard[1].id}`} className="leadboard-username">
-                        {dataLeaderBoard[1].username}
+                      <Link to={`/profile/${props.dataLeaderboard[1].id}`} className="leadboard-username">
+                        {props.dataLeaderboard[1].username}
                       </Link>
                     </div>
                   </div>
@@ -46,17 +33,17 @@ function Podum() {
               </div>
             )}
 
-            {dataLeaderBoard.length >= 1 && (
+            {props.dataLeaderboard.length >= 1 && (
 
               <div className="level-1">
                 <div className="leadboard-card">
                   <div className="leadboard-card-content">
                     <div className="leadboard-image">
-                      <img src={prepareUrl("") + dataLeaderBoard[0].avatarUrl} alt={dataLeaderBoard[0].username} />
+                      <img src={prepareUrl("") + props.dataLeaderboard[0].avatarUrl} alt={props.dataLeaderboard[0].username} />
                     </div>
                     <div className="leadboard-infos">
-                      <Link to={`/profile/${dataLeaderBoard[0].id}`} className="leadboard-username">
-                        {dataLeaderBoard[0].username}
+                      <Link to={`/profile/${props.dataLeaderboard[0].id}`} className="leadboard-username">
+                        {props.dataLeaderboard[0].username}
                       </Link>
                     </div>
                   </div>
@@ -66,16 +53,16 @@ function Podum() {
 
             )}
             
-            { dataLeaderBoard.length >= 3 && (
+            { props.dataLeaderboard.length >= 3 && (
               <div className="level-3">
                 <div className="leadboard-card">
                   <div className="leadboard-card-content">
                     <div className="leadboard-image">
-                    <img src={prepareUrl("") + dataLeaderBoard[2].avatarUrl} alt={dataLeaderBoard[2].username} /> 
+                    <img src={prepareUrl("") + props.dataLeaderboard[2].avatarUrl} alt={props.dataLeaderboard[2].username} /> 
                     </div>
                     <div className="leadboard-infos">
-                      <Link to={`/profile/${dataLeaderBoard[2].id}`} className="leadboard-username">
-                        {dataLeaderBoard[2].username}
+                      <Link to={`/profile/${props.dataLeaderboard[2].id}`} className="leadboard-username">
+                        {props.dataLeaderboard[2].username}
                       </Link>
                     </div>
                   </div>
