@@ -34,6 +34,8 @@ export class AuthController {
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');
 
+    this.logger.log(`User ${user.username} Is logged out `);
+
     return res.status(HttpStatus.OK).json({ message: 'done' });
   }
 
@@ -65,6 +67,8 @@ export class AuthController {
     res.cookie('access_token', tokens.access_token, { httpOnly: false });
     res.cookie('refresh_token', tokens.refresh_token, { httpOnly: false });
 
+    this.logger.log(`User ${username} Is logged In `);  
+
     return;
   }
 
@@ -74,7 +78,7 @@ export class AuthController {
   async refresh(@Res() res: Response, @GetUser() user: User) {
     const { access_token } = await this.authService.refreshToken(user);
 
-    // TODO: set refresh_token
+    this.logger.log(`${user.username} is back to the server `)
     res.cookie('access_token', access_token, { httpOnly: false });
 
     return res.status(HttpStatus.OK).json({ message: 'done' });
