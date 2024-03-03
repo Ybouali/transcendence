@@ -20,7 +20,7 @@ function Leaderboard() {
     gaurd();
 
     initData();
-  })
+  }, [setLeaderboard])
   
   const gaurd = async () => {
 
@@ -45,7 +45,7 @@ function Leaderboard() {
 
   return (
     <div>
-      <Header isConnected={true}  />
+      {/* <Header isConnected={true}  /> */}
       <section className='profile' >
         <div className='container' >
           <Podum dataLeaderboard={leaderboard} />

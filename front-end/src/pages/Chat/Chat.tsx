@@ -28,7 +28,7 @@ function Chat() {
 
   return (
     <>
-      <Header isConnected={true}  />
+      {/* <Header isConnected={true}  /> */}
       Chat
     </>
   )

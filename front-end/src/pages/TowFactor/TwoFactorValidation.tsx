@@ -32,7 +32,7 @@ function TwoFactorValidation() {
 
   return (
     <>
-        <Header isConnected={true} />
+        {/* <Header isConnected={true} /> */}
         <section className="two-factor-validation-section container">
             <div className="two-factor-validation-content">
                 <div className="two-factor-validation-header">
