@@ -14,6 +14,6 @@ RUN chmod 777 script/script.sh
 
 RUN mkdir -p /avatar_users_images/
 
-ENTRYPOINT [ "script/script.sh" ]
+# ENTRYPOINT [ "script/script.sh" ]
 
 # ENTRYPOINT [ "npm", "run", "start:dev" ]

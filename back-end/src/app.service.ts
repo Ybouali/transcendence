@@ -89,7 +89,7 @@ export class AppService {
             });
 
             // log the user that the server forced to loged out
-            this.logger.log(`User ${user.email} Is logged out `);
+            this.logger.log(`User ${user.username} Is logged out `);
           }
         } catch (error) {
           // this.logger.error("catch error in for bocle 1 refreshing");
@@ -118,7 +118,6 @@ export class AppService {
           // if the throw exeption so the user should be signed again
           if (this.verifyJwtToken(tokenToVerify)) {
 
-            this.logger.debug("Verified the access token");
             // update the user
             await this.prisma.user.update({
               where: { id: user.id },
@@ -130,7 +129,7 @@ export class AppService {
             });
 
             // log the user that the server forced to refresh the asscess token
-            this.logger.log(`User ${user.email} Is Off Line `);
+            this.logger.log(`User ${user.username} Is Off Line `);
           }
         } catch (error) {
           this.logger.error("catch error in for bocle 1 Access Token");

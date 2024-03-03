@@ -5,6 +5,7 @@ services:
     container_name: back-end
     image: back-end:back-end
     restart: unless-stopped
+    command: "bash /app/script/script.sh"
     env_file:
       - /Users/$USER/Desktop/data_transcendence/env_files/.env_back_end
     depends_on:
