@@ -1,8 +1,11 @@
 import React from 'react'
+import { LeaderBoardType } from '../../../types';
 
-function LeaderboardTable() {
+interface data {
+  dataLeaderboard: LeaderBoardType [] | null;
+}
 
-  
+function LeaderboardTable(props: data) {
 
   return (
     <table id="example" className="display" style={{width: '100%'}}>
@@ -14,19 +17,19 @@ function LeaderboardTable() {
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>Ruth Sanchez</td>
-          <td>-80</td>
-          <td>35</td>
-        </tr>
+        { props.dataLeaderboard && (
+          props.dataLeaderboard.map((value: LeaderBoardType, index: number) => {
+
+            return (
+              <tr key={index} >
+                <td>{value.username}</td>
+                <td>{value.numberGamesPlayed}</td>
+                <td>{value.level}</td>
+              </tr>
+            )
+          })
+        ) }
       </tbody>
-      <tfoot>
-        <tr>
-          <th>Username</th>
-          <th>Global Score</th>
-          <th>Rank</th>
-        </tr>
-      </tfoot>
     </table>
   )
 }

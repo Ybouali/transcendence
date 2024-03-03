@@ -309,7 +309,7 @@ function Settings() {
   return (
     <>
 		<ToastContainer />
-		<Header isConnected={true}  />
+		{/* <Header isConnected={true}  /> */}
 		{ connectedUser && 
 			<div ref={profileSettingsRef} className="profile-settings container">
 				{/* 4.375 */}

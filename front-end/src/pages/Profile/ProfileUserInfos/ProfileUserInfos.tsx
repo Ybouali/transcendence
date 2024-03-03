@@ -71,7 +71,7 @@ function ProfileUserInfos() {
         <div className="profile-user-description">
           <div className="profile-user-fullname">{connectedUser?.fullName}</div>
           <p className="profile-user-username">{connectedUser?.username}</p>
-          <p className="profile-user-status">{connectedUser.isOnLine ? connectedUser?.Status : 'offline'}</p>
+          { connectedUser.isOnLine ? <p className="profile-user-status">{connectedUser?.Status}</p> : <p className="profile-user-status">offline</p> }
         </div>
 
         <div className="profile-user-stats">

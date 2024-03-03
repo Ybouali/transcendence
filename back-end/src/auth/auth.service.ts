@@ -58,6 +58,14 @@ export class AuthService {
       // if the user exists in the database just return the tokens
       if (user) {
 
+        await this.prisma.user.update({
+          where: { id: user.id},
+          data: {
+            isOnLine: true,
+            Status: 'online'
+          }
+        })
+
         // here need to set redirect tow factor to true 
         if (user.twoFactor) {
 

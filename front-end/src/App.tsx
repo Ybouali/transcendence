@@ -13,14 +13,31 @@ import Settings from './pages/Settings/Settings';
 import NotAuth from './pages/NotAuth/NotAuth';
 import ConnectedProvider from './context/ConnectedContextProvider';
 import TwoFactorValidation from './pages/TowFactor/TwoFactorValidation';
+import Header from './components/Header/Header';
+import { prepareUrl } from './utils/utils';
 
 function App() {
+
+  const loginIntra = async () => {
+
+    try {
+      
+      const url = prepareUrl("auth/42/");
+    
+      // make call to server to login with the intra 42
+      window.location.href = url;
+
+    } catch (error) {
+      return ;
+    }
+  }
 
   return (
     <ConnectedProvider>
       <BrowserRouter>
+        <Header logInFunc={loginIntra} />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home logInFunc={loginIntra} />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/game" element={<Game />} />

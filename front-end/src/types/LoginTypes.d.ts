@@ -1,4 +1,4 @@
 export interface LoginType {
-    isConnected: boolean;
-    logInFunc?: () => void;
+    // isConnected: boolean;
+    logInFunc: () => void;
 }
