@@ -15,6 +15,9 @@ import ConnectedProvider from './context/ConnectedContextProvider';
 import TwoFactorValidation from './pages/TowFactor/TwoFactorValidation';
 import Header from './components/Header/Header';
 import { prepareUrl } from './utils/utils';
+import ErrorPage from './pages/error-page/ErrorPage';
+import { SocketProvider } from './context/SocketProvider';
+import CommunityHub from './pages/community-hub/CommunityHub';
 
 function App() {
 
@@ -36,10 +39,12 @@ function App() {
     <ConnectedProvider>
       <BrowserRouter>
         <Header logInFunc={loginIntra} />
+        <SocketProvider>
         <Routes>
           <Route path="/" element={<Home logInFunc={loginIntra} />} />
           <Route path="/chat" element={<Chat />} />
-          <Route path="/friends" element={<Friends />} />
+          <Route path="/friends" element={<CommunityHub type="friends" />} />
+          <Route path="/groups" element={<CommunityHub type="rooms" />} />
           <Route path="/game" element={<Game />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile" element={<Profile />} />
@@ -47,8 +52,10 @@ function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/notauth" element={<NotAuth />} />
           <Route path="/tow-factor" element={<TwoFactorValidation />} />
+          <Route path="/error-page/:code" element={<ErrorPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </SocketProvider>
         <Footer />
       </BrowserRouter>
     </ConnectedProvider>
