@@ -10,50 +10,8 @@ import axios from 'axios'
 
 function Home(props: LoginType) {
 
-  const navigate = useNavigate();
-
-  useEffect( () => {
-
-    logIn();
-    
-  }, [])
-
-  const logIn = async () => {
-
-    try {
-      
-      // get the tokens from the local storage
-      const tokens: Tokens | null = await getTokensFromCookie();
-
-      // check if the tokens is present in the cookie so you should redirect to the profile page
-      if (tokens) {
-        navigate("/profile");
-      }
-
-    } catch (error) {
-      // console.log(error)
-      return ;
-    }
-  }
-
-  // const loginIntra = async () => {
-
-  //   try {
-      
-  //     const url = prepareUrl("auth/42/");
-    
-  //     // make call to server to login with the intra 42
-  //     window.location.href = url;
-
-  //   } catch (error) {
-  //     return ;
-  //   }
-  // }
-
   return (
     <>
-      {/* <Header isConnected={false} logInFunc={loginIntra} /> */}
-      {/* <Showcase isConnected={false} logInFunc={loginIntra} /> */}
       <Showcase logInFunc={props.logInFunc} />
       <About />
       <Team />

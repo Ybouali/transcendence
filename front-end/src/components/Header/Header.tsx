@@ -7,7 +7,7 @@ import useFetch from "../../utils/hooks/useFetch";
 import { LoginType, Tokens } from "../../types";
 import StaticHeaderHome from "./StaticHeader/StaticHeader";
 import DynamicHeader from "./DynamicHeader/DynamicHeader";
-import { getTokensFromCookie } from "../../utils/utils";
+import { getCookie, getTokensFromCookie } from "../../utils/utils";
 
 
 const Header = (props: LoginType) => {
@@ -36,13 +36,23 @@ const Header = (props: LoginType) => {
 
     const getAuth = async () => {
 
-      const token: Tokens | null = await getTokensFromCookie();
+      const gat = getCookie('access_token');
+      const grt = getCookie('refresh_token');
 
-      if (token) {
-        setIsConnected(true);
-      } else {
-        setIsConnected(false);
+      if (gat && grt) {
+        
+        console.log("hello world !");
+
+        const token: Tokens | null = await getTokensFromCookie();
+  
+        if (token) {
+          setIsConnected(true);
+        } else {
+          setIsConnected(false);
+        }
+
       }
+
 
     }
 

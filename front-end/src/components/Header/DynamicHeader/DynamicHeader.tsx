@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { getTokensFromCookie, prepareUrl, updateUser } from '../../../utils/utils';
+import { getCookie, getTokensFromCookie, prepareUrl, updateUser } from '../../../utils/utils';
 import { Tokens, UserType } from '../../../types';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -80,47 +80,55 @@ function DynamicHeader(props: IsLoggedIn) {
     });
 
     const logoutFromServer = async () => {
+      const gat = getCookie('access_token');
+      const grt = getCookie('refresh_token');
+
+      if (gat && grt) {
 
         // get the tokens
         const tokens: Tokens | null = await getTokensFromCookie();
 
-        if (!tokens) {
-          navigate("/notauth");
+        if (!tokens || !tokens.access_token || !tokens.refresh_token) {
+          navigate("/error-page/:401");
         }
 
         if (tokens) {
 
-        try {
+          try {
 
-            const url: string = prepareUrl("auth/logout/");
-            
-            // logout from the server
-            const res = await axios.get(url, {
-              headers: {
-                'access_token': tokens.access_token,
-                'refresh_token': tokens.refresh_token
+              const url: string = prepareUrl("auth/logout/");
+              
+              // logout from the server
+              const res = await axios.get(url, {
+                headers: {
+                  'access_token': tokens.access_token,
+                  'refresh_token': tokens.refresh_token
+                }
+              })
+              
+              if (res.data.message === "done") {
+              
+                // remove tokens from the cookie
+                document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie = "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+                // set connected to false 
+                props.setIsConnected();
+
+                // navigate to home page
+                navigate("/")
               }
-            })
-            
-            if (res.data.message === "done") {
-            
-            // remove tokens from the cookie
-            document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            document.cookie = "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-
-            // set connected to false 
-            props.setIsConnected();
-
-            // navigate to home page
-            navigate("/")
-            }
-            else {
-            navigate("/notauth");
-            }
-        } catch (error) {
-            console.log(error);
+              else {
+                navigate("/error-page/:401");
+              }
+          } catch (error) {
+              console.log(error);
+          }
         }
-        }
+        
+      }
+
+        
 
     }
 

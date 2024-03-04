@@ -25,8 +25,6 @@ export class AuthService {
     private encrypt: EncryptionService,
   ) {}
 
-  private readonly salt: string = process.env.SALT_ENCRYPT;
-
   async logout(user: User) {
     await this.prisma.user.update({
       where: { email: user.email },
@@ -44,6 +42,7 @@ export class AuthService {
         throw new NotAcceptableException();
       }
 
+
       // get the user data from intra 42 api's
       // const dataIntra: IntraUserDto = await this.fetchDataUserFromIntra(code);
 
@@ -58,6 +57,7 @@ export class AuthService {
       // if the user exists in the database just return the tokens
       if (user) {
 
+        // update the status of the user
         await this.prisma.user.update({
           where: { id: user.id},
           data: {
@@ -78,6 +78,13 @@ export class AuthService {
           })
 
         }
+        
+        // check  if the user has already logged in
+        
+        
+        // const tokens: Tokens = {
+
+        // }
 
         return await this.returnTokens(user.id, user.email);
       }
@@ -113,7 +120,12 @@ export class AuthService {
     }
   }
 
-  async refreshToken(@GetUser() user: User): Promise<{ access_token: string }> {
+  async refreshToken(@GetUser() user: User): Promise<Tokens | null> {
+
+    if (user.refreshToken === "logout") {
+      return null;
+    }
+
     const access_token: string = await this.generateJwtToken(
       user.id,
       user.email,
@@ -122,14 +134,17 @@ export class AuthService {
 
     const hashAT: string = await this.encrypt.encrypt(access_token);
 
-    await this.prisma.user.update({
+    const userN: User = await this.prisma.user.update({
       where: { id: user.id },
       data: { accessToken: hashAT, isOnLine: true },
     });
+    
+    const refresh_token: string = await this.encrypt.decrypt(user.refreshToken);
 
     return {
       access_token,
-    };
+      refresh_token
+    }
   }
 
   async generateTokens(id: string, email: string): Promise<Tokens> {

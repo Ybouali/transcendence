@@ -11,12 +11,6 @@ export class EncryptionService {
   // get the secret from the config service
   private readonly key = process.env.ENCRYPT_SECRET;
 
-  // // get the salt from the config service
-  // private readonly salt: string = process.env.SALT_ENCRYPT;
-
-  // // get the algorithem from the config service
-  // private readonly algo = process.env.ALGORITHM_ENCRYPT;
-
   async encrypt(toEncrypt: string): Promise<string> {
 
     try {

@@ -33,16 +33,21 @@ function ProfileUserInfos() {
       // get the tokens
       const tokens: Tokens | null = await getTokensFromCookie();
   
-      if (tokens) {
+      if (!tokens || !tokens.access_token || !tokens.refresh_token) {
     
         if (userId) {
           // the will be called because the url contains a user id
 
-          const userById = await getUserById(userId, tokens);
+          if (tokens) {
+            
+            const userById = await getUserById(userId, tokens);
 
-          if (userById) {
-            setOtherUser(userById);
+            if (userById) {
+              setOtherUser(userById);
+            }
+            
           }
+
 
         }
 

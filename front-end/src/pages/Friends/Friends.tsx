@@ -19,7 +19,7 @@ function Friends() {
     const tokens: Tokens | null = await getTokensFromCookie();
 
     if (!tokens) {
-      navigate("/notauth")
+      navigate("/error-page/:401")
     }
 
   }

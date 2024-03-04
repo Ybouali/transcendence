@@ -27,8 +27,8 @@ function Profile() {
     // if there is no tokens the user will be redirected to not auth page this will be the Gaurd
     const tokens: Tokens | null = await getTokensFromCookie();
 
-    if (!tokens) {
-      navigate("/notauth")
+    if (!tokens || !tokens.access_token || !tokens.refresh_token) {
+      navigate("/error-page/:401")
     }
 
     if (connectedUser?.twoFactor && connectedUser?.towFactorToRedirect) {

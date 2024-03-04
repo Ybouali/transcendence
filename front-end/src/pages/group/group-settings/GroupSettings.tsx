@@ -128,7 +128,7 @@ const GroupSettings: React.FC<GroupSettingsProps> = ({ members, admins, componen
     const tokens: any = await getTokensFromCookie();
 
     if (!tokens) {
-      navigate("/notauth");
+      navigate("/error-page/:401");
     }
     
     if (roomCredentials?.url.includes('create')) {

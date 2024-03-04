@@ -24,7 +24,7 @@ function TwoFactorValidation() {
         const userData: UserType | null = await generateTowFactorQrCode();
 
         if (!userData) {
-            navigate("/notauth")
+            navigate("/error-page/:401")
         } else {
             setConnectedUser(userData)
         }

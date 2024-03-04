@@ -2,7 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import useLocalStorage from "../utils/hooks/useLocalStorage";
 import { ConnectedContext } from "./ConnectedContext";
 import { UserType } from "../types";
-import { getUserInfo } from "../utils/utils";
+import { getCookie, getUserInfo } from "../utils/utils";
 
 interface UserProviderProps {
   children: React.ReactNode;
@@ -21,11 +21,19 @@ export const ConnectedProvider: React.FC<UserProviderProps> = ({ children }) => 
 
   const initData = async () => {
 
-    const userData: UserType | null = await getUserInfo();
+    const gat = getCookie('access_token');
+    const grt = getCookie('refresh_token');
 
-    if (userData) {
-      setConnectedUser(userData)
-    }
+      if (gat && grt) {
+        
+        const userData: UserType | null = await getUserInfo();
+    
+        if (userData) {
+          setConnectedUser(userData)
+        }
+        
+      }
+
 
   }
 
