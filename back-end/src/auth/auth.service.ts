@@ -77,14 +77,48 @@ export class AuthService {
             }
           })
 
-        }
+          // check  if the user has already logged in
         
-        // check  if the user has already logged in
-        
-        
-        // const tokens: Tokens = {
+          // the user has already tokens so need just to decrypt them and return them
+          if (user.refreshToken !== "logout" && user.accessToken !== "offline") {
 
-        // }
+            // need to decrypt the tokens from the user and return them
+            const accToken: string = await this.encrypt.decrypt(user.accessToken);
+            const refToken: string = await this.encrypt.decrypt(user.refreshToken);
+
+            return {
+              access_token: accToken,
+              refresh_token: refToken
+            }
+          }  // the user it just off line but his has already logged in the server
+            // need to create a new access token and return it
+          else if (user.refreshToken !== "logout") {
+
+            // decrypt the refresh token from the user 
+            const refToken: string = await this.encrypt.decrypt(user.refreshToken);
+            
+            // create the access token
+            const acctoken = await this.generateJwtToken(user.id, user.email, 60 * 5);
+
+            // encrypt the access token
+            const hashToken = await this.encrypt.encrypt(acctoken);
+
+            // update the user access token
+            const updateUser: User = await this.prisma.user.update({
+              where: { id: user.id },
+              data: {
+                accessToken: hashToken
+              }
+            })
+
+            return {
+              access_token: acctoken,
+              refresh_token: refToken
+            }
+
+          }
+
+        }
 
         return await this.returnTokens(user.id, user.email);
       }

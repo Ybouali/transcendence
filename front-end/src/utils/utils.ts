@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { HistoryGameReturnedType, LeaderBoardType, Tokens, UserType } from '../types';
 
 export function prepareUrl(url: string): string {
@@ -40,10 +40,34 @@ export async function getTokensFromCookie(): Promise<Tokens | null> {
                 access_token: gat,
             }
         })
-        .then(response => { return response; })
-        .catch(err => { return null; }) 
+        .then(response => {
+            console.log("------------------ RESPONSE -----------------")
+            console.log(response)
+            console.log("---------------------------------------------")
+            return response;
+            
+        })
+        .catch(err => {
 
-        if (!data) { return null; }
+            console.error("")
+            
+            if (err.response.status == 401) {
+
+                console.log("------------------- ERROR -------------------")
+                console.log(err)
+                console.log("---------------------------------------------")
+                throw new Error("need to refresh the access token")
+            }
+
+            if (err instanceof AxiosError) {
+                throw new Error("need to refresh the access token")
+            }
+            return null;
+        }) 
+
+        if (!data) {
+            return null;
+        }
 
         if (data.status !== 200) { throw new Error("need to refresh the access_token") ; }
 
@@ -54,6 +78,10 @@ export async function getTokensFromCookie(): Promise<Tokens | null> {
 
         return tokensRet;
     } catch (error) {
+
+        document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
         const url: string = prepareUrl("auth/refresh/");
 
         // refresh the access token
@@ -63,17 +91,19 @@ export async function getTokensFromCookie(): Promise<Tokens | null> {
             },
         });
 
+        console.log({
+            resData
+        })
+        
         if (resData.data.message !== 'done') return null;
-
-        gat = getCookie('access_token');
-        grt = getCookie('refresh_token');
+        
+        document.cookie = resData.data.access_token
+        document.cookie = resData.data.refresh_token
 
         return {
             access_token: gat,
             refresh_token: grt,
         }
-
-
     }
 
     return null;

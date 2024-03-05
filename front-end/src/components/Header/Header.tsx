@@ -40,8 +40,6 @@ const Header = (props: LoginType) => {
       const grt = getCookie('refresh_token');
 
       if (gat && grt) {
-        
-        console.log("hello world !");
 
         const token: Tokens | null = await getTokensFromCookie();
   
