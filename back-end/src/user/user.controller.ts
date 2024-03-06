@@ -29,6 +29,7 @@ export class UserController {
 
   @Get('/me')
   async getMe(@GetUser() user: User) {
+    this.logger.debug(`User ${user.username}`)
     return user;
   }
 

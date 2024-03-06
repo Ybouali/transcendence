@@ -67,7 +67,7 @@ export class AuthController {
     res.cookie('access_token', tokens.access_token, { httpOnly: false });
     res.cookie('refresh_token', tokens.refresh_token, { httpOnly: false });
 
-    this.logger.log(`User ${username} Is logged In `);  
+    this.logger.log(`User ${username} Is logged In `);
 
     return;
   }
@@ -76,11 +76,17 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Get('refresh')
   async refresh(@Res() res: Response, @GetUser() user: User) {
-    const { access_token } = await this.authService.refreshToken(user);
+    const tokens: Tokens = await this.authService.refreshToken(user);
 
     this.logger.log(`${user.username} is back to the server `)
-    res.cookie('access_token', access_token, { httpOnly: false });
 
-    return res.status(HttpStatus.OK).json({ message: 'done' });
+
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+
+    res.cookie('access_token', tokens.access_token, { httpOnly: false });
+    res.cookie('refresh_token', tokens.refresh_token, { httpOnly: false });
+
+    return res.status(HttpStatus.OK).json({ message: 'done', access_token: tokens.access_token, refresh_token: tokens.refresh_token });
   }
 }

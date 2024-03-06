@@ -37,7 +37,7 @@
 
 import io from "socket.io-client";
 import React, { useEffect, useState } from "react";
-import { getTokensFromCookie } from '../utils/utils';
+import { getCookie, getTokensFromCookie } from '../utils/utils';
 
 const SocketContext = React.createContext(null);
 
@@ -45,6 +45,12 @@ const SocketProvider: React.FC<any> = ({ children }) => {
     const [socket, setSocket] = useState<any>(null);
 
     useEffect(() => {
+
+        const gat = getCookie('access_token');
+        const grt = getCookie('refresh_token');
+
+      if (gat && grt) {
+
         const establishSocketConnection = async () => {
         const tokens = await getTokensFromCookie();
 
@@ -69,6 +75,9 @@ const SocketProvider: React.FC<any> = ({ children }) => {
         };
 
         establishSocketConnection();
+      }
+
+        
     }, []);
 
     return (

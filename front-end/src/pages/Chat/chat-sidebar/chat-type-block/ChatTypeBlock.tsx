@@ -30,7 +30,7 @@ const ChatTypeBlock: React.FC<any> = ({ type, selectedChat, setSelectedChat, las
     try {
       const tokens: any = await getTokensFromCookie();
       if (!tokens) {
-        navigate("/notauth");
+        navigate("/error-page/:401");
       }
       if (type == 'chat-friends') {
         const response = await fetch(`http://localhost:3333/messages/conversation/me`,{

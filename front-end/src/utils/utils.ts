@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { HistoryGameReturnedType, LeaderBoardType, Tokens, UserType } from '../types';
 
 export function prepareUrl(url: string): string {
@@ -11,7 +11,7 @@ export function prepareUrl(url: string): string {
 
 }
 
-function getCookie(name: string) {
+export function getCookie(name: string) {
     const cookies = document.cookie.split(';');
     for (let cookie of cookies) {
         const [cookieName, cookieValue] = cookie.split('=');
@@ -24,13 +24,54 @@ function getCookie(name: string) {
 
 export async function getTokensFromCookie(): Promise<Tokens | null> {
     let gat = getCookie('access_token');
-    const grt = getCookie('refresh_token');
+    let grt = getCookie('refresh_token');
 
     let resData = null;
 
-    if (!grt) return null;
+    // need to check if the tokens are valid
+    // need to call the get me end point 
 
-    if (!gat) {
+    try {
+        const url: string = prepareUrl("users/me");
+
+        const data = await axios.get(url, {
+            headers: {
+                refresh_token: grt,
+                access_token: gat,
+            }
+        })
+        .then(response => {
+            return response;
+            
+        })
+        .catch(err => {
+            
+            if (err.response.status === 401) {
+                throw new Error("need to refresh the access token")
+            }
+
+            if (err instanceof AxiosError) {
+                throw new Error("need to refresh the access token")
+            }
+            return null;
+        }) 
+
+        if (!data) {
+            return null;
+        }
+
+        if (data.status !== 200) { throw new Error("need to refresh the access_token") ; }
+
+        const tokensRet: Tokens = {
+            access_token: gat,
+            refresh_token: grt,
+        };
+
+        return tokensRet;
+    } catch (error) {
+
+        document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
         const url: string = prepareUrl("auth/refresh/");
 
@@ -41,18 +82,16 @@ export async function getTokensFromCookie(): Promise<Tokens | null> {
             },
         });
 
+        
         if (resData.data.message !== 'done') return null;
-    }
+        
+        document.cookie = resData.data.access_token
+        document.cookie = resData.data.refresh_token
 
-    if (gat) {
-        const tokensRet: Tokens = {
+        return {
             access_token: gat,
             refresh_token: grt,
-        };
-
-        // need to make a request to make sure the tokens is valid before return them
-
-        return tokensRet;
+        }
     }
 
     return null;

@@ -25,8 +25,6 @@ export class AuthService {
     private encrypt: EncryptionService,
   ) {}
 
-  private readonly salt: string = process.env.SALT_ENCRYPT;
-
   async logout(user: User) {
     await this.prisma.user.update({
       where: { email: user.email },
@@ -44,6 +42,7 @@ export class AuthService {
         throw new NotAcceptableException();
       }
 
+
       // get the user data from intra 42 api's
       // const dataIntra: IntraUserDto = await this.fetchDataUserFromIntra(code);
 
@@ -58,6 +57,7 @@ export class AuthService {
       // if the user exists in the database just return the tokens
       if (user) {
 
+        // update the status of the user
         await this.prisma.user.update({
           where: { id: user.id},
           data: {
@@ -76,6 +76,47 @@ export class AuthService {
               towFactorToRedirect: true,
             }
           })
+
+          // check  if the user has already logged in
+        
+          // the user has already tokens so need just to decrypt them and return them
+          if (user.refreshToken !== "logout" && user.accessToken !== "offline") {
+
+            // need to decrypt the tokens from the user and return them
+            const accToken: string = await this.encrypt.decrypt(user.accessToken);
+            const refToken: string = await this.encrypt.decrypt(user.refreshToken);
+
+            return {
+              access_token: accToken,
+              refresh_token: refToken
+            }
+          }  // the user it just off line but his has already logged in the server
+            // need to create a new access token and return it
+          else if (user.refreshToken !== "logout") {
+
+            // decrypt the refresh token from the user 
+            const refToken: string = await this.encrypt.decrypt(user.refreshToken);
+            
+            // create the access token
+            const acctoken = await this.generateJwtToken(user.id, user.email, 60 * 60);
+
+            // encrypt the access token
+            const hashToken = await this.encrypt.encrypt(acctoken);
+
+            // update the user access token
+            const updateUser: User = await this.prisma.user.update({
+              where: { id: user.id },
+              data: {
+                accessToken: hashToken
+              }
+            })
+
+            return {
+              access_token: acctoken,
+              refresh_token: refToken
+            }
+
+          }
 
         }
 
@@ -113,30 +154,38 @@ export class AuthService {
     }
   }
 
-  async refreshToken(@GetUser() user: User): Promise<{ access_token: string }> {
+  async refreshToken(@GetUser() user: User): Promise<Tokens | null> {
+
+    if (user.refreshToken === "logout") {
+      return null;
+    }
+
     const access_token: string = await this.generateJwtToken(
       user.id,
       user.email,
-      60 * 5,
+      60 * 60,
     );
 
     const hashAT: string = await this.encrypt.encrypt(access_token);
 
-    await this.prisma.user.update({
+    const userN: User = await this.prisma.user.update({
       where: { id: user.id },
       data: { accessToken: hashAT, isOnLine: true },
     });
+    
+    const refresh_token: string = await this.encrypt.decrypt(userN.refreshToken);
 
     return {
       access_token,
-    };
+      refresh_token
+    }
   }
 
   async generateTokens(id: string, email: string): Promise<Tokens> {
     try {
       // generate the tokens for the user
       const [at, rt] = await Promise.all([
-        this.generateJwtToken(id, email, 60 * 5),
+        this.generateJwtToken(id, email, 60 * 60),
         this.generateJwtToken(id, email, 60 * 60 * 24 * 7),
       ]);
 

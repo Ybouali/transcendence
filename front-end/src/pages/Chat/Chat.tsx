@@ -59,7 +59,7 @@ const Chat = () => {
         const tokens: any = await getTokensFromCookie();
 
         if (!tokens) {
-            navigate("/notauth");
+            navigate("/error-page/:401");
         }
     
         try {

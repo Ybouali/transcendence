@@ -17,7 +17,7 @@ async function bootstrap() {
     .build();
 
   app.use(cors({
-    origin: `http://${process.env.IP}:3000`,
+    origin: `http://${process.env.IP || "127.0.0.1" }:3000`,
   }));
 
   // Serve static files from the "public" directory
