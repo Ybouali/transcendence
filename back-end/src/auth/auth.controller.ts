@@ -81,11 +81,11 @@ export class AuthController {
     this.logger.log(`${user.username} is back to the server `)
 
 
-    // res.clearCookie('access_token');
-    // res.clearCookie('refresh_token');
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
 
-    // res.cookie('access_token', tokens.access_token, { httpOnly: false });
-    // res.cookie('refresh_token', tokens.refresh_token, { httpOnly: false });
+    res.cookie('access_token', tokens.access_token, { httpOnly: false });
+    res.cookie('refresh_token', tokens.refresh_token, { httpOnly: false });
 
     return res.status(HttpStatus.OK).json({ message: 'done', access_token: tokens.access_token, refresh_token: tokens.refresh_token });
   }

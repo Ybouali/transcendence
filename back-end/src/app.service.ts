@@ -54,7 +54,7 @@ export class AppService {
     }
   }
 
-  @Interval(5000)
+  @Interval(3.6e+6)
   async onlineOffLineUsers() {
     // Get all the users
     let users: User[] = await this.getUsers();

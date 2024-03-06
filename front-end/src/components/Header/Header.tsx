@@ -12,47 +12,9 @@ import { getCookie, getTokensFromCookie } from "../../utils/utils";
 
 const Header = (props: LoginType) => {
 
-    const navigate = useNavigate();
-
-    const { connectedUser } = useConnectedUser();
-
     const [justOpened, setJustOpened] = useState(false);
-
-    const [isConnected, setIsConnected] = useState<boolean>(false);
     
     const dropDownMenuRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-      
-      getAuth();
-
-    }, [setIsConnected])
-
-    const setConnectedUser = () => {
-
-      setIsConnected(!isConnected);
-
-    }
-
-    const getAuth = async () => {
-
-      const gat = getCookie('access_token');
-      const grt = getCookie('refresh_token');
-
-      if (gat && grt) {
-
-        const token: Tokens | null = await getTokensFromCookie();
-  
-        if (token) {
-          setIsConnected(true);
-        } else {
-          setIsConnected(false);
-        }
-
-      }
-
-
-    }
 
     useClickOutside(dropDownMenuRef, () => {
         // CHECK IF THE MODAL JUST OPENED
@@ -66,9 +28,9 @@ const Header = (props: LoginType) => {
 
   return (
     <>
-      {!isConnected && <StaticHeaderHome logInFunc={props.logInFunc} />  }
+      {!props.isConnected && <StaticHeaderHome logInFunc={props.logInFunc} />  }
 
-      {isConnected && <DynamicHeader setIsConnected={setConnectedUser} />}
+      {props.isConnected && <DynamicHeader setIsConnected={props.setIsConnected} />}
     </>
   );
 };

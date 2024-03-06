@@ -41,21 +41,12 @@ export async function getTokensFromCookie(): Promise<Tokens | null> {
             }
         })
         .then(response => {
-            console.log("------------------ RESPONSE -----------------")
-            console.log(response)
-            console.log("---------------------------------------------")
             return response;
             
         })
         .catch(err => {
-
-            console.error("")
             
-            if (err.response.status == 401) {
-
-                console.log("------------------- ERROR -------------------")
-                console.log(err)
-                console.log("---------------------------------------------")
+            if (err.response.status === 401) {
                 throw new Error("need to refresh the access token")
             }
 
@@ -91,9 +82,6 @@ export async function getTokensFromCookie(): Promise<Tokens | null> {
             },
         });
 
-        console.log({
-            resData
-        })
         
         if (resData.data.message !== 'done') return null;
         

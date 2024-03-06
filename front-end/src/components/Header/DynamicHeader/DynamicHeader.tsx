@@ -9,7 +9,7 @@ import useFetch from '../../../utils/hooks/useFetch';
 import SearchResults from '../../SearchResults/SearchResults';
 
 interface IsLoggedIn {
-    setIsConnected: () => void;
+    setIsConnected?: () => void;
 }
 
 function DynamicHeader(props: IsLoggedIn) {
@@ -112,8 +112,12 @@ function DynamicHeader(props: IsLoggedIn) {
                 document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                 document.cookie = "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
+
+
                 // set connected to false 
-                props.setIsConnected();
+                if (props.setIsConnected) {
+                  props.setIsConnected();
+                }
 
                 // navigate to home page
                 navigate("/")

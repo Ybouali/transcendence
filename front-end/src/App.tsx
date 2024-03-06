@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Home from './pages/Home/Home';
@@ -11,12 +11,45 @@ import Settings from './pages/Settings/Settings';
 import ConnectedProvider from './context/ConnectedContextProvider';
 import TwoFactorValidation from './pages/TowFactor/TwoFactorValidation';
 import Header from './components/Header/Header';
-import { prepareUrl } from './utils/utils';
+import { getCookie, getTokensFromCookie, prepareUrl } from './utils/utils';
 import ErrorPage from './pages/error-page/ErrorPage';
 import { SocketProvider } from './context/SocketProvider';
 import CommunityHub from './pages/community-hub/CommunityHub';
+import { Tokens } from './types';
 
 function App() {
+
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+
+  useEffect(() => {
+
+    getAuth()
+
+  }, [setIsConnected])
+
+  const setConnectedUser = () => {
+
+    setIsConnected(!isConnected);
+
+  }
+
+  const getAuth = async () => {
+
+    const gat = getCookie('access_token');
+    const grt = getCookie('refresh_token');
+
+    if (gat && grt) {
+
+      const token: Tokens | null = await getTokensFromCookie();
+
+      if (token) {
+        setIsConnected(true);
+      } else {
+        setIsConnected(false);
+      }
+
+    }
+  }
 
   const loginIntra = async () => {
 
@@ -35,7 +68,7 @@ function App() {
   return (
     <ConnectedProvider>
       <BrowserRouter>
-        <Header logInFunc={loginIntra} />
+        <Header logInFunc={loginIntra} isConnected={isConnected} setIsConnected={setConnectedUser} />
         <SocketProvider>
           <Routes>
             <Route path="/" element={<Home logInFunc={loginIntra} />} />
