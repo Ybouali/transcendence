@@ -1,33 +1,76 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 import "./GamesHistoryStyle.css"
-import { HistoryGameReturnedType } from '../../../types';
+import { HistoryGameReturnedType, Tokens, UserType } from '../../../types';
 import GameHistoryItem from './GameHistoryItem/GameHistoryItem';
 import { useParams } from 'react-router-dom';
-import { getHisGamesByUserId } from '../../../utils/utils';
+import { getHisGamesByUserId, getTokensFromCookie } from '../../../utils/utils';
 import DataTable from "datatables.net-dt";
 import "datatables.net-buttons"
 import "datatables.net-responsive"
 import "datatables.net-dt/css/dataTables.dataTables.css";
 import $ from 'jquery';
+import { useConnectedUser } from '../../../context/ConnectedContext';
 
 function GamesHistory( ) {
 
   const [tableInitialized, setTableInitialized] = useState<boolean>(false);
+
+  const { connectedUser, setConnectedUser } = useConnectedUser();
 
   const { userId } = useParams();
 
   const [dataHisGame, setDataHisGame] = useState<HistoryGameReturnedType [] | null>(null);
 
   useEffect(() => {
-    
-    if (userId) {
-      getDatahistoryGames(userId)
-    } else {
-      getDatahistoryGames(null)
+    initData();
+  }, [setDataHisGame]);
+
+  const initData = async () => {
+
+    const tokens: Tokens | null = await getTokensFromCookie();
+
+    if (tokens && tokens.access_token && tokens.refresh_token)  {
+
+      if (userId) {
+      
+        await getDatahistoryGames(userId)
+      
+      } else {
+        
+        if (connectedUser?.id) {
+          await getDatahistoryGames(connectedUser.id)
+        }
+
+      }  
+
     }
 
-  }, []);
+  }
+
+  const getDatahistoryGames = async (userId: string | null) => {
+
+    let data: HistoryGameReturnedType [] | null = null;
+
+    try {
+
+      if (userId) {
+        data = await getHisGamesByUserId(userId);
+      } else {
+        
+        data = await getHisGamesByUserId(null);
+      }
+
+      if (Array.isArray(data)) {
+        setDataHisGame(data);
+      }
+      else {
+        setDataHisGame([]);
+      }
+    } catch (error) {
+      setDataHisGame([]);
+    }
+  }
 
   const tableRef = useRef<any>();
 
@@ -36,6 +79,7 @@ function GamesHistory( ) {
 
     if (!tableInitialized) {
       
+      // Then you can reinitialize your DataTable
       $('#example').DataTable();
 
       setTableInitialized(true);
@@ -71,41 +115,6 @@ function GamesHistory( ) {
     };
   }, []); // Empty dependency array ensures that the effect runs only once on mount
 
-  const getDatahistoryGames = async (userId: string | null) => {
-
-
-    try {
-      
-      let data: HistoryGameReturnedType [] | null = null;
-
-      if (userId) {
-        data = await getHisGamesByUserId(userId);
-      } else {
-        
-        data = await getHisGamesByUserId(null);
-      }
-
-      if (Array.isArray(data)) {
-        setDataHisGame(data);
-      }
-      else {
-        setDataHisGame([]);
-      }
-    } catch (error) {
-      setDataHisGame([]);
-    }
-
-    // let data: HistoryGameReturnedType [] | null = null;
-
-    // if (userId) {
-    //   data = await getHisGamesByUserId(userId);
-    // } else {
-      
-    //   data = await getHisGamesByUserId(null);
-    // }
-
-    // setDataHisGame(data);
-  }
     return (
       <table
         ref={tableRef}

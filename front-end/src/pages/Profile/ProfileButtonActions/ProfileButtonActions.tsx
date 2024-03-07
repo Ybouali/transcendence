@@ -4,17 +4,18 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Tokens, UserType } from '../../../types';
 import {  getTokensFromCookie, getUserById, getUserInfo } from '../../../utils/utils';
 import { useUser } from '../../../context/UserContext';
+import { useConnectedUser } from '../../../context/ConnectedContext';
 
 
 function ProfileButtonActions() {
 
   const navigate = useNavigate();
 
+  const { connectedUser } = useConnectedUser()
+
   const { userId } = useParams();
 
   const [friend, setFriend] = useState<boolean>(false);
-
-  const { user, fetchUser } = useUser()
 
   const [userData, setUserData] = useState<UserType | null>();
 
@@ -24,37 +25,43 @@ function ProfileButtonActions() {
 
     initData()
 
-  }, [])
+  }, [setUserData, setPersonal, setFriend])
 
   const initData = async () => {
 
-    // setUserData(userDataCon);
+    setUserData(connectedUser);
 
-    // console.log({ userData})
+    const tokens: Tokens | null = await getTokensFromCookie();
 
-    // if (!userData) {
-    //   navigate("/notauth")
-    // }
-
-    // const tokens: Tokens | null = await getTokensFromCookie();
-
-    // if (tokens === null) {
-    //   navigate('/notauth');
-    //   return ;
-    // }
+    if (tokens === null) {
+      navigate('/error-page/:401');
+      return ;
+    }
     
-    // if (userId) {
-    //   // the will be called because the url contains a user id
-    //   setUserData(await getUserById(userId, tokens))
-    //   setPersonal(false);
-    //   // here need to check if the user is a friend if is a friend so
-    //   // setFriend(true);
-    //   // if not a friend 
-    //   // setFriend(false);
-    // }
-    // else {
-    //   setPersonal(true);
-    // }
+    if (userId) {
+      
+      // the will be called because the url contains a user id
+      if (userId === connectedUser?.id) {
+        setPersonal(true);
+        setUserData(connectedUser);
+      } else {
+
+        const otherUser: UserType | null = await getUserById(userId, tokens);
+
+        setPersonal(false)
+        // here need to check if the user is a friend if is a friend so
+        // setFriend(true);
+        // if not a friend 
+        // setFriend(false);
+        setUserData(otherUser)
+      }
+
+
+      
+    }
+    else {
+      setPersonal(true);
+    }
     
   }
 
