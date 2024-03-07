@@ -4,12 +4,15 @@ import ProfileAchievement from './ProfileAchievement/ProfileAchievement';
 import { getNumberOfWinnedGames, getTokensFromCookie, getUserById, getUserInfo } from '../../../utils/utils';
 import { Tokens, UserType } from '../../../types';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useConnectedUser } from '../../../context/ConnectedContext';
 
 function ProfileAchievements() {
 
   const { userId } = useParams()
 
-  const navigate = useNavigate()
+  const { connectedUser, setConnectedUser } = useConnectedUser()
+
+  const [userData, setUserData] = useState<UserType | null>(null)
 
   const [numberGameWinned, setNumberGameWinned] = useState<number>(0)
 
@@ -17,35 +20,34 @@ function ProfileAchievements() {
 
     initData()
 
-  }, [])
+  }, [setUserData])
 
 
     const initData = async () => {
-      let userData: UserType | null = null;
 
       const tokens: Tokens | null = await getTokensFromCookie();
 
-      if (tokens === null) {
-        navigate('/');
-        return ;
+      if (tokens && tokens.access_token && tokens.refresh_token) {
+
+        setUserData(connectedUser);
+
+        if (userId) {
+          // the will be called because the url contains a user id
+          const otherUser: UserType | null = await getUserById(userId, tokens);
+
+          if (otherUser) {
+            setUserData(otherUser)
+          }
+        }
+
+        const nGameWinned: number | null = await getNumberOfWinnedGames(userData?.id)
+  
+        if (nGameWinned) {
+          setNumberGameWinned(nGameWinned);
+        }
+
       }
       
-      if (userId) {
-        // the will be called because the url contains a user id
-        userData = await getUserById(userId, tokens);
-      }
-      
-      if (userData === undefined) {
-        // this will be called because the url dose not contain a user id
-        // and this is the default one aka display the user logged in info
-        userData = await getUserInfo();
-      }
-
-      const nGameWinned: number | null = await getNumberOfWinnedGames(userData?.id)
-
-      if (nGameWinned) {
-        setNumberGameWinned(nGameWinned);
-      }
     }
 
 

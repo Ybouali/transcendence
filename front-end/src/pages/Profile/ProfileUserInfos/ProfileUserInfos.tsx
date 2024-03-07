@@ -8,51 +8,42 @@ import { useConnectedUser } from '../../../context/ConnectedContext';
 
 function ProfileUserInfos() {
 
-  const navigate = useNavigate();
-
   const { userId } = useParams();
 
   const { connectedUser } = useConnectedUser()
 
-  const [numberGamePlayed, setNumberGamePlayed] = useState<number>(0);
+  const [userData, setUserData] = useState<UserType | null>();
 
-  const [otherUser, setOtherUser] = useState<UserType | null>(null);
-  const [desplayedUser, setDesplayedUser] = useState<UserType | null>(null);
+  const [numberGamePlayed, setNumberGamePlayed] = useState<number>(0);
 
   useEffect(() => {
 
     initUserinfos()
 
-  })
+  }, [setUserData, setNumberGamePlayed])
 
-  
-
-  
   const initUserinfos = async () => {
 
       // get the tokens
       const tokens: Tokens | null = await getTokensFromCookie();
-  
-      if (!tokens || !tokens.access_token || !tokens.refresh_token) {
-    
+
+      if (tokens && tokens.access_token && tokens.refresh_token) {
+
+        setUserData(connectedUser)
+
         if (userId) {
           // the will be called because the url contains a user id
-
-          if (tokens) {
-            
             const userById = await getUserById(userId, tokens);
 
             if (userById) {
-              setOtherUser(userById);
+              console.log(userById)
+              setUserData(userById);
             }
-            
-          }
-
 
         }
 
         // get the number of game played by the player
-        const numberOfGames: number | null = await getNumberGamePlayedByUserId(desplayedUser?.id)
+        const numberOfGames: number | null = await getNumberGamePlayedByUserId(userData?.id)
     
         if (!numberOfGames) {
           setNumberGamePlayed(0);
@@ -66,17 +57,17 @@ function ProfileUserInfos() {
 
   return (
     <>
-    { connectedUser ? (
+    { userData ? (
       <div className="profile-user-infos">
 
         <div className="profile-user-image">
-          <img src={ prepareUrl("") + connectedUser?.avatarUrl} alt="user image" />
+          <img src={ prepareUrl("") + userData?.avatarUrl} alt="user image" />
         </div>
 
         <div className="profile-user-description">
-          <div className="profile-user-fullname">{connectedUser?.fullName}</div>
-          <p className="profile-user-username">{connectedUser?.username}</p>
-          { connectedUser.isOnLine ? <p className="profile-user-status">{connectedUser?.Status}</p> : <p className="profile-user-status">offline</p> }
+          <div className="profile-user-fullname">{userData?.fullName}</div>
+          <p className="profile-user-username">{userData?.username}</p>
+          <p className="profile-user-status">{userData?.Status}</p>
         </div>
 
         <div className="profile-user-stats">
@@ -90,7 +81,7 @@ function ProfileUserInfos() {
             <p className="stats-title">Played games</p>
           </div>
           <div className="stats-infos" id="level">
-            <div className="stats-number">{connectedUser?.levelGame}</div>
+            <div className="stats-number">{userData?.levelGame}</div>
             <p className="stats-title">Level</p>
           </div>
         </div>

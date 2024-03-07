@@ -29,6 +29,8 @@ export class AuthService {
     await this.prisma.user.update({
       where: { email: user.email },
       data: {
+        isOnLine: false,
+        Status: 'offline',
         accessToken: 'offline',
         refreshToken: 'logout',
       },
