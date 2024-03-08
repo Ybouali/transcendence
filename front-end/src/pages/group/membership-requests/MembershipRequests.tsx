@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import CardItem from "../../../components/card-item/CardItem";
 import "./MembershipRequestsStyle.css";
 import { useConnectedUser } from '../../../context/ConnectedContext';
+import { getTokensFromCookie } from "../../../utils/utils";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 
@@ -23,18 +25,29 @@ const MembershipRequests: React.FC<MembershipRequestsProps>  = ({ data , setData
   const { connectedUser } = useConnectedUser()
       const group_id = data?.group_id;
       const user_id = connectedUser?.id;
+      const navigate = useNavigate();
 
       const handleAccept = async (user_id: any, userTwo: any) => {
         if (!window.confirm('Are you sure you want to Accept had khona?')) return; 
+        const tokens: any = await getTokensFromCookie();
+
+        if (!tokens) {
+            navigate("/notauth");
+        }
         try {
-                  const response = await fetch(`http://localhost:3333/room/${user_id}/${group_id}/accept`, {
+                  const response = await fetch(`http://localhost:3333/room/${group_id}/accept`, {
                   method: "POST",
                   body: JSON.stringify({ adminId: user_id, roomId: group_id, userTwo: userTwo }),
                   headers: {
                     "Content-Type": "application/json",
+                    'access_token': tokens.access_token,
+                    'refresh_token': tokens.refresh_token
                   },
                 });
                 const res = await response.json();
+                if (res?.statusCode !== undefined) {
+                  throw new Error('Try again later!');
+                }
                 if (!response.ok){
                   throw new Error('Try again later!');
                 }
@@ -62,14 +75,24 @@ const MembershipRequests: React.FC<MembershipRequestsProps>  = ({ data , setData
     const handleDecline = async (user_id: any, userTwo: any) => {
       if (!window.confirm('Are you sure you want to Decline had khona?')) return;
       try {
+              const tokens: any = await getTokensFromCookie();
+
+              if (!tokens) {
+                  navigate("/notauth");
+              }
               const response = await fetch(`http://localhost:3333/room/${group_id}/decline`, {
                   method: "POST",
                   body: JSON.stringify({ adminId: user_id, roomId: group_id, userTwo: userTwo }),
                   headers: {
                     "Content-Type": "application/json",
+                    'access_token': tokens.access_token,
+                    'refresh_token': tokens.refresh_token
                   },
               })
               const res = await response.json();
+              if (res?.statusCode !== undefined) {
+                throw new Error('Try again later!');
+              }
               if (!response.ok){
                 throw new Error('Try again later!');
               }

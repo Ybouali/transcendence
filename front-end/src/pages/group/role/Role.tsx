@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useConnectedUser } from '../../../context/ConnectedContext';
 import { toast } from "react-toastify";
+import { getTokensFromCookie } from "../../../utils/utils";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -16,6 +18,7 @@ const Role: React.FC<any> = ({ data, setData }) => {
   const group_id = data?.group_id;
   const user_id = connectedUser?.id;
   const friendsList = data?.friends_list; 
+  const navigate = useNavigate();
 
 
   const [owner, setOwner] = useState([]);
@@ -34,11 +37,18 @@ const Role: React.FC<any> = ({ data, setData }) => {
   const handleMute = async (user_id: any, mutedUser: any, type: any) => {
     if (!window.confirm('Are you sure you want to mute had bnadm?')) return;
     try {
+            const tokens: any = await getTokensFromCookie();
+
+            if (!tokens) {
+                navigate("/notauth");
+            }
             const response = await fetch(`http://localhost:3333/room/${group_id}/mute`, {
               method: "POST",
               body: JSON.stringify({ userId: mutedUser, roomId: group_id,  duration: 1}),
               headers: {
                 "Content-Type": "application/json",
+                'access_token': tokens.access_token,
+                'refresh_token': tokens.refresh_token
               },
             });
 
@@ -71,11 +81,18 @@ const Role: React.FC<any> = ({ data, setData }) => {
   const handleBan = async (user_id: any, bannedId: any, type: any) => {
     if (!window.confirm('Are you sure you want to set had khona?')) return; 
     try {
+              const tokens: any = await getTokensFromCookie();
+
+              if (!tokens) {
+                  navigate("/notauth");
+              }
               const response = await fetch(`http://localhost:3333/room/${group_id}/ban`, {
               method: "POST",
               body: JSON.stringify({ adminId: user_id, roomId: group_id, bannedId: bannedId }),
               headers: {
                 "Content-Type": "application/json",
+                'access_token': tokens.access_token,
+                'refresh_token': tokens.refresh_token
               },
             });
             const res = await response.json();
@@ -109,11 +126,18 @@ const Role: React.FC<any> = ({ data, setData }) => {
   const handleSetAmin = async (user_id: any, newAdmin: any) => {
       if (!window.confirm('Are you sure you want to set had bnadm as admin?')) return; 
       try {
-              const response = await fetch(`http://localhost:3333/room/${group_id}/setAdmin`, {
+            const tokens: any = await getTokensFromCookie();
+
+            if (!tokens) {
+                navigate("/notauth");
+            }
+            const response = await fetch(`http://localhost:3333/room/${group_id}/setAdmin`, {
             method: "POST",
             body: JSON.stringify({ adminId: user_id, roomId: group_id, newAdmin: newAdmin }),
             headers: {
               "Content-Type": "application/json",
+              'access_token': tokens.access_token,
+              'refresh_token': tokens.refresh_token
             },
           });
           const res = await response.json();
@@ -148,11 +172,18 @@ const Role: React.FC<any> = ({ data, setData }) => {
   const handleUnsetAdmin = async (user_id: any, unsetAdminId: any) => {
     if (!window.confirm('Are you sure you want to set had bnadm as admin?')) return;
       try {
+              const tokens: any = await getTokensFromCookie();
+
+              if (!tokens) {
+                  navigate("/notauth");
+              }
               const response = await fetch(`http://localhost:3333/room/${group_id}/unsetAdmin`, {
               method: "POST",
               body: JSON.stringify({ adminId: user_id, roomId: group_id, unsetAdmin: unsetAdminId }),
               headers: {
                 "Content-Type": "application/json",
+                'access_token': tokens.access_token,
+                'refresh_token': tokens.refresh_token
               },
           });
           const res = await response.json();
@@ -186,11 +217,18 @@ const Role: React.FC<any> = ({ data, setData }) => {
   const handleKick = async (user_id: any, kickedUser: any) => {
       if (!window.confirm('Are you sure you want to delete had bnadm?')) return; 
       try {
+            const tokens: any = await getTokensFromCookie();
+
+            if (!tokens) {
+                navigate("/notauth");
+            }
             const response = await fetch(`http://localhost:3333/room/${group_id}/kick`, {
             method: "POST",
             body: JSON.stringify({ adminId: user_id, roomId: group_id, userId: kickedUser }),
             headers: {
               "Content-Type": "application/json",
+              'access_token': tokens.access_token,
+              'refresh_token': tokens.refresh_token
             },
           });
           const res = await response.json();

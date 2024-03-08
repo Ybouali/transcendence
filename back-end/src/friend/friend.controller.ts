@@ -20,6 +20,11 @@ export class FriendController{
         return await this.friendService.getAllFriends(userId);
     }
 
+    @Get("isfriend/:friendId")
+    async getIsFriend(@GetUser("id") userId: string, @Param("friendId") friendId: string): Promise<{ relationShip: string }> {
+        return this.friendService.getIsFriend(userId, friendId)
+    }
+
     // :userId for test
     @Post('add/:friendId')
     async addFriend(@GetUser('id') userId: string, @Param('friendId') friendId: string) {

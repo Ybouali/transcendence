@@ -7,6 +7,7 @@ import { MessagesService } from './DirectMessages/messages.service';
 import { ChatService } from './chat.service';
 import { SharedService } from './shared/shared.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import * as jwt from 'jsonwebtoken';
 // import { CreateRoomDto } from './rooms/dto/create-room.dto';
 import { RoomsService } from './rooms/rooms.service';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -27,20 +28,34 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     ) {}
 
     handleDisconnect(client: any) {
-        // [test]
-        const userId = client.handshake.headers.authorization;
-        this.chatService.removeUserSocket(userId, client.id);
-        this.logger.debug('onDisconnect ', client.id);
-
-
+        const accessToken = client.handshake.query.access_token as string;
+        console.log('accessToken : handleDisconnect', accessToken);
+        try {
+        if (accessToken) {
+            const decodedToken = jwt.verify(accessToken, process.env.SECRET_JWT_TOKEN);
+            const userId: string = (decodedToken as any).sub;
+            this.chatService.removeUserSocket(userId, client.id);
+            console.log('[x] client disconnected with this id:', userId)
+        }
+    } catch (error) {
+        console.error('Error decoding access token:', error.message);
+    }
     }
 
     handleConnection(client: any) {
-        // [test]
-        const userId = client.handshake.headers.authorization;
-
-        this.chatService.addUserSocket(userId, client.id);
-        this.logger.debug('onConnection: ', client.id, '=> ', userId);
+        const accessToken = client.handshake.query.access_token as string;
+        console.log('accessToken : handleConnection', accessToken);
+        try {
+            // Decode the access token to get userId
+            if (accessToken) {
+                const decodedToken = jwt.verify(accessToken, process.env.SECRET_JWT_TOKEN);
+                const userId: string = (decodedToken as any).sub;
+                this.chatService.addUserSocket(userId, client.id);
+                console.log('[+] This client is connected =>', userId);
+            }
+        } catch (error) {
+            console.error('Error decoding access token:', error.message);
+        }
     }
 
     private async isUserMuted(senderId: string, roomId: string): Promise<boolean> {

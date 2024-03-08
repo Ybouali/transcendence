@@ -30,7 +30,7 @@ const ChatTypeBlock: React.FC<any> = ({ type, selectedChat, setSelectedChat, las
     try {
       const tokens: any = await getTokensFromCookie();
       if (!tokens) {
-        navigate("/error-page/:401");
+        navigate("/notauth");
       }
       if (type == 'chat-friends') {
         const response = await fetch(`http://localhost:3333/messages/conversation/me`,{
@@ -96,28 +96,28 @@ const ChatTypeBlock: React.FC<any> = ({ type, selectedChat, setSelectedChat, las
     console.log('connectedUser here:', connectedUser);
     fetchData();
 
-    socketData.on("newFriend", (newFriendData: any) => {
+    socketData?.on("newFriend", (newFriendData: any) => {
       setNewFriend(newFriendData)
     });
 
-    socketData.on("removeFriend", (removedFriendData: any) => {
+    socketData?.on("removeFriend", (removedFriendData: any) => {
       if (removedFriendData) {
         setFriendsMessages((prevValue: any) => prevValue.filter((item: any) => item.id !== removedFriendData?.id))
         setCloseSelectedChat(removedFriendData);
       };
     });
 
-    socketData.on("leaveRoom", (removedRoomData: any) => {
+    socketData?.on("leaveRoom", (removedRoomData: any) => {
         setgroupsMessages((prevValue: any) => prevValue.filter((item: any) => item.id !== removedRoomData?.payload?.roomId))
         setCloseSelectedChat(removedRoomData);
     });
 
-    socketData.on("newRoom", (newRoomData: any) => {
+    socketData?.on("newRoom", (newRoomData: any) => {
       if (newRoomData) {
         setNewGroup(newRoomData)
       };
     });
-  }, [connectedUser]);
+  }, [connectedUser, socketData]); // socketData tzadt f v3
 
   const [closeSelectedChat, setCloseSelectedChat] = useState<CloseSelectedChat | null>(null);
   

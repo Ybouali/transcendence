@@ -11,6 +11,7 @@ import { EncryptionModule } from './encryption/encryption.module';
 import { HistoryGameModule } from './history-game/history-game.module';
 import { FriendModule } from './friend/friend.module';
 import { ChatModule } from './chat/chat.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ChatModule } from './chat/chat.module';
     HistoryGameModule,
     FriendModule,
     ChatModule,
+    SearchModule
   ],
   controllers: [AppController],
   providers: [AppService, JwtService],

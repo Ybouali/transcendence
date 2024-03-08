@@ -97,6 +97,28 @@ export async function getTokensFromCookie(): Promise<Tokens | null> {
     return null;
 }
 
+export async function getIsFriend(userId: string) : Promise<{ relation: string }> {
+
+    const tokens: Tokens | null = await getTokensFromCookie();
+
+    if (!tokens) return { relation: "nothing" };
+
+    const resData = await axios.get(prepareUrl("friend/isfriend/") + userId, {
+        headers: {
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
+        }
+    })
+
+    if (resData) { 
+        return {
+            relation: resData.data.relationShip
+        }
+    }
+    
+    return { relation: "nothing" };
+}
+
 export async function getHisGamesByUserId(
     userId: string | null
 ): Promise<HistoryGameReturnedType[] | null> {
@@ -128,6 +150,7 @@ export async function getHisGamesByUserId(
     if (!resData.data) {
         return null;
     }
+
     const rHisgame: HistoryGameReturnedType[] = resData.data;
 
     return rHisgame;

@@ -1,4 +1,5 @@
 import { convertIsoToTime } from "../../../../../utils/functions/handleTimeConversion";
+import { prepareUrl } from "../../../../../utils/utils";
 import "./ChatMessage.css";
 const ChatMessage: React.FC<any> = ({ data }) => {
   const { userType, username, timestamp, message, image } = data;
@@ -7,7 +8,7 @@ const ChatMessage: React.FC<any> = ({ data }) => {
       <div className="chat-message-content">
         <div className="chat-message-image">
           <div className="chat-message-image-content">
-            <img src={`http://localhost:3333` + image} alt="user avatar" />
+            <img src={prepareUrl(image)} alt="user avatar" />
           </div>
         </div>
         <div className="chat-message-infos">

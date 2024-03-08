@@ -59,7 +59,7 @@ const Chat = () => {
         const tokens: any = await getTokensFromCookie();
 
         if (!tokens) {
-            navigate("/error-page/:401");
+            navigate("/notauth");
         }
     
         try {
@@ -95,7 +95,7 @@ const Chat = () => {
 
   return (
     <>
-      {/* <Header isConnected={true}  /> */}
+      {/*<Header isConnected={true}  />*/}
       <section className="chat">
         <div className="container">
           <div className="chat-content">

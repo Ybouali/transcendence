@@ -12,17 +12,17 @@ import { getCookie, getTokensFromCookie } from "../../utils/utils";
 
 const Header = (props: LoginType) => {
 
-    const [justOpened, setJustOpened] = useState(false);
+    // const [justOpened, setJustOpened] = useState(false);
     
-    const dropDownMenuRef = useRef<HTMLDivElement>(null);
+    // const dropDownMenuRef = useRef<HTMLDivElement>(null);
 
-    useClickOutside(dropDownMenuRef, () => {
-        // CHECK IF THE MODAL JUST OPENED
-        if (justOpened) {
-        setJustOpened(false);
-        return;
-        }
-    });
+    // useClickOutside(dropDownMenuRef, () => {
+    //     // CHECK IF THE MODAL JUST OPENED
+    //     if (justOpened) {
+    //     setJustOpened(false);
+    //     return;
+    //     }
+    // });
 
     
 
