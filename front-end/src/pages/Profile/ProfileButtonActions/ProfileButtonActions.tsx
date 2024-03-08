@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import "./ProfileButtonActionsStyle.css"
 import { useNavigate, useParams } from 'react-router-dom';
 import { Tokens, UserType } from '../../../types';
-import {  getTokensFromCookie, getUserById, getUserInfo } from '../../../utils/utils';
+import {  getIsFriend, getTokensFromCookie, getUserById, getUserInfo } from '../../../utils/utils';
 import { useUser } from '../../../context/UserContext';
 import { useConnectedUser } from '../../../context/ConnectedContext';
 
@@ -49,10 +49,16 @@ function ProfileButtonActions() {
         const otherUser: UserType | null = await getUserById(userId, tokens);
 
         setPersonal(false)
-        // here need to check if the user is a friend if is a friend so
-        // setFriend(true);
-        // if not a friend 
-        // setFriend(false);
+
+        const isFriend: string = (await getIsFriend(userId)).relation;
+
+        if (isFriend === "friend") {
+          setFriend(true);
+        } else if (isFriend === "blocked") {
+          navigate("/friends")
+        } else {
+          setFriend(false);
+        }
         setUserData(otherUser)
       }
 

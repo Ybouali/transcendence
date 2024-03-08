@@ -8,6 +8,39 @@ import { PrismaService } from "src/prisma/prisma.service";
 @Injectable()
 export class FriendService{
     constructor(private readonly prisma: PrismaService){}
+
+    async getIsFriend(userId: string, friendId: string): Promise<{ relationShip: string }> {
+
+        const res = await this.prisma.friendship.findFirst({where: { 
+            OR: [
+                { userOne: userId, userTwo: friendId},
+                { userOne: friendId, userTwo: friendId },
+            ]
+         }})
+
+        if (res) {
+            return {
+                relationShip: "friend"
+            }
+        } 
+
+        const blockUsers = await this.prisma.blockedUsers.findFirst({where: { 
+            OR: [
+                { blockedId: userId, blockingId: friendId},
+                { blockedId: friendId, blockingId: userId},
+            ]
+         }})
+
+         if (blockUsers) {
+            return {
+                relationShip: "blocked"
+            }
+         }
+
+        return { relationShip: "isnotfriend" }
+
+    }
+
     async getAllFriends(userId: string) {
         const userFriends = await this.prisma.friendship.findMany({
             where: {

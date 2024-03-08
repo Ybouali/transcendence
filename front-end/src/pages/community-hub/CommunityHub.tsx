@@ -25,7 +25,7 @@ const CommunityHub: React.FC<any> = ({ type }) => {
     const tokens: any = await getTokensFromCookie();
 
     if (!tokens) {
-        navigate("/error-page/:401");
+        navigate("/notauth");
     }
 
     try {
@@ -40,6 +40,7 @@ const CommunityHub: React.FC<any> = ({ type }) => {
         if (res?.statusCode !== undefined){
           throw new Error('Try again, Later!')
         }
+        console.log(res)
         setValue(res);
     } catch (error) {
         toast.error('Try again, Later!')
@@ -69,8 +70,9 @@ const CommunityHub: React.FC<any> = ({ type }) => {
   }
 
   useEffect(() => {
+    // setData(null)
     fetchData();
-  }, [])
+  }, [type])
 
   useEffect(() => {
     if (value) setData(value);
@@ -178,7 +180,7 @@ const CommunityHub: React.FC<any> = ({ type }) => {
 
   return (
     <>
-    {/* <Header isConnected={true}  /> */}
+    {/*<Header isConnected={true}  />*/}
     <section className="community-hub">
       <div className="container">
         <div className="community-hub-header">

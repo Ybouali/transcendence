@@ -3,6 +3,7 @@ import useClickOutside from "../../../../utils/hooks/useClickOutside";
 import "./ChatConversationHeaderStyle.css";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
+import { prepareUrl } from "../../../../utils/utils";
 
 
 interface ChatConversationHeaderProps {
@@ -65,7 +66,7 @@ const ChatConversationHeader: React.FC<ChatConversationHeaderProps> = ({ convers
       <div className="chat-conversation-infos">
         <div className="chat-conversation-images">
           {conversationInfos?.images?.map((image: any, index: number) => (
-            <img src={ `http://localhost:3333` + image} alt="member avatar" key={`key-${index}`} />
+            <img src={prepareUrl(image)} alt="member avatar" key={`key-${index}`} />
           ))}
         </div>
         <div className="chat-conversation-description">

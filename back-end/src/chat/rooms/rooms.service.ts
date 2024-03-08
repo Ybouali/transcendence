@@ -1824,15 +1824,15 @@ export class RoomsService {
                 throw new BadRequestException('This user is not a admin in this room.');
             }
 
-            const existingAdmins = await this.prisma.admins.findMany({
-                where: {
-                roomId: roomId,
-                },
-                select: {
-                userId: true,
-                },
-            });
-            const newAdmins = updateRoom.admins.filter(admin => !existingAdmins.some(existingAdmin => existingAdmin.userId === admin));
+            // const existingAdmins = await this.prisma.admins.findMany({
+            //     where: {
+            //     roomId: roomId,
+            //     },
+            //     select: {
+            //     userId: true,
+            //     },
+            // });
+            // const newAdmins = updateRoom.admins.filter(admin => !existingAdmins.some(existingAdmin => existingAdmin.userId === admin));
                 
             if (updateRoom.roomType === 'protected') {
                 const hashedPassword = await this.hashPassword(updateRoom.password);
@@ -1861,22 +1861,22 @@ export class RoomsService {
                     
             
                 // Remove existing admins not included in the updated list
-                await this.prisma.admins.deleteMany({
-                    where: {
-                    roomId: roomId,
-                    userId: {
-                        notIn: updateRoom.admins,
-                    },
-                    },
-                });
+                // await this.prisma.admins.deleteMany({
+                //     where: {
+                //     roomId: roomId,
+                //     userId: {
+                //         notIn: updateRoom.admins,
+                //     },
+                //     },
+                // });
                 }
 
-                await this.prisma.admins.createMany({
-                    data: newAdmins.map(admin => ({
-                        userId: admin,
-                        roomId: roomId,
-                    })),
-                });
+                // await this.prisma.admins.createMany({
+                //     data: newAdmins.map(admin => ({
+                //         userId: admin,
+                //         roomId: roomId,
+                //     })),
+                // });
             
                 // delete room.password;
                 // return room;

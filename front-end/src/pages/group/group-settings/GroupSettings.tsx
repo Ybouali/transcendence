@@ -128,7 +128,7 @@ const GroupSettings: React.FC<GroupSettingsProps> = ({ members, admins, componen
     const tokens: any = await getTokensFromCookie();
 
     if (!tokens) {
-      navigate("/error-page/:401");
+      navigate("/notauth");
     }
     
     if (roomCredentials?.url.includes('create')) {
@@ -260,7 +260,7 @@ const GroupSettings: React.FC<GroupSettingsProps> = ({ members, admins, componen
 
   return (
     <>
-    {/* {componentFor === "create" && <Header isConnected={true}  />} */}
+    {componentFor === "create" /*&& <Header isConnected={true}  />*/}
     <div
       ref={groupSettingsRef}
       className={`group-settings ${

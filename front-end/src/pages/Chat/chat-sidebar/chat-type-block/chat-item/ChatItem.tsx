@@ -3,6 +3,7 @@ import "./ChatItem.css";
 // import ConnectedContext from "../../../../../ConnectedContext";
 import { useConnectedUser } from '../../../../../context/ConnectedContext';
 import { Link } from "react-router-dom";
+import { prepareUrl } from "../../../../../utils/utils";
 
 
 
@@ -43,7 +44,7 @@ if (type === "friend" && data.friend) {
         <Link onClick={(e) => e.preventDefault()} to={""}>
           <div className="friend-infos chat-item-infos">
             <div className="friend-img chat-item-images">
-              <img src={`http://localhost:3333` + friend?.image} alt="member-avatar" />
+              <img src={prepareUrl(friend?.image)} alt="member-avatar" />
             </div>
             <div className="friend-description chat-item-description">
               <div className="chat-item-title">{friend?.name}</div>
@@ -73,7 +74,7 @@ if (type === "friend" && data.friend) {
           <div className="group-infos chat-item-infos">
             <div className="group-img chat-item-images">
               {group.images.map((image: any, index: number) => {
-                return <img key={`key-` + index} src={`http://localhost:3333` + image} alt="member avatar" />
+                return <img key={`key-` + index} src={prepareUrl(image)} alt="member avatar" />
               }
               )}
             </div>

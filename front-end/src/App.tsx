@@ -16,6 +16,8 @@ import ErrorPage from './pages/error-page/ErrorPage';
 import { SocketProvider } from './context/SocketProvider';
 import CommunityHub from './pages/community-hub/CommunityHub';
 import { Tokens } from './types';
+import GroupSettings from './pages/group/group-settings/GroupSettings';
+import Group from './pages/group/Group';
 
 function App() {
 
@@ -75,6 +77,11 @@ function App() {
             <Route path="/chat" element={<Chat />} />
             <Route path="/friends" element={<CommunityHub type="friends" />} />
             <Route path="/groups" element={<CommunityHub type="rooms" />} />
+            <Route path="/group/:id" element={<Group />} />
+            <Route
+              path="/group/create"
+              element={<GroupSettings componentFor="create" members={undefined} admins={undefined} groupInfos={undefined} setData={() => {}} />}
+            />
             <Route path="/game" element={<Game />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/profile" element={<Profile />} />

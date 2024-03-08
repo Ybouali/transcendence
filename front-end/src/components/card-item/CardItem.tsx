@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import CardFooter from "./card-footer/CardFooter";
 import "./CardItemStyle.css";
 import { useEffect } from "react";
+import { prepareUrl } from "../../utils/utils";
 
 const CardItem: React.FC<any> = ({ data, footerButtons }) => {
 
@@ -14,7 +15,7 @@ const CardItem: React.FC<any> = ({ data, footerButtons }) => {
         <div className="card-infos">
           <div className="card-images">
             {data?.images?.map((image: any, index: number) => (
-              <img key={`key-${index}`} src={`http://localhost:3333` + image} alt="person avatar" />
+              <img key={`key-${index}`} src={prepareUrl(image)} alt="person avatar" />
             ))}
           </div>
           <div className="card-description">

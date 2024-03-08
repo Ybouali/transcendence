@@ -3,6 +3,8 @@ import CardItem from "../../../components/card-item/CardItem";
 import "./BannedMembersStyle.css";
 import { Link } from "react-router-dom";
 import { useConnectedUser } from '../../../context/ConnectedContext';
+import { getTokensFromCookie } from "../../../utils/utils";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 interface BannedMember {
@@ -27,19 +29,26 @@ const BannedMembers : React.FC<BannedMembersProps> = ({ data, setData }) => {
         const { connectedUser } = useConnectedUser()
         const group_id = data?.group_id;
         const user_id = connectedUser?.id;
+        const navigate = useNavigate();
 
       const handleUnBan = async (user_id: any, unbannedId: any) => {
         if (!window.confirm('Are you sure you want to unban had khona?')) return;
         try {
+              const tokens: any = await getTokensFromCookie();
+
+              if (!tokens) {
+                  navigate("/notauth");
+              }
               const response = await fetch(`http://localhost:3333/room/${group_id}/unban`, {
                 method: "POST",
                 body: JSON.stringify({ adminId: user_id, roomId: group_id, unbannedId: unbannedId }),
                 headers: {
                   "Content-Type": "application/json",
+                  'access_token': tokens.access_token,
+                  'refresh_token': tokens.refresh_token
                 },
               });
               const res = await response.json();
-              console.log('ressss', res);
               if (res?.statusCode !== undefined) {
                 throw new Error('An error occurred, Please try again.');
               }

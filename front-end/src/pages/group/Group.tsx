@@ -87,7 +87,7 @@ const Group: React.FC = () => {
         
         return  (
             <>
-            {/* <Header isConnected={true}  /> */}
+            {/*<Header isConnected={true}  />*/}
         <section className="group" data-group-type="protected">
                 <div className="container">
                     <div className="group-content" data-status="online">

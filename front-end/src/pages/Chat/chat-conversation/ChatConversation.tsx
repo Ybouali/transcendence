@@ -25,7 +25,7 @@ const ChatConversation: React.FC<any> = ({ chatMessages, conversationInfos, isBa
   }, [chatMessages]);
 
   useEffect(() => {
-    socketData.on("newMESSAGE", (newMessage: any) => {
+    socketData?.on("newMESSAGE", (newMessage: any) => {
       const data = {
         userType: newMessage.senderId === connectedUser?.id ? 'sender' : 'receiver', 
         username: newMessage.senderName, 
@@ -49,10 +49,10 @@ const ChatConversation: React.FC<any> = ({ chatMessages, conversationInfos, isBa
     });
 
 
-    socketData.on('newMESSAGE_ERROR', (newMessageError: any) => {
+    socketData?.on('newMESSAGE_ERROR', (newMessageError: any) => {
       
     });
-  }, [])
+  }, [socketData]) // hadi tzadt f v3
 
   useEffect(() => {
     const handleYouAreMuted = (roomWhereYouMuted: any) => {
@@ -72,12 +72,12 @@ const ChatConversation: React.FC<any> = ({ chatMessages, conversationInfos, isBa
         }
       }
     }
-    socketData.on('youAreMuted', handleYouAreMuted);
-    socketData.on('youAreUnMuted', handleYouAreUnMuted);
+    socketData?.on('youAreMuted', handleYouAreMuted);
+    socketData?.on('youAreUnMuted', handleYouAreUnMuted);
 
     return () => {
-      socketData.off('youAreMuted', handleYouAreMuted);
-      socketData.off('youAreUnMuted', handleYouAreUnMuted);
+      socketData?.off('youAreMuted', handleYouAreMuted);
+      socketData?.off('youAreUnMuted', handleYouAreUnMuted);
     };
   }, [selectedChat, socketData]);
   
