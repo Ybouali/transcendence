@@ -51,7 +51,7 @@ function Settings() {
 			reader.onload = (e) => {
 				const img: any = new Image();
 				img.onload = () => {
-					console.log("this is the image", img);
+					// console.log("this is the image", img);
 					if (img.width < 200 || img.height < 200) {
 						toast.error(
 							"Image resolution must be equal or greater than 200 x 200 pixels to resize.",
@@ -70,7 +70,7 @@ function Settings() {
 									...prevSizes,
 									resized: resizedImage.length,
 								}));
-								console.log(resizedImage);
+								// console.log(resizedImage);
 								setFile(resizedImage);
 							},
 							"base64",
@@ -81,7 +81,7 @@ function Settings() {
 					toast.error("Error loading image");
 				};
 				img.src = e.target!.result; // TODO: more checks, because you tell ts the e.target will never equal null
-				console.log("this is the image source: ", img.src);
+				// console.log("this is the image source: ", img.src);
 			};
 			reader.readAsDataURL(imageFile);
 		} else {
@@ -106,7 +106,7 @@ function Settings() {
 			reader.onload = (e) => {
 				const img: any = new Image();
 				img.onload = () => {
-					console.log("this is the image", img);
+					// console.log("this is the image", img);
 					if (img.width < 200 || img.height < 200) {
 						toast.error(
 							"Image resolution must be equal or greater than 200 x 200 pixels to resize.",
@@ -125,7 +125,7 @@ function Settings() {
 									...prevSizes,
 									resized: resizedImage.length,
 								}));
-								console.log(resizedImage);
+								// console.log(resizedImage);
 								setFile(resizedImage);
 							},
 							"base64",
@@ -136,7 +136,7 @@ function Settings() {
 					toast.error("Error loading image");
 				};
 				img.src = e.target!.result;
-				console.log("this is the image source: ", img.src);
+				// console.log("this is the image source: ", img.src);
 			};
 			reader.readAsDataURL(imageFile);
 		} else {
@@ -246,7 +246,7 @@ function Settings() {
 		const formData = new FormData();
 		formData.append('file', blob);
 
-		console.log(blob)
+		// console.log(blob)
 
 		if (blob) {
 
@@ -264,7 +264,7 @@ function Settings() {
 							'refresh_token': tokens.refresh_token,
 						},
 					});
-					console.log(response);
+					// console.log(response);
 					toast.success('The informations has been updated successfully.');
 					const userData: UserType = {
 						id: response.data.id,
