@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import Header from '../../components/Header/Header'
 import "./ProfileStyle.css"
 import ProfileUserInfos from './ProfileUserInfos/ProfileUserInfos'
 import ProfileButtonActions from './ProfileButtonActions/ProfileButtonActions'

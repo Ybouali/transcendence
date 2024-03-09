@@ -466,7 +466,7 @@ function DynamicHeader(props: IsLoggedIn) {
                   </Link>
                 </li>
                 <li className="dropdown-item">
-                  <Link to='/'>
+                  <Link to='/game'>
                     <div className="dropdown-item-icon">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -502,7 +502,7 @@ function DynamicHeader(props: IsLoggedIn) {
                 </li>
 
                 <li className="dropdown-item">
-                  <Link to='/profile-settings'>
+                  <Link to='/settings'>
                     <div className="dropdown-item-icon">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

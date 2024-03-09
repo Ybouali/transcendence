@@ -10,14 +10,19 @@ function GameHistoryItem(props: HistoryGameReturnedType) {
     const day = date.getDate();
   
     return (
+
       <tr>
-        <td className={`${player1.score >= player2.score ? "winner" : ""}`}>
-          <Link to={""} >{player1.username}</Link>
+        <td>
+          <Link to={`/profile/${player2.id}`}>
+            {player1.username}
+          </Link>
         </td>
         <td>{player1.score}</td>
         <td>{player2.score}</td>
-        <td className={`${player2.score >= player1.score ? "winner" : ""}`}>
-          <a href="http://example.com/58">{player2.username}</a>
+        <td>
+          <Link to={`/profile/${player2.id}`}>
+            {player2.username}
+          </Link>
         </td>
         <td>{`${year}-${month}-${day}`}</td>
       </tr>
