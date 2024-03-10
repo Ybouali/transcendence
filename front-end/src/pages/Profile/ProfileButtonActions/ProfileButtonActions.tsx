@@ -1,105 +1,65 @@
 import React, { useContext, useEffect, useState } from 'react'
 import "./ProfileButtonActionsStyle.css"
-import { useNavigate, useParams } from 'react-router-dom';
-import { Tokens, UserType } from '../../../types';
-import {  getIsFriend, getTokensFromCookie, getUserById, getUserInfo } from '../../../utils/utils';
-import { useUser } from '../../../context/UserContext';
-import { useConnectedUser } from '../../../context/ConnectedContext';
+import { Link, useNavigate } from 'react-router-dom';
+
+interface ProfileButtonActionsType {
+
+  friend: boolean;
+  setIsFriend: () => void;
+
+  personal: boolean;
+}
 
 
-function ProfileButtonActions() {
-
+function ProfileButtonActions(props: ProfileButtonActionsType) {
+  
   const navigate = useNavigate();
 
-  const { connectedUser } = useConnectedUser()
-
-  const { userId } = useParams();
-
-  const [friend, setFriend] = useState<boolean>(false);
-
-  const [userData, setUserData] = useState<UserType | null>();
-
-  const [personal, setPersonal] = useState<boolean>(true);
-
-  useEffect(() => {
-
-    initData()
-
-  }, [setUserData, setPersonal, setFriend])
-
-  const initData = async () => {
-
-    setUserData(connectedUser);
-
-    const tokens: Tokens | null = await getTokensFromCookie();
-
-    if (tokens === null) {
-      navigate('/error-page/:401');
-      return ;
-    }
-    
-    if (userId) {
-      
-      // the will be called because the url contains a user id
-      if (userId === connectedUser?.id) {
-        setPersonal(true);
-        setUserData(connectedUser);
-      } else {
-
-        const otherUser: UserType | null = await getUserById(userId, tokens);
-
-        setPersonal(false)
-
-        const isFriend: string = (await getIsFriend(userId)).relation;
-
-        if (isFriend === "friend") {
-          setFriend(true);
-        } else if (isFriend === "blocked") {
-          navigate("/friends")
-        } else {
-          setFriend(false);
-        }
-        setUserData(otherUser)
-      }
-
-
-      
-    }
-    else {
-      setPersonal(true);
-    }
-    
+  const handleBlockUser = () => {
+    // TODO: send request to the backend to block a user 
+    // navigate to the friend page
+    navigate("/friends");
   }
 
+  const handleChatWithFriend = () => {
+     
+    // TODO: navigate to the chat page but i think u need to set a id of the user to chat with aba abdo
+    navigate("/chat");
+  }
 
+  const handlePlayWithFriend = () => {
+     
+    // TODO: navigate to the game page but i think u need to set a id of the user to play with a hajar
+    navigate("/game");
+  }
 
   return (
     <>
-      {personal && 
+      {props.personal && 
         // "personal-account"
         <div className="profile-actions" data-type="personal-account"></div>
       }
-      {!personal && 
+      {!props.personal && 
         <div className="profile-actions" data-type="friend-account">
 
           <div className="actions-buttons">
-            {friend && 
+            {props.friend && 
               <>
-                <button type="button" className="action-button button-active">
+                <button onClick={handleChatWithFriend} type="button" className="action-button button-active">
                   Chat
                 </button>
-                <button type="button" className="action-button button-active">
+                <button onClick={handlePlayWithFriend} type="button" className="action-button button-active">
                   Play
                 </button>
-                <button type="button" className="action-button button-inactive">
+                <button onClick={handleBlockUser} type="button" className="action-button button-inactive">
                   Block
                 </button>
               </>
             }
 
             {/* "others-account" */}
-            {!friend && 
-              <button type="button" className="action-button button-active">
+            {!props.friend && 
+              <button onClick={props.setIsFriend} type="button" className="action-button button-active">
                 َAdd user
               </button>
             }

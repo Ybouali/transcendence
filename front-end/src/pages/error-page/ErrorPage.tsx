@@ -73,8 +73,8 @@ const ErrorPage : React.FC = () => {
 				<h1 className="error-page-number">{code}</h1>
 				<p className="error-page-message">{getMessage(code !== undefined ? parseInt(code) : 0) /* TODO: kant parseInt(code) */}</p> 
 				<div className="actions-buttons">
-					<Link to="/" className="action-button button-active">
-						Go back to the homepage
+					<Link to="/profile" className="action-button button-active">
+						Go back to the profile page
 					</Link>
 				</div>
 			</div>
