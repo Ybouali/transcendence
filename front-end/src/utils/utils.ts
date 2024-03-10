@@ -97,9 +97,9 @@ export async function getTokensFromCookie(): Promise<Tokens | null> {
     return null;
 }
 
-export async function getIsFriend(userId: string) : Promise<{ relation: string }> {
+export async function getIsFriend(userId: string, tokens: Tokens) : Promise<{ relation: string }> {
 
-    const tokens: Tokens | null = await getTokensFromCookie();
+    // const tokens: Tokens | null = await getTokensFromCookie();
 
     if (!tokens) return { relation: "nothing" };
 
@@ -120,9 +120,10 @@ export async function getIsFriend(userId: string) : Promise<{ relation: string }
 }
 
 export async function getHisGamesByUserId(
-    userId: string | null
+    userId: string | null,
+    tokens: Tokens
 ): Promise<HistoryGameReturnedType[] | null> {
-    const tokens: Tokens | null = await getTokensFromCookie();
+    // const tokens: Tokens | null = await getTokensFromCookie();
 
     if (!tokens) {
         return null;
@@ -350,7 +351,8 @@ export async function getUserById(
 }
 
 export async function getNumberOfWinnedGames(
-    userId: string | undefined
+    userId: string | undefined,
+    tokens: Tokens
 ): Promise<number | null> {
     if (userId === undefined) {
         return null;
@@ -359,7 +361,7 @@ export async function getNumberOfWinnedGames(
     // the url
     let url: string = prepareUrl("history-game/winnedgame/") + userId;
 
-    const tokens: Tokens | null = await getTokensFromCookie();
+    // const tokens: Tokens | null = await getTokensFromCookie();
 
     if (tokens === null) {
         return null;
@@ -420,14 +422,15 @@ export async function getLeaderboardOfPlayers() : Promise< LeaderBoardType [] | 
 }
 
 export async function getNumberGamePlayedByUserId(
-    userId: string | undefined
+    userId: string | undefined,
+    tokens: Tokens
 ): Promise<number | null> {
     if (userId === undefined) {
         return 0;
     }
 
     // get the tokens from the local storage
-    const tokens: Tokens | null = await getTokensFromCookie();
+    // const tokens: Tokens | null = await getTokensFromCookie();
 
     if (tokens === null) {
         return null;
@@ -435,7 +438,7 @@ export async function getNumberGamePlayedByUserId(
 
     // get the number of game winned by the player
 
-    const win: number | null = await getNumberOfWinnedGames(userId);
+    const win: number | null = await getNumberOfWinnedGames(userId, tokens);
 
     if (win === null) {
         return null;

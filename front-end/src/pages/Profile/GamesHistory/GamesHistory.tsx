@@ -3,74 +3,70 @@ import React, { useEffect, useRef, useState } from 'react'
 import "./GamesHistoryStyle.css"
 import { HistoryGameReturnedType, Tokens, UserType } from '../../../types';
 import GameHistoryItem from './GameHistoryItem/GameHistoryItem';
-import { useParams } from 'react-router-dom';
-import { getHisGamesByUserId, getTokensFromCookie } from '../../../utils/utils';
-import DataTable from "datatables.net-dt";
-import "datatables.net-buttons"
-import "datatables.net-responsive"
-import "datatables.net-dt/css/dataTables.dataTables.css";
-import $ from 'jquery';
-import { useConnectedUser } from '../../../context/ConnectedContext';
 
-function GamesHistory( ) {
+interface GamesHistory {
+  dataHisGame: HistoryGameReturnedType [] | []
+} 
 
-  const [tableInitialized, setTableInitialized] = useState<boolean>(false);
+function GamesHistory(props: GamesHistory) {
 
-  const { connectedUser, setConnectedUser } = useConnectedUser();
+  // const [tableInitialized, setTableInitialized] = useState<boolean>(false);
 
-  const { userId } = useParams();
+  // const { connectedUser, setConnectedUser } = useConnectedUser();
 
-  const [dataHisGame, setDataHisGame] = useState<HistoryGameReturnedType [] | null>(null);
+  // const { userId } = useParams();
 
-  useEffect(() => {
-    initData();
-  }, [setDataHisGame]);
+  // const [dataHisGame, setDataHisGame] = useState<HistoryGameReturnedType [] | null>(null);
 
-  const initData = async () => {
+  // useEffect(() => {
+  //   initData();
+  // }, [setDataHisGame]);
 
-    const tokens: Tokens | null = await getTokensFromCookie();
+  // const initData = async () => {
 
-    if (tokens && tokens.access_token && tokens.refresh_token)  {
+  //   const tokens: Tokens | null = await getTokensFromCookie();
 
-      if (userId) {
+  //   if (tokens && tokens.access_token && tokens.refresh_token)  {
+
+  //     if (userId) {
       
-        await getDatahistoryGames(userId)
+  //       await getDatahistoryGames(userId)
       
-      } else {
+  //     } else {
         
-        if (connectedUser?.id) {
-          await getDatahistoryGames(connectedUser.id)
-        }
+  //       if (connectedUser?.id) {
+  //         await getDatahistoryGames(connectedUser.id)
+  //       }
 
-      }  
+  //     }  
 
-    }
+  //   }
 
-  }
+  // }
 
-  const getDatahistoryGames = async (userId: string | null) => {
+  // const getDatahistoryGames = async (userId: string | null) => {
 
-    let data: HistoryGameReturnedType [] | null = null;
+  //   let data: HistoryGameReturnedType [] | null = null;
 
-    try {
+  //   try {
 
-      if (userId) {
-        data = await getHisGamesByUserId(userId);
-      } else {
+  //     if (userId) {
+  //       data = await getHisGamesByUserId(userId);
+  //     } else {
         
-        data = await getHisGamesByUserId(null);
-      }
+  //       data = await getHisGamesByUserId(null);
+  //     }
 
-      if (Array.isArray(data)) {
-        setDataHisGame(data);
-      }
-      else {
-        setDataHisGame([]);
-      }
-    } catch (error) {
-      setDataHisGame([]);
-    }
-  }
+  //     if (Array.isArray(data)) {
+  //       setDataHisGame(data);
+  //     }
+  //     else {
+  //       setDataHisGame([]);
+  //     }
+  //   } catch (error) {
+  //     setDataHisGame([]);
+  //   }
+  // }
 
     return (
       <table
@@ -87,8 +83,8 @@ function GamesHistory( ) {
           </tr>
         </thead>
         <tbody>
-          {dataHisGame?.length !== 0 &&
-            dataHisGame?.map((gameLog: HistoryGameReturnedType, index: number) => {
+          {props.dataHisGame?.length !== 0 &&
+            props.dataHisGame?.map((gameLog: HistoryGameReturnedType, index: number) => {
               const key = `game-${index}`;
               return <GameHistoryItem key={index} player1={gameLog.player1} player2={gameLog.player2} timestamp={gameLog.timestamp} />;
             })}

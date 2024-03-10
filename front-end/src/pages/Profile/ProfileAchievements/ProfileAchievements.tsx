@@ -6,49 +6,39 @@ import { Tokens, UserType } from '../../../types';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useConnectedUser } from '../../../context/ConnectedContext';
 
-function ProfileAchievements() {
+interface ProfileAchievementsType {
+  numberGameWinned: number;
+} 
 
-  const { userId } = useParams()
-
-  const { connectedUser, setConnectedUser } = useConnectedUser()
-
-  const [userData, setUserData] = useState<UserType | null>(null)
-
-  const [numberGameWinned, setNumberGameWinned] = useState<number>(0)
-
-  useEffect(() => {
-
-    initData()
-
-  }, [setUserData])
+function ProfileAchievements(props: ProfileAchievementsType) {
 
 
-    const initData = async () => {
+    // const initData = async () => {
 
-      const tokens: Tokens | null = await getTokensFromCookie();
+    //   const tokens: Tokens | null = await getTokensFromCookie();
 
-      if (tokens && tokens.access_token && tokens.refresh_token) {
+    //   if (tokens && tokens.access_token && tokens.refresh_token) {
 
-        setUserData(connectedUser);
+    //     setUserData(connectedUser);
 
-        if (userId) {
-          // the will be called because the url contains a user id
-          const otherUser: UserType | null = await getUserById(userId, tokens);
+    //     if (userId) {
+    //       // the will be called because the url contains a user id
+    //       const otherUser: UserType | null = await getUserById(userId, tokens);
 
-          if (otherUser) {
-            setUserData(otherUser)
-          }
-        }
+    //       if (otherUser) {
+    //         setUserData(otherUser)
+    //       }
+    //     }
 
-        const nGameWinned: number | null = await getNumberOfWinnedGames(userData?.id)
+    //     const nGameWinned: number | null = await getNumberOfWinnedGames(userData?.id)
   
-        if (nGameWinned) {
-          setNumberGameWinned(nGameWinned);
-        }
+    //     if (nGameWinned) {
+    //       setNumberGameWinned(nGameWinned);
+    //     }
 
-      }
+    //   }
       
-    }
+    // }
 
 
     const levels = [1, 2, 3, 4, 5, 6, 7, 20];
@@ -58,7 +48,7 @@ function ProfileAchievements() {
       {levels.map((level, index) => {
         const stage: number = index + 1;
         let isActive: boolean = false;
-        if (numberGameWinned >= level) {
+        if (props.numberGameWinned >= level) {
           isActive = true;
         }
         const title: string =

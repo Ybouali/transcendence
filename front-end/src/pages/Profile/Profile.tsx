@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import "./ProfileStyle.css"
 import ProfileUserInfos from './ProfileUserInfos/ProfileUserInfos'
 import ProfileButtonActions from './ProfileButtonActions/ProfileButtonActions'
 import ProfileAchievements from './ProfileAchievements/ProfileAchievements'
-import { Tokens } from '../../types'
+import { HistoryGameReturnedType, Tokens, UserType } from '../../types'
 import GamesHistory from './GamesHistory/GamesHistory'
-import { useNavigate } from 'react-router-dom'
-import { getTokensFromCookie } from '../../utils/utils'
+import { useNavigate, useParams } from 'react-router-dom'
+import { getHisGamesByUserId, getIsFriend, getNumberGamePlayedByUserId, getNumberOfWinnedGames, getTokensFromCookie, getUserById } from '../../utils/utils'
 import { useConnectedUser } from '../../context/ConnectedContext'
 
 
@@ -14,12 +14,28 @@ function Profile() {
 
   const navigate = useNavigate();
 
+  const { userId } = useParams();
+
   const { connectedUser } = useConnectedUser()
+
+  const [userData, setUserData] = useState<UserType | null>(null);
+
+  const [numberGamePlayed, setNumberGamePlayed] = useState<number>(0);
+
+  const [numberFrined, setNumberFrined] = useState<number>(0);
+
+  const [personal, setPersonal] = useState<boolean>(true);
+
+  const [friend, setFriend] = useState<boolean>(false);
+
+  const [numberGameWinned, setNumberGameWinned] = useState<number>(0)
+
+  const [dataHisGame, setDataHisGame] = useState<HistoryGameReturnedType [] | []>([]);
 
   useEffect(() => {
 
     gaurd();
-  });
+  }, [setUserData, setNumberGamePlayed, setFriend, setPersonal, setNumberGameWinned, setDataHisGame ]);
   
   const gaurd = async () => {
 
@@ -33,269 +49,124 @@ function Profile() {
     if (connectedUser?.twoFactor && connectedUser?.towFactorToRedirect) {
       navigate("/tow-factor")
     }
+
+    await initData(tokens);
   }
 
-  // const gamesLog: HistoryGameReturnedType [] = 
+  const initData = async (tokens: Tokens | null) => {
 
-  // const gamesLog: HistoryGameReturnedType [] = [
-  //   {
-  //     player1: {
-  //       id: "546",
-  //       username: "john doe",
-  //       score: 40,
-  //     },
-  //     player2: {
-  //       id: "6",
-  //       username: "samantha williams",
-  //       score: 40,
-  //     },
-  //     timestamp: "2022-03-15T12:34:56.789Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "123",
-  //       username: "jane smith",
-  //       score: 20,
-  //     },
-  //     player2: {
-  //       id: "789",
-  //       username: "michael jones",
-  //       score: 30,
-  //     },
-  //     timestamp: "2022-03-16T09:12:34.567Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "456",
-  //       username: "bob brown",
-  //       score: 50,
-  //     },
-  //     player2: {
-  //       id: "321",
-  //       username: "alice green",
-  //       score: 5,
-  //     },
-  //     timestamp: "2022-03-17T15:45:23.456Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "987",
-  //       username: "david lee",
-  //       score: 15,
-  //     },
-  //     player2: {
-  //       id: "234",
-  //       username: "emily wang",
-  //       score: 25,
-  //     },
-  //     timestamp: "2022-03-18T21:43:12.345Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "567",
-  //       username: "jimmy chen",
-  //       score: 35,
-  //     },
-  //     player2: {
-  //       id: "890",
-  //       username: "sophia kim",
-  //       score: 45,
-  //     },
-  //     timestamp: "2022-03-19T11:23:45.678Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "432",
-  //       username: "lisa zhang",
-  //       score: 60,
-  //     },
-  //     player2: {
-  //       id: "876",
-  //       username: "kevin li",
-  //       score: 10,
-  //     },
-  //     timestamp: "2022-03-20T17:34:56.789Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "654",
-  //       username: "tommy nguyen",
-  //       score: 25,
-  //     },
-  //     player2: {
-  //       id: "321",
-  //       username: "jessica wu",
-  //       score: 30,
-  //     },
-  //     timestamp: "2022-03-21T08:45:23.456Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "789",
-  //       username: "ryan park",
-  //       score: 40,
-  //     },
-  //     player2: {
-  //       id: "234",
-  //       username: "grace lee",
-  //       score: 20,
-  //     },
-  //     timestamp: "2022-03-22T14:43:12.345Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "345",
-  //       username: "jason chung",
-  //       score: 15,
-  //     },
-  //     player2: {
-  //       id: "678",
-  //       username: "olivia kim",
-  //       score: 25,
-  //     },
-  //     timestamp: "2022-03-23T20:23:45.678Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "901",
-  //       username: "jenny huang",
-  //       score: 50,
-  //     },
-  //     player2: {
-  //       id: "432",
-  //       username: "peter wang",
-  //       score: 5,
-  //     },
-  //     timestamp: "2022-03-24T10:34:56.789Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "567",
-  //       username: "jimmy chen",
-  //       score: 35,
-  //     },
-  //     player2: {
-  //       id: "890",
-  //       username: "sophia kim",
-  //       score: 45,
-  //     },
-  //     timestamp: "2022-03-25T07:45:23.456Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "123",
-  //       username: "jane smith",
-  //       score: 20,
-  //     },
-  //     player2: {
-  //       id: "789",
-  //       username: "michael jones",
-  //       score: 30,
-  //     },
-  //     timestamp: "2022-03-26T13:43:12.345Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "654",
-  //       username: "tommy nguyen",
-  //       score: 25,
-  //     },
-  //     player2: {
-  //       id: "321",
-  //       username: "jessica wu",
-  //       score: 30,
-  //     },
-  //     timestamp: "2022-03-27T19:23:45.678Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "901",
-  //       username: "jenny huang",
-  //       score: 50,
-  //     },
-  //     player2: {
-  //       id: "432",
-  //       username: "peter wang",
-  //       score: 5,
-  //     },
-  //     timestamp: "2022-03-28T09:34:56.789Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "987",
-  //       username: "david lee",
-  //       score: 15,
-  //     },
-  //     player2: {
-  //       id: "234",
-  //       username: "emily wang",
-  //       score: 25,
-  //     },
-  //     timestamp: "2022-03-29T16:45:23.456Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "456",
-  //       username: "bob brown",
-  //       score: 50,
-  //     },
-  //     player2: {
-  //       id: "321",
-  //       username: "alice green",
-  //       score: 5,
-  //     },
-  //     timestamp: "2022-03-30T12:43:12.345Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "345",
-  //       username: "jason chung",
-  //       score: 15,
-  //     },
-  //     player2: {
-  //       id: "678",
-  //       username: "olivia kim",
-  //       score: 25,
-  //     },
-  //     timestamp: "2022-03-31T18:23:45.678Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "789",
-  //       username: "ryan park",
-  //       score: 40,
-  //     },
-  //     player2: {
-  //       id: "234",
-  //       username: "grace lee",
-  //       score: 20,
-  //     },
-  //     timestamp: "2022-04-01T08:34:56.789Z",
-  //   },
-  //   {
-  //     player1: {
-  //       id: "432",
-  //       username: "lisa zhang",
-  //       score: 60,
-  //     },
-  //     player2: {
-  //       id: "876",
-  //       username: "kevin li",
-  //       score: 10,
-  //     },
-  //     timestamp: "2022-04-01T08:34:56.789Z",
-  //   },
-  // ];
+    if (tokens && tokens.access_token && tokens.refresh_token) {
+
+      setUserData(connectedUser)
+
+      if (userId) {
+
+        // the will be called because the url contains a user id
+        if (userId === connectedUser?.id) {
+          setPersonal(true);
+          setUserData(connectedUser);
+        } else {
+
+          const otherUser: UserType | null = await getUserById(userId, tokens);
+
+          if (otherUser) {
+
+            setPersonal(false)
+  
+            setUserData(otherUser);
+
+          }
+
+          const isFriend: string = (await getIsFriend(userId, tokens)).relation;
+
+          if (isFriend === "friend") {
+            setFriend(true);
+          } else if (isFriend === "blocked") {
+            navigate("/friends")
+          } else if (isFriend === "isnotfriend") {
+            setFriend(false);
+          } else {
+            navigate("/error-page/:404")
+          }
+        }
+
+
+      } else {
+        setPersonal(true);
+      }
+
+      // get the number of game played by the player
+      const numberOfGames: number | null = await getNumberGamePlayedByUserId(userData?.id, tokens)
+  
+      if (!numberOfGames) {
+        setNumberGamePlayed(0);
+      } else {
+        setNumberGamePlayed(numberOfGames);
+      }
+
+      // get the number of friends by id by default right now will be 0 
+      const numberOfFriends: number | null = 0;
+
+      if (!numberOfFriends) {
+        setNumberFrined(0);
+      } else {
+        setNumberFrined(numberOfFriends);
+      }
+
+      const nGameWinned: number | null = await getNumberOfWinnedGames(userData?.id, tokens)
+  
+      if (nGameWinned) {
+        setNumberGameWinned(nGameWinned);
+      }
+
+      if (userData?.id) {
+        await getDatahistoryGames(userData.id, tokens)
+      }
+    }
+
+  }
+
+  const handleClickAddFriend = () => {
+
+    // TODO: need to call the endpoint to add a friend
+
+    setFriend(true);
+
+  }
+
+  const getDatahistoryGames = async (userId: string | null, tokens: Tokens) => {
+
+    let data: HistoryGameReturnedType [] | null = null;
+
+    try {
+
+      if (userId) {
+        data = await getHisGamesByUserId(userId, tokens);
+      } else {
+        
+        data = await getHisGamesByUserId(null, tokens);
+      }
+
+      if (Array.isArray(data)) {
+        setDataHisGame(data);
+      }
+      else {
+        setDataHisGame([]);
+      }
+    } catch (error) {
+      setDataHisGame([]);
+    }
+  }
 
   return (
     <>
       <section className="profile">
         <div className="container">
           <div className="profile-content" data-status="online">
-            <ProfileUserInfos />
-            <ProfileButtonActions />
-            <ProfileAchievements />
-            <GamesHistory /> 
+            <ProfileUserInfos userData={userData} numberGamePlayed={numberGamePlayed} numberFrined={numberFrined} />
+            <ProfileButtonActions friend={friend} personal={personal} setIsFriend={handleClickAddFriend} />
+            <ProfileAchievements numberGameWinned={numberGameWinned} />
+            <GamesHistory dataHisGame={dataHisGame} /> 
           </div>
         </div>
       </section>
