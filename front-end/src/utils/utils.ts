@@ -250,6 +250,10 @@ export async function updateUser(user: UserType): Promise<UserType | null> {
         return null;
     }
 
+    if (resData.data.message === "notallowed") {
+        return null;
+    }
+
     const userData: UserType = {
         id: resData.data.id,
         username: resData.data.username,
