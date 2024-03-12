@@ -1,16 +1,12 @@
 import {
   Injectable,
-  InternalServerErrorException,
   Logger,
   NotAcceptableException,
   NotFoundException,
   Req,
-  Res,
-  UploadedFile,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import * as fs from 'fs';
 import { Request, Response } from 'express';
 import { UpdateUserData } from './dto';
 
@@ -50,82 +46,71 @@ export class UserService {
 
   }
 
-  async updateUser(dataUser: UpdateUserData, userId: string): Promise<User> {
-    // make sure the user is existing in db
-    const checkUser = await this.prisma.user.findFirst({
-      where: { id: dataUser.id },
-    });
+  async updateUser(dataUser: UpdateUserData, userId: string): Promise<User | { message: string }> {
 
-    if (!checkUser) {
-      throw new NotAcceptableException();
+    
+    try {
+
+      // make sure the user is existing in db
+      const checkUser = await this.prisma.user.findFirst({
+        where: { id: dataUser.id },
+      });
+  
+      if (!checkUser) {
+        throw new NotAcceptableException();
+      }
+  
+      if (!dataUser) {
+        throw new NotFoundException();
+      }
+  
+      // make sure the user has right to update by checking that the id is his id
+      if (dataUser.id !== userId) {
+        throw new NotAcceptableException();
+      }
+
+      let tmp: User = await this.prisma.user.findFirst({
+        where: { username: dataUser.username}
+      })
+
+      if (tmp) {
+        return {
+          message: "notallowed"
+        };
+      }
+
+      // tmp = await this.prisma.user.findFirst({
+      //   where: { email: dataUser.email}
+      // })
+
+      // if (tmp) {
+        // return {
+        //   message: "notallowed"
+        // };
+      // }
+
+      const user = this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          username: dataUser.username,
+          fullName: dataUser.fullName,
+          avatarUrl: dataUser.avatarUrl,
+          Status: dataUser.Status,
+          email: dataUser.email,
+          twoFactor: dataUser.twoFactor,
+        },
+      });
+      return user;
+    } catch (error) {
+
+      return {
+        message: "notallowed"
+      };
     }
-
-    if (!dataUser) {
-      throw new NotFoundException();
-    }
-
-    // make sure the user has right to update by checking that the id is his id
-    if (dataUser.id !== userId) {
-      throw new NotAcceptableException();
-    }
-
-    const user = this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        username: dataUser.username,
-        fullName: dataUser.fullName,
-        avatarUrl: dataUser.avatarUrl,
-        Status: dataUser.Status,
-        email: dataUser.email,
-        twoFactor: dataUser.twoFactor,
-      },
-    });
-
-    return user;
+    return {
+      message: "notallowed"
+    };
   }
-
-  // async updateAvatar(user: User, @UploadedFile() file: Express.Multer.File) {
-  //   try {
-  //     // check if the file is a image file
-  //     if (!file.mimetype.startsWith('image')) {
-  //       throw new NotAcceptableException();
-  //     }
-
-  //     // check if user has already updated avatar if not change we need to change the name avatar in db
-  //     if (user.avatarNameUrl === 'defaultAvatar.png') {
-  //       // create the avatar name
-  //       const avatarNameUrl =
-  //         user.username + '_avatar.' + file.mimetype.split('/')[1];
-
-  //       user = await this.prisma.user.update({
-  //         where: { id: user.id },
-  //         data: { avatarNameUrl },
-  //       });
-  //     }
-
-  //     // path of the avatar file
-  //     const pathAvatar = process.env.PATH_AVATAR_USERS + user.avatarNameUrl;
-
-  //     // store the avatar
-  //     fs.writeFileSync(pathAvatar, file.buffer);
-
-  //     return { message: 'updated' };
-  //   } catch (error) {
-  //     throw new InternalServerErrorException();
-  //   }
-  // }
-
-  // async getAvatar(nameAvatar: string, @Res() res?: Response) {
-  //   try {
-  //     const pathAvatar = process.env.PATH_AVATAR_USERS + nameAvatar;
-
-  //     console.log({ pathAvatar });
-
-  //     res.sendFile(pathAvatar);
-  //   } catch (error) {
-  //     throw new NotFoundException();
-  //   }
-  // }
 
   async getRefreshToken(@Req() req?: Request): Promise<string> {
     const refresh_token = (req.headers['refresh_token'] as string).trim();

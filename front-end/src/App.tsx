@@ -94,7 +94,7 @@ function App() {
           </Routes>
         </SocketProvider>
         <Footer />
-            <ToastContainer position="bottom-right" theme="dark" stacked={true} />
+            {/* <ToastContainer position="bottom-right" theme="dark" stacked={true} /> */}
       </BrowserRouter>
     </ConnectedProvider>
   );
