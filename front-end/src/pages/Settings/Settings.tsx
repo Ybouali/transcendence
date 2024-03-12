@@ -10,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Resizer from "react-image-file-resizer";
 import { useDropzone } from "react-dropzone";
 import axios from 'axios';
+import './SettingsStyle.css'
 
 interface ISizes {
 	original: null | number;

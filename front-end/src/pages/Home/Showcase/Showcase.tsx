@@ -11,7 +11,7 @@ function Showcase(props: LoginType) {
         <div className="showcase-content">
           <div className="showcase-text">
             <h2 className="showcase-message">
-              Your first real time <br />
+              Your first real time <br className='line' />
               Ping-Pong
             </h2>
             <p className="showcase-description">

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import CardItem from "../../../components/card-item/CardItem";
 import "./MembershipRequestsStyle.css";
 import { useConnectedUser } from '../../../context/ConnectedContext';
-import { getTokensFromCookie } from "../../../utils/utils";
+import { getTokensFromCookie, prepareUrl } from "../../../utils/utils";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -35,7 +35,7 @@ const MembershipRequests: React.FC<MembershipRequestsProps>  = ({ data , setData
             navigate("/notauth");
         }
         try {
-                  const response = await fetch(`http://localhost:3333/room/${group_id}/accept`, {
+                  const response = await fetch(prepareUrl(`room/${group_id}/accept`), {
                   method: "POST",
                   body: JSON.stringify({ adminId: user_id, roomId: group_id, userTwo: userTwo }),
                   headers: {
@@ -80,7 +80,7 @@ const MembershipRequests: React.FC<MembershipRequestsProps>  = ({ data , setData
               if (!tokens) {
                   navigate("/notauth");
               }
-              const response = await fetch(`http://localhost:3333/room/${group_id}/decline`, {
+              const response = await fetch(prepareUrl(`room/${group_id}/decline`), {
                   method: "POST",
                   body: JSON.stringify({ adminId: user_id, roomId: group_id, userTwo: userTwo }),
                   headers: {

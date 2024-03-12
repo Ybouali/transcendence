@@ -120,10 +120,10 @@ export class RoomsController {
 
     // @UseGuards(RolesGuard)
     // @Roles(Role.Owner)
-    @Delete('/:userId/:roomId/delete')
-    async removeRoom(@Body() room: { roomId: string }): Promise<any> {
+    @Delete(':roomId/delete')
+    async removeRoom(@GetUser('id') userId: string,@Body() room: { roomId: string }): Promise<any> {
         try{
-            const membersIds = await this.roomsService.removeRoom(room.roomId);
+            const membersIds = await this.roomsService.removeRoom(room.roomId, userId);
             this.eventEmitter.emit('deleteRoom', room.roomId, membersIds);
             return {statusCode: undefined}
         } catch (error) {

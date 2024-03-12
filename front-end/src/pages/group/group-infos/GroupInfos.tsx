@@ -3,7 +3,7 @@ import "./GroupInfosStyle.css";
 import { useNavigate  } from "react-router-dom";
 import { useConnectedUser } from '../../../context/ConnectedContext';
 import { toast } from "react-toastify";
-import { getTokensFromCookie } from "../../../utils/utils";
+import { getTokensFromCookie, prepareUrl } from "../../../utils/utils";
 
 interface GroupInfosProps {
   groupInfos: {
@@ -80,7 +80,7 @@ const GroupInfos: React.FC<GroupInfosProps> = ({ groupInfos, members_requests })
             navigate("/error-page/401");
             return ;
         }
-        const response = await fetch(`http://localhost:3333/room/${group_id}/delete`, {
+        const response = await fetch(prepareUrl(`room/${group_id}/delete`), {
           method: "DELETE",
           body: JSON.stringify({roomId: group_id}),
           headers: {
@@ -114,7 +114,7 @@ const GroupInfos: React.FC<GroupInfosProps> = ({ groupInfos, members_requests })
             navigate("/error-page/401");
             return ;
         }
-        const response = await fetch(`http://localhost:3333/room/${group_id}/leaveROOM`, {
+        const response = await fetch(prepareUrl(`room/${group_id}/leaveROOM`), {
           method: "POST",
           body: JSON.stringify({ userId: user_id, roomId: group_id }),
           headers: {
@@ -149,7 +149,7 @@ const GroupInfos: React.FC<GroupInfosProps> = ({ groupInfos, members_requests })
                 navigate("/error-page/401");
                 return ;
             }
-            let response = await fetch(`http://localhost:3333/room/joinRoom`, {
+            let response = await fetch(prepareUrl(`room/joinRoom`), {
             method: "POST",
             body: JSON.stringify({ userId: user_id, roomId: group_id, password: password }),
             headers: {

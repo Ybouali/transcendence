@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { useConnectedUser } from '../../context/ConnectedContext';
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { getTokensFromCookie } from "../../utils/utils";
+import { getTokensFromCookie, prepareUrl } from "../../utils/utils";
 import Header from "../../components/Header/Header";
 
 const CommunityHub: React.FC<any> = ({ type }) => {
@@ -29,7 +29,7 @@ const CommunityHub: React.FC<any> = ({ type }) => {
     }
 
     try {
-        const response = await fetch(`http://localhost:3333/${type.slice(0, -1)}/all`, {
+        const response = await fetch(prepareUrl(`${type.slice(0, -1)}/all`), {
         method: "GET",
         headers: {
             'access_token': tokens.access_token,
@@ -50,7 +50,7 @@ const CommunityHub: React.FC<any> = ({ type }) => {
   const handleBlockFriend = async (e: React.MouseEvent<HTMLAnchorElement>, friend_id: string) => {
     e.preventDefault();
       try {
-            const response = await fetch(`http://localhost:3333/friend/${user_id}/block/${friend_id}`, {
+            const response = await fetch(prepareUrl(`friend/block/${friend_id}`), {
             method: "POST", 
           });
 
@@ -70,6 +70,11 @@ const CommunityHub: React.FC<any> = ({ type }) => {
   }
 
   useEffect(() => {
+
+    if (connectedUser?.twoFactor && connectedUser?.towFactorToRedirect) {
+      navigate("/tow-factor")
+    }
+    
     // setData(null)
     fetchData();
   }, [type])

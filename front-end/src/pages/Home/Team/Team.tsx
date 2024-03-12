@@ -26,7 +26,7 @@ function Team() {
         <Swiper
           // install Swiper modules
           modules={[Navigation, Pagination, Autoplay, A11y, EffectCoverflow]}
-          spaceBetween={50}
+          spaceBetween={20}
           slidesPerView={3}
           pagination={{ clickable: true }}
           scrollbar={{ draggable: true }}
@@ -35,6 +35,8 @@ function Team() {
           loop={true}
           autoplay={{ delay: 3000, disableOnInteraction: false }}
           className="mySwiper"
+          // slidesPerView={3}
+          // centeredSlides="true"
           effect="coverflow"
           coverflowEffect={{
             rotate: 50,
@@ -42,6 +44,16 @@ function Team() {
             depth: 100,
             modifier: 1,
             slideShadows: true,
+          }}
+          breakpoints={{
+            0: {
+              slidesPerView: 1,
+              spaceBetween: 10,
+            },
+            768: {
+              slidesPerView: 3,
+              spaceBetween: 10,
+            },
           }}
         >
           <SwiperSlide className="member-card">

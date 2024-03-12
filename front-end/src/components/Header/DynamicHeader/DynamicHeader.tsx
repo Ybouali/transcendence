@@ -401,7 +401,7 @@ function DynamicHeader(props: IsLoggedIn) {
                     <option value="busy">Busy</option>
                   </select>
                 </li>
-                <li className="dropdown-item">
+                <li className="dropdown-item" onClick={() => setOpenMenu(false)}>
                   <Link to='/profile'>
                     <div className="dropdown-item-icon">
                       <svg
@@ -417,7 +417,7 @@ function DynamicHeader(props: IsLoggedIn) {
                     <div className="dropdown-item-title">profile</div>
                   </Link>
                 </li>
-                <li className="dropdown-item">
+                <li className="dropdown-item" onClick={() => setOpenMenu(false)}>
                   <Link to='/friends'>
                     <div className="dropdown-item-icon">
                       <svg
@@ -433,7 +433,7 @@ function DynamicHeader(props: IsLoggedIn) {
                     <div className="dropdown-item-title">friends</div>
                   </Link>
                 </li>
-                <li className="dropdown-item">
+                <li className="dropdown-item" onClick={() => setOpenMenu(false)}>
                   <Link to='/groups'>
                     <div className="dropdown-item-icon">
                       <svg
@@ -449,7 +449,7 @@ function DynamicHeader(props: IsLoggedIn) {
                     <div className="dropdown-item-title">groups</div>
                   </Link>
                 </li>
-                <li className="dropdown-item">
+                <li className="dropdown-item" onClick={() => setOpenMenu(false)}>
                   <Link to={'/chat'}>
                     <div className="dropdown-item-icon">
                       <svg
@@ -465,7 +465,7 @@ function DynamicHeader(props: IsLoggedIn) {
                     <div className="dropdown-item-title">chat</div>
                   </Link>
                 </li>
-                <li className="dropdown-item">
+                <li className="dropdown-item" onClick={() => setOpenMenu(false)}>
                   <Link to='/game'>
                     <div className="dropdown-item-icon">
                       <svg
@@ -483,7 +483,7 @@ function DynamicHeader(props: IsLoggedIn) {
                     </div>
                   </Link>
                 </li>
-                <li className="dropdown-item">
+                <li className="dropdown-item" onClick={() => setOpenMenu(false)}>
                   <Link to='/leaderboard'>
                     <div className="dropdown-item-icon">
                       <svg
@@ -501,7 +501,7 @@ function DynamicHeader(props: IsLoggedIn) {
                   </Link>
                 </li>
 
-                <li className="dropdown-item">
+                <li className="dropdown-item" onClick={() => setOpenMenu(false)}>
                   <Link to='/settings'>
                     <div className="dropdown-item-icon">
                       <svg

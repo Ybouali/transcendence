@@ -3,7 +3,7 @@ import CardItem from "../../../components/card-item/CardItem";
 import "./BannedMembersStyle.css";
 import { Link } from "react-router-dom";
 import { useConnectedUser } from '../../../context/ConnectedContext';
-import { getTokensFromCookie } from "../../../utils/utils";
+import { getTokensFromCookie, prepareUrl } from "../../../utils/utils";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -39,7 +39,7 @@ const BannedMembers : React.FC<BannedMembersProps> = ({ data, setData }) => {
               if (!tokens) {
                   navigate("/notauth");
               }
-              const response = await fetch(`http://localhost:3333/room/${group_id}/unban`, {
+              const response = await fetch(prepareUrl(`room/${group_id}/unban`), {
                 method: "POST",
                 body: JSON.stringify({ adminId: user_id, roomId: group_id, unbannedId: unbannedId }),
                 headers: {

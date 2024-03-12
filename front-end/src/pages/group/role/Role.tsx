@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useConnectedUser } from '../../../context/ConnectedContext';
 import { toast } from "react-toastify";
-import { getTokensFromCookie } from "../../../utils/utils";
+import { getTokensFromCookie, prepareUrl } from "../../../utils/utils";
 import { useNavigate } from "react-router-dom";
 
 
@@ -42,7 +42,7 @@ const Role: React.FC<any> = ({ data, setData }) => {
             if (!tokens) {
                 navigate("/notauth");
             }
-            const response = await fetch(`http://localhost:3333/room/${group_id}/mute`, {
+            const response = await fetch(prepareUrl(`room/${group_id}/mute`), {
               method: "POST",
               body: JSON.stringify({ userId: mutedUser, roomId: group_id,  duration: 1}),
               headers: {
@@ -86,7 +86,7 @@ const Role: React.FC<any> = ({ data, setData }) => {
               if (!tokens) {
                   navigate("/notauth");
               }
-              const response = await fetch(`http://localhost:3333/room/${group_id}/ban`, {
+              const response = await fetch(prepareUrl(`room/${group_id}/ban`), {
               method: "POST",
               body: JSON.stringify({ adminId: user_id, roomId: group_id, bannedId: bannedId }),
               headers: {
@@ -131,7 +131,7 @@ const Role: React.FC<any> = ({ data, setData }) => {
             if (!tokens) {
                 navigate("/notauth");
             }
-            const response = await fetch(`http://localhost:3333/room/${group_id}/setAdmin`, {
+            const response = await fetch(prepareUrl(`room/${group_id}/setAdmin`), {
             method: "POST",
             body: JSON.stringify({ adminId: user_id, roomId: group_id, newAdmin: newAdmin }),
             headers: {
@@ -177,7 +177,7 @@ const Role: React.FC<any> = ({ data, setData }) => {
               if (!tokens) {
                   navigate("/notauth");
               }
-              const response = await fetch(`http://localhost:3333/room/${group_id}/unsetAdmin`, {
+              const response = await fetch(prepareUrl(`room/${group_id}/unsetAdmin`), {
               method: "POST",
               body: JSON.stringify({ adminId: user_id, roomId: group_id, unsetAdmin: unsetAdminId }),
               headers: {
@@ -222,7 +222,7 @@ const Role: React.FC<any> = ({ data, setData }) => {
             if (!tokens) {
                 navigate("/notauth");
             }
-            const response = await fetch(`http://localhost:3333/room/${group_id}/kick`, {
+            const response = await fetch(prepareUrl(`room/${group_id}/kick`), {
             method: "POST",
             body: JSON.stringify({ adminId: user_id, roomId: group_id, userId: kickedUser }),
             headers: {

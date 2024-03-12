@@ -8,7 +8,7 @@
   padding: 1rem;
   border-radius: 10px;
   box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
-  width: 100%;
+  /* width: 100%; */
 }
 
 .muted-members,
@@ -39,7 +39,7 @@
 }
 
 .members-role-cards {
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) ; /* khasseha class mere bash mat3aytsh 3la style dyal muted f member cards */
 }
 
 .muted-members-cards.cards-content {

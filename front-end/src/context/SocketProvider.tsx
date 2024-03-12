@@ -1,43 +1,6 @@
-// import io from "socket.io-client";
-// import React, { useEffect, useState } from "react";
-// // import { getTokensFromCookie } from '../utils/utils';
-// import { useUser } from "./UserContext";
-// const SocketContext = React.createContext(null);
-
-// export { SocketContext };
-
-// export default function SocketProvider({ children }: any) {
-//     const [socket, setSocket] = useState<any>(null);
-//     const { user } = useUser();
-
-//     useEffect(() => {
-//         console.log('For now there is no user');
-//         if (user) {
-//             console.log('user is here:', user);
-//             const newSocket = io("http://localhost:3333/chat", {
-//                 query: { userId: user.id },
-//         });
-//         setSocket(newSocket);
-
-//         // return () => newSocket.close();
-//         return () => {
-//             newSocket.close();
-//         };
-//         }
-//     }, [user]);
-
-//     return (
-//         <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
-//     );
-// }
-
-
-
-
-
 import io from "socket.io-client";
 import React, { useEffect, useState } from "react";
-import { getCookie, getTokensFromCookie } from '../utils/utils';
+import { getCookie, getTokensFromCookie, prepareUrl } from '../utils/utils';
 
 const SocketContext = React.createContext(null);
 
@@ -59,7 +22,7 @@ const SocketProvider: React.FC<any> = ({ children }) => {
             return;
         }
 
-        const newSocket = io("http://localhost:3333/chat", {
+        const newSocket = io(prepareUrl("chat"), {
             query: {
                 access_token: tokens.access_token,
             },

@@ -14,7 +14,7 @@ export class FriendService{
         const res = await this.prisma.friendship.findFirst({where: { 
             OR: [
                 { userOne: userId, userTwo: friendId},
-                { userOne: friendId, userTwo: friendId },
+                { userOne: friendId, userTwo: userId },
             ]
          }})
 
@@ -177,10 +177,22 @@ export class FriendService{
 
     async addFriend(userId: string, friendId: string) {
         try {
+            const alreadyFreind = await this.prisma.friendship.findFirst({
+                where: {
+                    OR: [
+                        {userOne: userId, userTwo: friendId},
+                        {userOne: friendId, userTwo: userId}
+                    ]
+                }
+            });
+
+            if (alreadyFreind) {
+                throw new Error('Already freind....');
+            }
             await this.prisma.friendship.create({
                 data: {
-                userOne: userId,
-                userTwo: friendId,
+                    userOne: userId,
+                    userTwo: friendId,
                 },
             });
         } catch (error) {

@@ -2,7 +2,7 @@ FROM node:latest
 
 WORKDIR /app
 
-COPY package*.json .
+COPY package*.json ./
 
 RUN npm install -g npm@10.2.5
 
