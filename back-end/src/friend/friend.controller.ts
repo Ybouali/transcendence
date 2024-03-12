@@ -29,11 +29,13 @@ export class FriendController{
     @Post('add/:friendId')
     async addFriend(@GetUser('id') userId: string, @Param('friendId') friendId: string) {
         try {
+            console.log('add friend...');
             await this.friendService.addFriend(userId, friendId);
             this.eventEmitter.emit('addFriend', {userId, friendId});
+            return {statusCode: 200};
         } catch (error) {
             console.log('errrrrrrrrrrror');
-            throw new BadRequestException('Already friend');
+            return {statusCode: 400};
         }
     }
 

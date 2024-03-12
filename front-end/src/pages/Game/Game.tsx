@@ -31,7 +31,6 @@ function Game() {
 
   return (
     <div>
-      {/* <Header isConnected={true}  /> */}
       Game
     </div>
   )

@@ -385,11 +385,17 @@ body {
   /* border-top: 2px solid #a0a0a0; */
 }
 
-@media (max-width: 600px) {
+/* @media (max-width: 600px) {
   .cards-content {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
+} */
+@media (max-width: 900px) {
+  .cards-content {
+    grid-template-columns: 1fr;
+  }
 }
+
 .card {
   display: none;
   position: relative;

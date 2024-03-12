@@ -26,7 +26,6 @@ function Friends() {
 
   return (
     <div>
-      {/* <Header isConnected={true}  /> */}
       Friends
     </div>
   )

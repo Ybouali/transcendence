@@ -6,7 +6,8 @@ import ProfileAchievements from './ProfileAchievements/ProfileAchievements'
 import { HistoryGameReturnedType, Tokens, UserType } from '../../types'
 import GamesHistory from './GamesHistory/GamesHistory'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getHisGamesByUserId, getIsFriend, getNumberGamePlayedByUserId, getNumberOfWinnedGames, getTokensFromCookie, getUserById } from '../../utils/utils'
+import { toast } from "react-toastify";
+import { getHisGamesByUserId, getIsFriend, getNumberGamePlayedByUserId, getNumberOfWinnedGames, getTokensFromCookie, getUserById, prepareUrl } from '../../utils/utils'
 import { useConnectedUser } from '../../context/ConnectedContext'
 
 
@@ -35,7 +36,7 @@ function Profile() {
   useEffect(() => {
 
     gaurd();
-  }, [setUserData, setNumberGamePlayed, setFriend, setPersonal, setNumberGameWinned, setDataHisGame ]);
+  }, [setUserData, setNumberGamePlayed, setFriend, setPersonal, setNumberGameWinned, setDataHisGame, userId]);
   
   const gaurd = async () => {
 
@@ -126,12 +127,37 @@ function Profile() {
 
   }
 
-  const handleClickAddFriend = () => {
+  const addFriend = async () => {
+    const tokens: any = await getTokensFromCookie();
+
+    if (!tokens) {
+        navigate("/notauth");
+    }
+
+    try {
+        const response = await fetch(prepareUrl(`friend/add/${userData?.id}`), {
+        method: "POST",
+        headers: {
+            'access_token': tokens.access_token,
+            'refresh_token': tokens.refresh_token
+        },
+        });
+        const res = await response.json();
+        if (res?.statusCode !== 200){
+            throw new Error('Try again, Later!');
+        }
+        toast.success(`You are friend with ${userData?.fullName}`)
+        setFriend(true);
+    } catch (error) {
+        toast.error('Try again, Later!')
+    } 
+  }
+
+  const handleClickAddFriend = async () => {
 
     // TODO: need to call the endpoint to add a friend
-
-    setFriend(true);
-
+    await addFriend();
+    
   }
 
   const getDatahistoryGames = async (userId: string | null, tokens: Tokens) => {
@@ -163,8 +189,8 @@ function Profile() {
       <section className="profile">
         <div className="container">
           <div className="profile-content" data-status="online">
-            <ProfileUserInfos userData={userData} numberGamePlayed={numberGamePlayed} numberFrined={numberFrined} />
-            <ProfileButtonActions friend={friend} personal={personal} setIsFriend={handleClickAddFriend} />
+            <ProfileUserInfos userData={userData} numberGamePlayed={numberGamePlayed} numberFrined={numberFrined} personal={ personal || friend }/>
+            <ProfileButtonActions friend={friend} personal={personal} setIsFriend={handleClickAddFriend} userData={userData} />
             <ProfileAchievements numberGameWinned={numberGameWinned} />
             <GamesHistory dataHisGame={dataHisGame} /> 
           </div>

@@ -7,7 +7,7 @@
   padding: 1rem;
   border-radius: 10px;
   box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
-  width: 100%;
+  /* width: 100%; */
 }
 
 .banned-members,

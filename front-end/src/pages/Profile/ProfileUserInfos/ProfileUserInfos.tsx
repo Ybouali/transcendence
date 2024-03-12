@@ -8,6 +8,7 @@ interface UserInfoType {
   userData: UserType | null,
   numberGamePlayed: number,
   numberFrined: number,
+  personal: boolean
 }
 
 function ProfileUserInfos(props: UserInfoType) {
@@ -24,7 +25,7 @@ function ProfileUserInfos(props: UserInfoType) {
         <div className="profile-user-description">
           <div className="profile-user-fullname">{props.userData?.fullName}</div>
           <p className="profile-user-username">{props.userData?.username}</p>
-          <p className="profile-user-status">{props.userData?.Status}</p>
+          {props.personal && (<p className="profile-user-status">{props.userData?.Status}</p>)}
         </div>
 
         <div className="profile-user-stats">

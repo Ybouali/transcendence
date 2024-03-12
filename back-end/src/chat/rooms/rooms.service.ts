@@ -1231,68 +1231,71 @@ export class RoomsService {
             }
             
             
-            async removeRoom(roomId: string): Promise<any[]> {
-                    const room = await this.prisma.chatRoom.findUnique({
-                    where: { id: roomId },
-                    include: {
-                        members: true,
-                        AdminUsers: {
-                        select: {
-                            userId: true,
-                        },
-                        },
-                        banedUsers: {
-                        select: {
-                            userId: true,
-                        },
-                        },
+            async removeRoom(roomId: string, userId: string): Promise<any[]> {
+                const room = await this.prisma.chatRoom.findUnique({
+                where: { 
+                    id: roomId,
+                    ownerID: userId
+                },
+                include: {
+                    members: true,
+                    AdminUsers: {
+                    select: {
+                        userId: true,
                     },
-                    });
+                    },
+                    banedUsers: {
+                    select: {
+                        userId: true,
+                    },
+                    },
+                },
+                });
 
-                    const memberIds = room.members.map((member) => member.userId);
-                
-                    if (!room) {
-                        throw new NotFoundException('Room not found');
-                    }
-                try {
-                    await this.prisma.roomMessage.deleteMany({
-                        where: {
-                            roomId: roomId,
-                        },
-                    });
-                    // Delete room members
-                    await this.prisma.member.deleteMany({
-                        where: {
-                            chatRoomId: roomId,
-                        },
-                    });
-                
-                    // Delete room admins
-                    await this.prisma.admins.deleteMany({
-                        where: {
-                            roomId: roomId,
-                        },
-                    });
-                
-                    // Delete room banned members
-                    await this.prisma.banedUsers.deleteMany({
-                        where: {
-                            roomId: roomId,
-                        },
-                    });
-                
-                    // Delete the room itself
-                    await this.prisma.chatRoom.delete({
-                        where: {
-                            id: roomId,
-                        },
-                    });
-
-                    return memberIds
-                } catch(error) {
-                    throw new BadRequestException('Failed to remove room');
+                const memberIds = room.members.map((member) => member.userId);
+            
+                if (!room) {
+                    throw new NotFoundException('Room not found');
                 }
+            try {
+                await this.prisma.roomMessage.deleteMany({
+                    where: {
+                        roomId: roomId,
+                    },
+                });
+                // Delete room members
+                await this.prisma.member.deleteMany({
+                    where: {
+                        chatRoomId: roomId,
+                    },
+                });
+            
+                // Delete room admins
+                await this.prisma.admins.deleteMany({
+                    where: {
+                        roomId: roomId,
+                    },
+                });
+            
+                // Delete room banned members
+                await this.prisma.banedUsers.deleteMany({
+                    where: {
+                        roomId: roomId,
+                    },
+                });
+            
+                // Delete the room itself
+                await this.prisma.chatRoom.delete({
+                    where: {
+                        id: roomId,
+                    },
+                });
+
+                return memberIds
+            } catch(error) {
+                throw new BadRequestException('Failed to remove room');
             }
+        }
             
             
             

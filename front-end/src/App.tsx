@@ -18,6 +18,7 @@ import CommunityHub from './pages/community-hub/CommunityHub';
 import { Tokens } from './types';
 import GroupSettings from './pages/group/group-settings/GroupSettings';
 import Group from './pages/group/Group';
+import { ToastContainer } from "react-toastify";
 
 function App() {
 
@@ -75,6 +76,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home logInFunc={loginIntra} />} />
             <Route path="/chat" element={<Chat />} />
+            <Route path="/chat/:id" element={<Chat />} />
             <Route path="/friends" element={<CommunityHub type="friends" />} />
             <Route path="/groups" element={<CommunityHub type="rooms" />} />
             <Route path="/group/:id" element={<Group />} />
@@ -92,6 +94,7 @@ function App() {
           </Routes>
         </SocketProvider>
         <Footer />
+            <ToastContainer position="bottom-right" theme="dark" stacked={true} />
       </BrowserRouter>
     </ConnectedProvider>
   );

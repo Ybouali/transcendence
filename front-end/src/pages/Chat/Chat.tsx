@@ -5,10 +5,11 @@ import ChatContext from "./ChatContext";
 import { useConnectedUser } from '../../context/ConnectedContext';
 import { useParams } from "react-router-dom";
 import "./ChatStyle.css";
-import { getTokensFromCookie } from "../../utils/utils";
+import { getTokensFromCookie, prepareUrl } from "../../utils/utils";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Header from "../../components/Header/Header";
+import { Tokens } from "../../types";
 
 interface SelectedChat {
   user_id: string | undefined;
@@ -45,46 +46,63 @@ const Chat = () => {
   useEffect(() => {
     if (selectedChat !== null) {
       if (selectedChat?.type === "users") {
-        setUrl(`http://localhost:3333/messages/conversation/${selectedChat?.friend_id}`
+        setUrl(prepareUrl(`messages/conversation/${selectedChat?.friend_id}`)
         );
       }
       if (selectedChat?.type === "groups") {
-        setUrl(`http://localhost:3333/room/messages/${selectedChat?.group_id}`);
+        setUrl(prepareUrl(`room/messages/${selectedChat?.group_id}`));
       }
     }
   }, [selectedChat]);
 
 
-  const fetchData = async (url: any) => {
-        const tokens: any = await getTokensFromCookie();
+  const fetchData = async (url: any, tokens: Tokens) => {
 
-        if (!tokens) {
-            navigate("/notauth");
+    try {
+      if (tokens.access_token && tokens.refresh_token) {
+        const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            'access_token': tokens.access_token,
+            'refresh_token': tokens.refresh_token
+        },
+        });
+        const res = await response.json();
+        if (res?.statusCode !== undefined){
+            throw new Error('Try again, Later!');
         }
-    
-        try {
-            const response = await fetch(url, {
-            method: "GET",
-            headers: {
-                'access_token': tokens.access_token,
-                'refresh_token': tokens.refresh_token
-            },
-            });
-            const res = await response.json();
-            if (res?.statusCode !== undefined){
-                throw new Error('Try again, Later!');
-            }
-            setValue(res);
-        } catch (error) {
-            toast.error('Try again, Later!')
-        } 
-}
+        setValue(res);
+
+      }
+    } catch (error) {
+        toast.error('Try again, Later!')
+    } 
+  }
 
   useEffect(() => {
-    if (url) {
-      fetchData(url);
-    }
+
+    gaurd()
   }, [url])
+
+  const gaurd = async () => {
+
+    const tokens: Tokens | null = await getTokensFromCookie();
+
+    if (!tokens) {
+      navigate("/error-page/:401");
+      return null;
+    }
+
+    if (connectedUser?.twoFactor && connectedUser?.towFactorToRedirect) {
+      navigate("/tow-factor")
+    }
+
+    if (url) {
+      fetchData(url, tokens);
+    }
+  }
+
+  
 
   useEffect(() => {
 

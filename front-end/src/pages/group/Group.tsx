@@ -10,7 +10,7 @@ import "./GroupStyle.css";
 import { useConnectedUser } from '../../context/ConnectedContext';
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { getTokensFromCookie } from "../../utils/utils";
+import { getTokensFromCookie, prepareUrl } from "../../utils/utils";
 import Header from "../../components/Header/Header";
 
 
@@ -24,6 +24,10 @@ const Group: React.FC = () => {
     const [loading, setLoading] = useState(true); 
 
     const {id} = useParams();
+    
+    useEffect(() => {
+        fetchData();
+    }, [])
 
     const fetchData = async () => {
 
@@ -37,7 +41,7 @@ const Group: React.FC = () => {
             }
         
             try {
-                const response = await fetch(`http://localhost:3333/room/${id}`, {
+                const response = await fetch(prepareUrl(`room/${id}`), {
                 method: "GET",
                 headers: {
                     'access_token': tokens.access_token,
@@ -58,11 +62,12 @@ const Group: React.FC = () => {
             }
     }
 
-    useEffect(() => {
-        fetchData();
-    }, [])
     
     useEffect(() => {
+
+        if (connectedUser?.twoFactor && connectedUser?.towFactorToRedirect) {
+            navigate("/tow-factor")
+        }
         
         if (Object.keys(value).length) {
             if (user_id === value?.owner[0]?.id) {

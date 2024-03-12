@@ -4,7 +4,7 @@ import useWindowSize from "../../../utils/hooks/useWindowSize";
 import { useNavigate } from "react-router-dom";
 import { useConnectedUser } from '../../../context/ConnectedContext';
 import { toast } from "react-toastify";
-import { getTokensFromCookie } from "../../../utils/utils";
+import { getTokensFromCookie, prepareUrl } from "../../../utils/utils";
 import Header from "../../../components/Header/Header";
 
 
@@ -209,7 +209,7 @@ const GroupSettings: React.FC<GroupSettingsProps> = ({ members, admins, componen
           image:         '',
           users:         []
         }
-        setRoomCredentials({url:`http://localhost:3333/room/createRoom`, room})
+        setRoomCredentials({url: prepareUrl(`room/createRoom`), room})
       }
     }
 
@@ -224,7 +224,7 @@ const GroupSettings: React.FC<GroupSettingsProps> = ({ members, admins, componen
           password:       passwordRef.current.value,
           admins:         selectedChange ? editedSelectedValues : admins.map((admin: any) => admin.id)
         }
-        setRoomCredentials({url:`http://localhost:3333/room/${groupInfos.id}/updateRoom`, room})
+        setRoomCredentials({url: prepareUrl(`room/${groupInfos.id}/updateRoom`), room})
       }
     }
   }

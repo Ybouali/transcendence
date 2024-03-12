@@ -4,6 +4,7 @@ import CardItem from '../card-item/CardItem';
 import './SearchResultStyle.css';
 import { Link } from 'react-router-dom';
 import { prepareUrl } from '../../utils/utils';
+import { useNavigate } from "react-router-dom";
 
 const SearchResults: React.FC<any> = ({
   results,
@@ -15,6 +16,7 @@ const SearchResults: React.FC<any> = ({
   setSearch,
 }) => {
   const searchResultsRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useClickOutside(searchResultsRef, () => {
     // CHECK IF THE MODAL JUST OPENED
@@ -37,7 +39,11 @@ const SearchResults: React.FC<any> = ({
               searchResults.classList.remove('opened');
             if (searchResults?.parentElement?.classList?.contains('is-clicked'))
               searchResults?.parentElement?.classList?.remove('is-clicked');
-            searchResults?.parentElement?.querySelector('input')?.remove(); // changed from input = '' to .remove()
+            if (searchResults.parentElement) {
+              if (searchResults.parentElement.querySelector('input') !== null){
+                searchResults.parentElement.querySelector('input')!.value = ''; // changed from input = '' to .remove()
+              }
+            } 
           });
         }
       }
@@ -48,7 +54,7 @@ const SearchResults: React.FC<any> = ({
     console.log('results', results);
   }, [results]);
 
-  console.log('opened', searchOpen);
+  // console.log('opened', searchOpen);
 
   return (
     <div
@@ -76,6 +82,7 @@ const SearchResults: React.FC<any> = ({
                     <li key={key}>
                       <Link
                         to={`/profile/${user?.id}`}
+                        
                         onClick={() => {
                           if (searchResultsRef.current) {
                             const searchBar =
@@ -89,7 +96,7 @@ const SearchResults: React.FC<any> = ({
                           setSearchJustOpened(false);
                         }}
                         className="card-link"
-                      >
+                      >  
                         {/* <CardItem data={user} type="user" /> */}
                         <div className="search-card">
                           <div className="search-card-body">

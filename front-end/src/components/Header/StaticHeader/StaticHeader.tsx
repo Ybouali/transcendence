@@ -65,7 +65,7 @@ function StaticHeaderHome(props: LoginType) {
               aria-controls="primary-navigation"
               aria-expanded="false"
             >
-              <img
+              {/* <img
                 className="icon-hamburger"
                 src="images/icon-hamburger.svg"
                 alt="Icon Hamburger"
@@ -76,7 +76,7 @@ function StaticHeaderHome(props: LoginType) {
                 src="images/icon-close.svg"
                 alt="Icon Close"
                 aria-hidden="true"
-              />
+              /> */}
               <span className="visually-hidden">Menu</span>
             </button>
 
@@ -86,7 +86,7 @@ function StaticHeaderHome(props: LoginType) {
                   <a href="index.html">Home</a>
                 </li>
                 <li>
-                  <a href="#about">About the game</a>
+                  <a href="#about">About</a>
                 </li>
                 <li>
                   <a href="#team">Team</a>

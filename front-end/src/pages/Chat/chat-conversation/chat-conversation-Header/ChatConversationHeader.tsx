@@ -3,7 +3,8 @@ import useClickOutside from "../../../../utils/hooks/useClickOutside";
 import "./ChatConversationHeaderStyle.css";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
-import { prepareUrl } from "../../../../utils/utils";
+import { getTokensFromCookie, prepareUrl } from "../../../../utils/utils";
+import { useNavigate } from "react-router-dom";
 
 
 interface ChatConversationHeaderProps {
@@ -15,6 +16,7 @@ const ChatConversationHeader: React.FC<ChatConversationHeaderProps> = ({ convers
   const [justOpened, setJustOpened] = useState(false);
   const dropDownButtonRef = useRef<HTMLDivElement>(null);
   const dropDownMenuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
 
@@ -22,7 +24,7 @@ const ChatConversationHeader: React.FC<ChatConversationHeaderProps> = ({ convers
     const dropDownButton = dropDownButtonRef.current;
     if (dropDownButton) {
       dropDownButton.addEventListener("click", () => {
-        setOpen((previousValue: any) => !previousValue);
+        setOpen(true);
         setJustOpened(true);
       });
     }
@@ -32,9 +34,18 @@ const ChatConversationHeader: React.FC<ChatConversationHeaderProps> = ({ convers
     // e.preventDefault();
     if (selectedChat) {
       try {
-            const response = await fetch(`http://localhost:3333/friend/block/${selectedChat.friend_id}`, {
-            method: "POST", 
-          });
+            const tokens: any = await getTokensFromCookie();
+
+            if (!tokens) {
+                navigate("/notauth");
+            }
+            const response = await fetch(prepareUrl(`friend/block/${selectedChat.friend_id}`), {
+              method: "POST", 
+              headers: {
+                'access_token': tokens.access_token,
+                'refresh_token': tokens.refresh_token
+              },
+            });
 
           const res = await response.json();
 
@@ -53,13 +64,22 @@ const ChatConversationHeader: React.FC<ChatConversationHeaderProps> = ({ convers
 
 
   useClickOutside(dropDownMenuRef, () => {
-    // CHECK IF THE MODAL JUST OPENED
-    if (justOpened) {
-      setJustOpened(false);
-      return;
-    }
-    if (open) setOpen(false);
+		// CHECK IF THE MODAL JUST OPENED
+		if (justOpened) {
+			setJustOpened(false);
+			return;
+		}
+    console.log('i am  here');
+		if (open) setOpen(false);
+	});
+
+  useEffect(() => {
+    console.log('rendred ------------------------------------');
   });
+
+  // return (
+  //   <div>Chat conversation header</div>
+  // )
 
   return (
     <div className="chat-conversation-header">
@@ -95,6 +115,28 @@ const ChatConversationHeader: React.FC<ChatConversationHeaderProps> = ({ convers
           )}
         </div>
       </div>
+      {/* <div className="actions-buttons">
+      {conversationInfos?.type === "person" && (<>
+                <button type="button" className="action-button button-active">
+                  Chat
+                </button>
+                <button type="button" className="action-button button-active">
+                  Play
+                </button>
+                <button type="button" className="action-button button-inactive">
+                  Block
+                </button>
+              </>)}
+      {conversationInfos?.type === "group" && (
+                <button type="button" className="action-button button-active">
+                  Settings
+                </button>
+                
+              )}
+           
+
+
+          </div> */}
       <div
         ref={dropDownButtonRef}
         className="chat-conversation-more dropdown-button"
@@ -108,14 +150,14 @@ const ChatConversationHeader: React.FC<ChatConversationHeaderProps> = ({ convers
       </div>
       <div
         ref={dropDownMenuRef}
-        className={`dropdown-menu ${open ? "open" : ""}`}
+        className={`dropdown-menu ${open ? 'open' : ''}`}
       >
         <div className="dropdown-menu-content">
           <ul className="dropdown-list">
             {conversationInfos?.type === "person" && (
               <>
                 <li className="dropdown-item">
-                  <Link to={""}>
+                  <Link to={`/profile/${selectedChat.friend_id}`}>
                     <div className="dropdown-item-icon">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
