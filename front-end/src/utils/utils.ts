@@ -11,6 +11,38 @@ export function prepareUrl(url: string): string {
 
 }
 
+export async function getNumberOfFriends(userId: string | undefined, tokens: Tokens ): Promise<number | null> {
+
+    console.log(`user id ${userId}`)
+
+    if (userId === undefined) {
+        return null;
+    }
+
+    // the url
+    let url: string = prepareUrl("friend/numberoffriends/") + userId;
+    // const tokens: Tokens | null = await getTokensFromCookie();
+
+    if (tokens === null) {
+        return null;
+    }
+
+    // make the req to the server
+    const response = await fetch(url, {
+    method: "GET",
+        headers: {
+            'access_token': tokens.access_token as string,
+            'refresh_token': tokens.refresh_token as string 
+        },
+    });
+    const res = await response.json();
+    if (res?.statusCode !== undefined){
+        return null;
+    }
+
+    return res?.number;
+}
+
 export function getCookie(name: string) {
     const cookies = document.cookie.split(';');
     for (let cookie of cookies) {

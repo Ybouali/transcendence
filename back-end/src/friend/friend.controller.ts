@@ -14,6 +14,16 @@ export class FriendController{
     constructor(private readonly friendService: FriendService,
         private eventEmitter: EventEmitter2) {}
 
+    @Get('numberoffriends/:userId')
+    async getNumberOfFriends(@Param('userId') userId: string) {
+        try {
+            const number = await this.friendService.getNumberOfFriends(userId)
+            return {number: number}
+        } catch (error) {
+            return error.response;
+        }
+    }
+
     // :userId for test
     @Get('all')
     async getAllFriends(@GetUser('id') userId: string) {

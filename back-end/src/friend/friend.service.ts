@@ -1,13 +1,38 @@
 /* eslint-disable prettier/prettier */
 
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 // import { FriendshipDto } from "./dto/friendship.dto";
 
 
 @Injectable()
 export class FriendService{
+
+    private logger = new Logger();
+
     constructor(private readonly prisma: PrismaService){}
+
+
+    async getNumberOfFriends(userId: string) : Promise<number>{
+    
+        try {
+
+            this.logger.debug(userId)
+
+            const numberOfFriends = await this.prisma.friendship.count({
+                where: {
+                    OR: [
+                        {userOne: userId},
+                        {userTwo: userId}
+                    ]
+                }
+            });
+            return numberOfFriends;
+        }
+        catch (error) {
+            throw new BadRequestException('bad request, number of friends');
+        }
+    }
 
     async getIsFriend(userId: string, friendId: string): Promise<{ relationShip: string }> {
 

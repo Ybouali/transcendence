@@ -32,9 +32,6 @@ export class AccessStrategy extends PassportStrategy(Strategy, 'access') {
 
     // if the user is not found
     if (!user) {
-      this.logger.debug("hello 3")
-      this.logger.debug(payload.sub)
-      this.logger.debug("hello 3")
       throw new ForbiddenException('Access denied');
     
     }
@@ -45,17 +42,12 @@ export class AccessStrategy extends PassportStrategy(Strategy, 'access') {
 
     // check if the refresh token is matched against the refresh token that comes from request
     if (accessToken !== access_token) {
-      this.logger.debug("hello 4")
-      this.logger.debug(payload.sub)
-      this.logger.debug("hello 4")
       throw new ForbiddenException('Access denied');
     }
 
     delete user.accessToken;
     delete user.refreshToken;
     delete user.towFactorSecret;
-
-    this.logger.debug(req.originalUrl);
 
     return user;
   }

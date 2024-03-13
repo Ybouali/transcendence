@@ -7,7 +7,7 @@ import { HistoryGameReturnedType, Tokens, UserType } from '../../types'
 import GamesHistory from './GamesHistory/GamesHistory'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from "react-toastify";
-import { getHisGamesByUserId, getIsFriend, getNumberGamePlayedByUserId, getNumberOfWinnedGames, getTokensFromCookie, getUserById, prepareUrl } from '../../utils/utils'
+import { getHisGamesByUserId, getIsFriend, getNumberGamePlayedByUserId, getNumberOfFriends, getNumberOfWinnedGames, getTokensFromCookie, getUserById, prepareUrl } from '../../utils/utils'
 import { useConnectedUser } from '../../context/ConnectedContext'
 
 
@@ -64,16 +64,19 @@ function Profile() {
 
         // the will be called because the url contains a user id
         if (userId === connectedUser?.id) {
+          console.log(`hello user ${connectedUser.username}`)
           setPersonal(true);
           setUserData(connectedUser);
+
         } else {
 
           const otherUser: UserType | null = await getUserById(userId, tokens);
 
           if (otherUser) {
 
+            console.log(`hello user ${otherUser.username}`)
             setPersonal(false)
-  
+
             setUserData(otherUser);
 
           }
@@ -91,40 +94,47 @@ function Profile() {
           }
         }
 
+        if (userData) {
+          await iniOtherData(userData.id, tokens);
+        }
+        
+
 
       } else {
         setPersonal(true);
       }
-
-      // get the number of game played by the player
-      const numberOfGames: number | null = await getNumberGamePlayedByUserId(userData?.id, tokens)
-  
-      if (!numberOfGames) {
-        setNumberGamePlayed(0);
-      } else {
-        setNumberGamePlayed(numberOfGames);
-      }
-
-      // get the number of friends by id by default right now will be 0 
-      const numberOfFriends: number | null = 0;
-
-      if (!numberOfFriends) {
-        setNumberFrined(0);
-      } else {
-        setNumberFrined(numberOfFriends);
-      }
-
-      const nGameWinned: number | null = await getNumberOfWinnedGames(userData?.id, tokens)
-  
-      if (nGameWinned) {
-        setNumberGameWinned(nGameWinned);
-      }
-
-      if (userData?.id) {
-        await getDatahistoryGames(userData.id, tokens)
-      }
     }
 
+  }
+
+  const iniOtherData = async (userId: string, tokens: Tokens) => {
+    // get the number of game played by the player
+    const numberOfGames: number | null = await getNumberGamePlayedByUserId(userId, tokens)
+        
+    if (!numberOfGames) {
+      setNumberGamePlayed(0);
+    } else {
+      setNumberGamePlayed(numberOfGames);
+    }
+
+    // get the number of friends by id by default right now will be 0 
+    const numberOfFriends: number | null = await getNumberOfFriends(userId, tokens)
+
+    if (!numberOfFriends) {
+      setNumberFrined(0);
+    } else {
+      setNumberFrined(numberOfFriends);
+    }
+
+    const nGameWinned: number | null = await getNumberOfWinnedGames(userId, tokens)
+
+    if (nGameWinned) {
+      setNumberGameWinned(nGameWinned);
+    }
+
+    if (userData?.id) {
+      await getDatahistoryGames(userId, tokens)
+    }
   }
 
   const addFriend = async () => {
