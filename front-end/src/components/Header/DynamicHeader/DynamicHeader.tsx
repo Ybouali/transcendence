@@ -134,17 +134,6 @@ function DynamicHeader(props: IsLoggedIn) {
               setLoading(false);
           }
   }
-  
-  
-  // useEffect(() => {
-  //   const dropDownButton: any = dropDownButtonRef.current;
-  //   if (dropDownButton) {
-  //     dropDownButton.addEventListener('click', () => {
-  //       setOpen((previousValue: any) => !previousValue);
-  //       setJustOpened(true);
-  //     });
-  //   }
-  // }, [dropDownButtonRef]);
 
     useDebounce(() => {
       // const searchtrim = search.trim
@@ -228,10 +217,6 @@ function DynamicHeader(props: IsLoggedIn) {
 
         if (toSetUser) {
           setConnectedUser(toSetUser);
-        } else {
-          // error on update so good bye from the app
-
-          logoutFromServer();
         }
       }
     }

@@ -73,21 +73,21 @@ export class UserService {
         where: { username: dataUser.username}
       })
 
-      if (tmp) {
+      if (tmp && tmp.id !== dataUser.id) {
         return {
           message: "notallowed"
         };
       }
 
-      // tmp = await this.prisma.user.findFirst({
-      //   where: { email: dataUser.email}
-      // })
+      tmp = await this.prisma.user.findFirst({
+        where: { email: dataUser.email}
+      })
 
-      // if (tmp) {
-        // return {
-        //   message: "notallowed"
-        // };
-      // }
+      if (tmp && tmp.id !== dataUser.id) {
+        return {
+          message: "notallowed"
+        };
+      }
 
       const user = this.prisma.user.update({
         where: { id: userId },
