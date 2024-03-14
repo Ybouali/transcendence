@@ -64,9 +64,10 @@ function Profile() {
 
         // the will be called because the url contains a user id
         if (userId === connectedUser?.id) {
-          console.log(`hello user ${connectedUser.username}`)
+          // console.log(`hello user connectedUser ${connectedUser.username}`)
           setPersonal(true);
           setUserData(connectedUser);
+          await iniOtherData(connectedUser.id, tokens);
 
         } else {
 
@@ -74,11 +75,12 @@ function Profile() {
 
           if (otherUser) {
 
-            console.log(`hello user ${otherUser.username}`)
+            // console.log(`hello user otherUser ${otherUser.username}`)
             setPersonal(false)
 
             setUserData(otherUser);
-
+            
+            await iniOtherData(otherUser.id, tokens);
           }
 
           const isFriend: string = (await getIsFriend(userId, tokens)).relation;
@@ -92,13 +94,9 @@ function Profile() {
           } else {
             navigate("/error-page/:404")
           }
-        }
 
-        if (userData) {
-          await iniOtherData(userData.id, tokens);
+          
         }
-        
-
 
       } else {
         setPersonal(true);
@@ -108,6 +106,8 @@ function Profile() {
   }
 
   const iniOtherData = async (userId: string, tokens: Tokens) => {
+
+    // console.log("init Other Data >>", userId)
     // get the number of game played by the player
     const numberOfGames: number | null = await getNumberGamePlayedByUserId(userId, tokens)
         
@@ -132,9 +132,7 @@ function Profile() {
       setNumberGameWinned(nGameWinned);
     }
 
-    if (userData?.id) {
-      await getDatahistoryGames(userId, tokens)
-    }
+    await getDatahistoryGames(userId, tokens)
   }
 
   const addFriend = async () => {
