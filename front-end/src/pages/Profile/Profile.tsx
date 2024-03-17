@@ -99,6 +99,10 @@ function Profile() {
         }
 
       } else {
+        if (connectedUser) {
+
+          await iniOtherData(connectedUser.id, tokens);
+        }
         setPersonal(true);
       }
     }
