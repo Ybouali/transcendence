@@ -38,8 +38,8 @@ export function InitSetup() {
         cub.position.set(0, 0, 0);
         setup.scene.add(cub);
         const ball = rander_ball();
-        const R_puddle = puddles();
-        const L_puddle = puddles();
+        const R_puddle = puddles(right_player);
+        const L_puddle = puddles(left_player);
         Player.on("Puddle2", (data: any) => {
             isRight = data;
             Player.on("left", (data: number) => {
@@ -98,6 +98,9 @@ export function InitSetup() {
                 window.removeEventListener('keydown', handleKeyDown);
                 document.body.removeChild(setup.renderer.domElement);
                 setup.scene.remove(cub);
+                setup.scene.remove(L_puddle);
+                setup.scene.remove(R_puddle);
+                setup.scene.remove(ball);
         };
     }, [/*  */])
     return (

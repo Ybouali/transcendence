@@ -78,7 +78,8 @@ export class HistoryGameService {
                     winnerId: dataGame.winnerId,
                     loserId: dataGame.loserId,
                     startTimeGame: dataGame.startTimeGame,
-                    endTimeGame: dataGame.endTimeGame,
+                    endTimeGame: "NULL",     
+                        //  Date.now(),
                     scoreWinner: dataGame.scoreWinner,
                     scoreLoser: dataGame.scoreLoser,
                 }

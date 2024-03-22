@@ -1,7 +1,7 @@
 
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Socket, Server } from "socket.io";
-import { roomSetting} from "./object";
+import { roomSetting, Id} from "./object";
 import { Game } from "./Game";
 
 @WebSocketGateway({ cors: '*' })
@@ -26,24 +26,32 @@ export class socketGateway {
     }
 
     @SubscribeMessage('onJoinGame')
-    onJoinGame(client: Socket) {
-        joinRoom(this.server, client)
+    onJoinGame(client: Socket, messsage : {userId: string}) {
+        console.log("user ID", messsage.userId )
+        if(!(checkId(messsage.userId, client)))
+            joinRoom(this.server, client)
     }
     @SubscribeMessage('OneVSone')
     OneVSone(client: Socket){
         OneGame(this.server, client);
     }
-
-    @SubscribeMessage('leaveGame')
-    onLeaveGame(@MessageBody() client : Socket) {
-         checkDectonnectin(this.server, client) ;
-    }
 }
-
-function QueueWaiting(io: Server, socket: Socket) {
-    if (roomSetting.queue.includes(socket.id))
+function checkId(cltId : string, client : Socket){
+        if(Id.has(cltId))
+        {
+            console.log("id already exists :", cltId)
+            return(1);
+        }
+        else
+            Id.set(cltId, client.id);
+        return(0);
+}
+function QueueWaiting( socket: Socket) {
+    if (roomSetting.queue.includes(socket.id)){
         console.log("this player already exists in waiting room")
-    else if (checkSocket(socket))
+        return ;
+    }
+     if (checkSocket(socket))
         console.log("player already exists in other room")
     else {
         if (roomSetting.queue.length < 3) {
@@ -57,7 +65,7 @@ function joinRoom(io: Server, socket: Socket) {
     const roomName = "room" + roomSetting.num;
     const roomInfo = io.sockets.adapter.rooms;
     let game : Game;
-    QueueWaiting(io, socket)
+    QueueWaiting(socket)
     if (roomSetting.queue.length == 2) {
         const Id: Set<string> = new Set(roomSetting.queue)
         roomInfo.set(roomName, Id)
@@ -82,13 +90,13 @@ function checkDectonnectin(io: Server, Socket: Socket) {
             RoomName = roomName;
             Socket.leave(roomName);
             console.log(Socket.id, "leaved ", roomName);
+            roomSetting.loser = Socket.id;
             const socketId = Array.from(room);
             for (const socket of socketId) {
                 const s = io.sockets.sockets.get(socket);
                 if (s) {
-                    // roomSetting.queue.push(s);
-                    // console.log(s.id, "is waiting for new game");
                     console.log(s.id, "left ", roomName);
+                    roomSetting.winner = s.id;
                     s.leave(roomName);
                 }
             }
@@ -120,28 +128,7 @@ function checkSocket(socket: Socket) {
 return (false)
 }
 
-function leaveQueue(io: Server, socket: Socket) {
-    roomSetting.queue.filter(value => value !== socket.id) 
-}
-
 function OneGame(io : Server, socket:Socket){
+    io.to(socket.id).emit("vsOne", true);
+}
 
-    const RoomName = "duel" + roomSetting.duel;
-    const roomInfo = io.sockets.adapter.rooms;
-    if( Array.from(roomSetting.room.values()).includes(socket.id))
-        console.log("you are already existing in one room")
-    else{
-    roomSetting.room.set(RoomName, socket.id);
-    const tmp: Set<string> =new  Set(socket.id)
-    roomInfo.set(RoomName, tmp);
-    if (io.sockets.adapter.rooms.get(RoomName)?.has(socket.id)) {
-        console.log(`Socket ${socket.id} is in room ${RoomName}`);
-    } else {
-        console.log(`Socket ${socket.id} is NOT in room ${RoomName}`);
-    }
-    console.log(socket.id);
-    console.log("room :", RoomName , " is created")
-    io.emit("vsOne", true);
-    roomSetting.duel += 1;
-}
-}
