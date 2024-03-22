@@ -13,6 +13,34 @@ interface ProfileAchievementsType {
 function ProfileAchievements(props: ProfileAchievementsType) {
 
 
+    // const initData = async () => {
+
+    //   const tokens: Tokens | null = await getTokensFromCookie();
+
+    //   if (tokens && tokens.access_token && tokens.refresh_token) {
+
+    //     setUserData(connectedUser);
+
+    //     if (userId) {
+    //       // the will be called because the url contains a user id
+    //       const otherUser: UserType | null = await getUserById(userId, tokens);
+
+    //       if (otherUser) {
+    //         setUserData(otherUser)
+    //       }
+    //     }
+
+    //     const nGameWinned: number | null = await getNumberOfWinnedGames(userData?.id)
+  
+    //     if (nGameWinned) {
+    //       setNumberGameWinned(nGameWinned);
+    //     }
+
+    //   }
+      
+    // }
+
+
     const levels = [1, 2, 3, 4, 5, 6, 7, 20];
     const levelsLength = levels.length;
   return (

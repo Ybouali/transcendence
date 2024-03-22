@@ -1,5 +1,5 @@
 import io from "socket.io-client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { getCookie, getTokensFromCookie, prepareUrl } from '../utils/utils';
 
 const SocketContext = React.createContext(null);
@@ -18,7 +18,7 @@ const SocketProvider: React.FC<any> = ({ children }) => {
         const tokens = await getTokensFromCookie();
 
         if (!tokens) {
-            console.log('There is not token here!');
+            //console.log('There is no token here!');
             return;
         }
 
@@ -32,7 +32,7 @@ const SocketProvider: React.FC<any> = ({ children }) => {
             console.error('Socket connection error:', error);
         });
 
-        console.log('socket here: ', tokens.access_token,)
+        //console.log('socket here: ', tokens.access_token,)
 
         setSocket(newSocket);
         };
@@ -48,4 +48,14 @@ const SocketProvider: React.FC<any> = ({ children }) => {
     );
 };
 
-export { SocketContext, SocketProvider };
+const useSocket = () => {
+    const socket = useContext(SocketContext);
+    if (!socket)
+        {
+            console.log('--------------------------------------');
+
+        }
+        return socket;
+}
+
+export { SocketContext, SocketProvider, useSocket };

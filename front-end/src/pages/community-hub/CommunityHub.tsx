@@ -40,7 +40,7 @@ const CommunityHub: React.FC<any> = ({ type }) => {
         if (res?.statusCode !== undefined){
           throw new Error('Try again, Later!')
         }
-        console.log(res)
+
         setValue(res);
     } catch (error) {
         toast.error('Try again, Later!')
@@ -50,8 +50,18 @@ const CommunityHub: React.FC<any> = ({ type }) => {
   const handleBlockFriend = async (e: React.MouseEvent<HTMLAnchorElement>, friend_id: string) => {
     e.preventDefault();
       try {
+        const tokens: any = await getTokensFromCookie();
+
+        if (!tokens) {
+            navigate("/notauth");
+        }
+
             const response = await fetch(prepareUrl(`friend/block/${friend_id}`), {
             method: "POST", 
+            headers: {
+              'access_token': tokens.access_token,
+              'refresh_token': tokens.refresh_token
+            },
           });
 
           const res = await response.json();
@@ -66,7 +76,37 @@ const CommunityHub: React.FC<any> = ({ type }) => {
       } catch (error) {
         toast.error('Try again, later!')
       }
-      
+  }
+
+  const handlePlayGame = async (e: React.MouseEvent<HTMLAnchorElement>, friend_id: string) => {
+    e.preventDefault();
+      try {
+            const tokens: any = await getTokensFromCookie();
+
+            if (!tokens) {
+                navigate("/notauth");
+            }
+            const response = await fetch(prepareUrl(`game/playwith/${friend_id}`), {
+              method: "POST", 
+              headers: {
+                'access_token': tokens.access_token,
+                'refresh_token': tokens.refresh_token
+              },
+            });
+
+          const res = await response.json();
+
+          if (res?.statusCode !== 200) {
+            throw new Error('An error occurred, Please try again.');
+          }
+
+          if (!response.ok){
+            throw new Error('An error occurred, Please try again.');
+          }
+          navigate(`/game/${friend_id}`);
+      } catch (error) {
+        toast.error('An error occurred, Please try again.')
+      }
   }
 
   useEffect(() => {
@@ -152,7 +192,7 @@ const CommunityHub: React.FC<any> = ({ type }) => {
             </Link>
             <span className="tooltiptext">Chat</span>
           </li>,
-          <li key={`friend-2-${id}`} className="card-button tooltip">
+          <li onClick={(e: any) => handlePlayGame(e, id)} key={`friend-2-${id}`} className="card-button tooltip">
             <Link to={""}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
                 <path
@@ -217,7 +257,7 @@ const CommunityHub: React.FC<any> = ({ type }) => {
           className="cards-content"
           style={{ borderTop: "2px solid #a0a0a0" }}
         >
-          {console.log('type:', type, 'data:', data)}
+
           {type === "friends" && data?.friends?.length === 0 && (
             <div className="empty-list">You have no friends yet</div>
           )}

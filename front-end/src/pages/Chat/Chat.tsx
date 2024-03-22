@@ -10,6 +10,9 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Header from "../../components/Header/Header";
 import { Tokens } from "../../types";
+// import Swal from 'sweetalert2';
+// import withReactContent from 'sweetalert2-react-content'
+// import { SocketContext } from '../../context/SocketProvider';
 
 interface SelectedChat {
   user_id: string | undefined;
@@ -25,6 +28,8 @@ interface ChatData {
   isMuted: boolean;
 }
 
+// const MySwal = withReactContent(Swal);
+
 const Chat = () => {
 
   const { connectedUser } = useConnectedUser()
@@ -34,6 +39,7 @@ const Chat = () => {
   const [url, setUrl] = useState<string | null>(null);
   const [value, setValue] = useState<any>(null);
   const navigate = useNavigate();
+  // const socketData: any = useContext(SocketContext);
 
   const {id} = useParams();
   useEffect(() => {
@@ -42,6 +48,24 @@ const Chat = () => {
       setSelectedChat((prevValue: any) => {return {user_id: connectedUser?.id, friend_id, type: 'users'}})
     }
   }, [id]);
+
+
+  // socketData?.on("requestGame", (newFriendData: any) => {
+  //       MySwal.fire({
+  //         title: "Do you want to play with this player?",
+  //         showDenyButton: true,
+  //         showCancelButton: false,
+  //         confirmButtonText: "Yes",
+  //         denyButtonText: 'No'
+  //       }).then((result: any) => {
+  //       /* Read more about isConfirmed, isDenied below */
+  //       if (result.isConfirmed) {
+  //           console.log('OK')
+  //       } else if (result.isDenied) {
+  //           console.log('NOT OK');
+  //       }
+  //       });
+  //     });
 
   useEffect(() => {
     if (selectedChat !== null) {

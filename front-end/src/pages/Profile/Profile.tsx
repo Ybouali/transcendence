@@ -58,16 +58,15 @@ function Profile() {
 
     if (tokens && tokens.access_token && tokens.refresh_token) {
 
-      setUserData(connectedUser)
+      // setUserData(connectedUser)
 
       if (userId) {
 
         // the will be called because the url contains a user id
         if (userId === connectedUser?.id) {
-          // console.log(`hello user connectedUser ${connectedUser.username}`)
+          //console.log(`hello user ${connectedUser.username}`)
           setPersonal(true);
           setUserData(connectedUser);
-          await iniOtherData(connectedUser.id, tokens);
 
         } else {
 
@@ -75,12 +74,11 @@ function Profile() {
 
           if (otherUser) {
 
-            // console.log(`hello user otherUser ${otherUser.username}`)
+            //console.log(`hello user ${otherUser.username}`)
             setPersonal(false)
 
             setUserData(otherUser);
-            
-            await iniOtherData(otherUser.id, tokens);
+
           }
 
           const isFriend: string = (await getIsFriend(userId, tokens)).relation;
@@ -94,9 +92,13 @@ function Profile() {
           } else {
             navigate("/error-page/:404")
           }
-
-          
         }
+
+        if (userData) {
+          await iniOtherData(userData.id, tokens);
+        }
+        
+
 
       } else {
         if (connectedUser) {
@@ -110,8 +112,6 @@ function Profile() {
   }
 
   const iniOtherData = async (userId: string, tokens: Tokens) => {
-
-    // console.log("init Other Data >>", userId)
     // get the number of game played by the player
     const numberOfGames: number | null = await getNumberGamePlayedByUserId(userId, tokens)
         
@@ -122,13 +122,13 @@ function Profile() {
     }
 
     // get the number of friends by id by default right now will be 0 
-    const numberOfFriends: number | null = await getNumberOfFriends(userId, tokens)
+    // const numberOfFriends: number | null = await getNumberOfFriends(userId, tokens)
 
-    if (!numberOfFriends) {
-      setNumberFrined(0);
-    } else {
-      setNumberFrined(numberOfFriends);
-    }
+    // if (!numberOfFriends) {
+    //   setNumberFrined(0);
+    // } else {
+    //   setNumberFrined(numberOfFriends);
+    // }
 
     const nGameWinned: number | null = await getNumberOfWinnedGames(userId, tokens)
 
@@ -136,7 +136,9 @@ function Profile() {
       setNumberGameWinned(nGameWinned);
     }
 
-    await getDatahistoryGames(userId, tokens)
+    if (userData?.id) {
+      await getDatahistoryGames(userId, tokens)
+    }
   }
 
   const addFriend = async () => {
@@ -200,8 +202,8 @@ function Profile() {
     <>
       <section className="profile">
         <div className="container">
-          <div className="profile-content" data-status="online">
-            <ProfileUserInfos userData={userData} numberGamePlayed={numberGamePlayed} numberFrined={numberFrined} personal={ personal || friend }/>
+          <div className="profile-content" data-status={userData?.Status.toLowerCase()}>
+            <ProfileUserInfos userData={userData} numberGamePlayed={numberGamePlayed} numberFrined={numberFrined} personal={ personal || friend } />
             <ProfileButtonActions friend={friend} personal={personal} setIsFriend={handleClickAddFriend} userData={userData} />
             <ProfileAchievements numberGameWinned={numberGameWinned} />
             <GamesHistory dataHisGame={dataHisGame} /> 

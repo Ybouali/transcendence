@@ -61,9 +61,9 @@ function ProfileButtonActions(props: ProfileButtonActionsType) {
     navigate("/game");
   }
 
-  useEffect(() => {
-    console.log('isFriend:', props?.friend);
-  })
+  //useEffect(() => {
+  //  console.log('isFriend:', props?.friend);
+  //})
 
   return (
     <>

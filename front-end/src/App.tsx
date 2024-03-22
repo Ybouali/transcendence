@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Home from './pages/Home/Home';
@@ -18,11 +18,34 @@ import CommunityHub from './pages/community-hub/CommunityHub';
 import { Tokens } from './types';
 import GroupSettings from './pages/group/group-settings/GroupSettings';
 import Group from './pages/group/Group';
+import Players from './pages/Game/players/Players';
 import { ToastContainer } from "react-toastify";
+// import Swal from 'sweetalert2';
+// import withReactContent from 'sweetalert2-react-content'
+// import { SocketContext, useSocket } from './context/SocketProvider';
+
+// const MySwal = withReactContent(Swal);
 
 function App() {
 
-  const [isConnected, setIsConnected] = useState<boolean>(false);
+  useEffect(() => {
+    const handlePopState = (event: any) => {
+    
+      event.preventDefault();
+      console.log('popstate');
+        // YOUR FUNCTION HERE
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  const [isConnected, setIsConnected] = useState<boolean>(false); 
+  // const socketData: any = useContext(SocketContext);
+  // const socketData: any = useSocket();
 
   useEffect(() => {
 
@@ -32,7 +55,7 @@ function App() {
 
   const setConnectedUser = () => {
 
-    setIsConnected(!isConnected);
+    setIsConnected(!isConnected); 
 
   }
 
@@ -68,11 +91,34 @@ function App() {
     }
   }
 
+  // useEffect(() => {
+  //   console.log('socketData =======>', socketData);
+  //   if (socketData) {
+  //     socketData?.on("requestGame", (newFriendData: any) => {
+  //       MySwal.fire({
+  //         title: "Do you want to play with this player?",
+  //         showDenyButton: true,
+  //         showCancelButton: false,
+  //         confirmButtonText: "Yes",
+  //         denyButtonText: 'No'
+  //       }).then((result: any) => {
+  //       /* Read more about isConfirmed, isDenied below */
+  //       if (result.isConfirmed) {
+  //           console.log('OK')
+  //       } else if (result.isDenied) {
+  //           console.log('NOT OK');
+  //       }
+  //       });
+  //     });
+  //   }
+  // }, [socketData]);
+
+
   return (
     <ConnectedProvider>
       <BrowserRouter>
-        <Header logInFunc={loginIntra} isConnected={isConnected} setIsConnected={setConnectedUser} />
         <SocketProvider>
+        <Header logInFunc={loginIntra} isConnected={isConnected} setIsConnected={setConnectedUser} />
           <Routes>
             <Route path="/" element={<Home logInFunc={loginIntra} />} />
             <Route path="/chat" element={<Chat />} />
@@ -85,12 +131,17 @@ function App() {
               element={<GroupSettings componentFor="create" members={undefined} admins={undefined} groupInfos={undefined} setData={() => {}} />}
             />
             <Route path="/game" element={<Game />} />
+            <Route path="/game/guest" element={<Game />} />
+            <Route path="/game/:id" element={<Game />} />
+            <Route path="/game/results/:id/:scores" element={<Game />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/tow-factor" element={<TwoFactorValidation />} />
             <Route path="/error-page/:code" element={<ErrorPage />} />
+
+
           </Routes>
         </SocketProvider>
         <Footer />

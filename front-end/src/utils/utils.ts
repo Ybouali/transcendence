@@ -13,7 +13,7 @@ export function prepareUrl(url: string): string {
 
 export async function getNumberOfFriends(userId: string | undefined, tokens: Tokens ): Promise<number | null> {
 
-    console.log(`user id ${userId}`)
+    // console.log(`user id ${userId}`)
 
     if (userId === undefined) {
         return null;

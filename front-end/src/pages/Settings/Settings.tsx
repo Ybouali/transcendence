@@ -327,7 +327,7 @@ function Settings() {
 						src={
 						file
 							? file
-							: `${prepareUrl("") + connectedUser?.avatarUrl}`
+							: `${connectedUser?.avatarUrl && prepareUrl("") + connectedUser?.avatarUrl}`
 						}
 						alt="Uploaded"
 					/>
