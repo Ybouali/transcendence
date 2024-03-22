@@ -12,6 +12,7 @@ import { HistoryGameModule } from './history-game/history-game.module';
 import { FriendModule } from './friend/friend.module';
 import { ChatModule } from './chat/chat.module';
 import { SearchModule } from './search/search.module';
+import { GameModule } from './game/game.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { SearchModule } from './search/search.module';
     HistoryGameModule,
     FriendModule,
     ChatModule,
-    SearchModule
+    SearchModule,
+    GameModule
   ],
   controllers: [AppController],
   providers: [AppService, JwtService],

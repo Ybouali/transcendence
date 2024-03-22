@@ -50,9 +50,9 @@ const SearchResults: React.FC<any> = ({
     }
   }, [searchResultsRef, results]);
 
-  useEffect(() => {
-    console.log('results', results);
-  }, [results]);
+  //useEffect(() => {
+  //  console.log('results', results);
+  //}, [results]);
 
   // console.log('opened', searchOpen);
 

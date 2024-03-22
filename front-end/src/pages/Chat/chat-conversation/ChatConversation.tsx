@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import "./ChatConversationStyle.css";
 
 
+
 const ChatConversation: React.FC<any> = ({ chatMessages, conversationInfos, isBanned, isMuted, setChatData}) => {
   const { selectedChat, setSelectedChat, lastMessage, setLastMessage } = useContext(ChatContext) ?? {}; // TODO: more checks
   const socketData: any = useContext(SocketContext);
@@ -25,6 +26,25 @@ const ChatConversation: React.FC<any> = ({ chatMessages, conversationInfos, isBa
   }, [chatMessages]);
 
   useEffect(() => {
+    // console.log('socketData ==>', socketData);
+
+      // socketData?.on("requestGame", (newFriendData: any) => {
+      //   MySwal.fire({
+      //     title: "Do you want to play with this player?",
+      //     showDenyButton: true,
+      //     showCancelButton: false,
+      //     confirmButtonText: "Yes",
+      //     denyButtonText: 'No'
+      // }).then((result: any) => {
+      // /* Read more about isConfirmed, isDenied below */
+      // if (result.isConfirmed) {
+      //     console.log('OK')
+      // } else if (result.isDenied) {
+      //     console.log('NOT OK');
+      // }
+      // });
+      // });
+
     socketData?.on("newMESSAGE", (newMessage: any) => {
       const data = {
         userType: newMessage.senderId === connectedUser?.id ? 'sender' : 'receiver', 

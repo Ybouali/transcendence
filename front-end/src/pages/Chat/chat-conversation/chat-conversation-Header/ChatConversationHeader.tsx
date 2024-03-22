@@ -30,6 +30,39 @@ const ChatConversationHeader: React.FC<ChatConversationHeaderProps> = ({ convers
     }
   }, [dropDownButtonRef]);
   
+  const handlePlayGame = async () => {
+    // e.preventDefault();
+    if (selectedChat) {
+      try {
+            const tokens: any = await getTokensFromCookie();
+
+            if (!tokens) {
+                navigate("/notauth");
+            }
+            const response = await fetch(prepareUrl(`game/playwith/${selectedChat.friend_id}`), {
+              method: "POST", 
+              headers: {
+                'access_token': tokens.access_token,
+                'refresh_token': tokens.refresh_token
+              },
+            });
+
+          const res = await response.json();
+
+          if (res?.statusCode !== 200) {
+            throw new Error('An error occurred, Please try again.');
+          }
+
+          if (!response.ok){
+            throw new Error('An error occurred, Please try again.');
+          }
+          navigate(`/game/${selectedChat?.friend_id}`);
+      } catch (error) {
+        toast.error('An error occurred, Please try again.')
+      }
+    }
+  }
+
   const handleBlockFriend = async () => {
     // e.preventDefault();
     if (selectedChat) {
@@ -69,12 +102,12 @@ const ChatConversationHeader: React.FC<ChatConversationHeaderProps> = ({ convers
 			setJustOpened(false);
 			return;
 		}
-    console.log('i am  here');
+
 		if (open) setOpen(false);
 	});
 
   useEffect(() => {
-    console.log('rendred ------------------------------------');
+    //console.log('rendred ------------------------------------');
   });
 
   // return (
@@ -173,7 +206,9 @@ const ChatConversationHeader: React.FC<ChatConversationHeaderProps> = ({ convers
                   </Link>
                 </li>
                 <li className="dropdown-item">
-                  <a href="#">
+                  <Link onClick={(e) => {
+                    handlePlayGame();
+                  } } to={""}>
                     <div className="dropdown-item-icon">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -186,12 +221,11 @@ const ChatConversationHeader: React.FC<ChatConversationHeaderProps> = ({ convers
                       </svg>
                     </div>
                     <div className="dropdown-item-title">Play Game</div>
-                  </a>
+                  </Link>
                 </li>
                 <li className="dropdown-item" id="block">
                   <Link onClick={(e) => {
                     handleBlockFriend();
-
                   } } to={""}>
                     <div className="dropdown-item-icon">
                       <svg

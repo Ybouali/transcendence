@@ -144,14 +144,14 @@ const GroupSettings: React.FC<GroupSettingsProps> = ({ members, admins, componen
         });
 
         const res = await response.json();
-        console.log('reeees', res);
+        //console.log('reeees', res);
         if (res?.statusCode !== undefined){
           throw new Error('Try again, Later!');
         }
         if (!response.ok){
           throw new Error('Try again, Later!');
         }
-        console.log('The group is well created!');
+        //console.log('The group is well created!');
         toast.success('The group is well created!');
         navigate(`/groups`);
       } catch (error) {
@@ -229,9 +229,9 @@ const GroupSettings: React.FC<GroupSettingsProps> = ({ members, admins, componen
     }
   }
 
-  useEffect(() => {
-    console.log('editedSelectedValues =>', editedSelectedValues );
-  }, [editedSelectedValues])
+  //useEffect(() => {
+  //  console.log('editedSelectedValues =>', editedSelectedValues );
+  //}, [editedSelectedValues])
 
   useEffect(() => {
     if (groupTypeRef.current) {

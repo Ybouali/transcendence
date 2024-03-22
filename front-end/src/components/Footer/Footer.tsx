@@ -1,8 +1,12 @@
-import React from 'react'
+import React, {useEffect, useContext} from 'react';
+import { useLocation } from 'react-router-dom';
 import "./FooterStyle.css"
 
+
 function Footer() {
-    const year = new Date().getFullYear();
+  const location = useLocation();
+  const year = new Date().getFullYear();
+  if (location.pathname === '/game' || location.pathname.includes('game')) return null;
   return (
     <footer>
         &copy; &nbsp; {year} &nbsp; FT_Trencendance

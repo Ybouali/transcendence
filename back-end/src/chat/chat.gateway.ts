@@ -603,4 +603,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             throw new BadRequestException('Already friend');
         }
     }
+
+    @OnEvent('sendRequestGame')
+    async sendRequestGame(data: any): Promise<any> {
+        try {
+            const destUserSockets = SharedService.UsersSockets.get(data?.userId);
+            console.log('sendRequestGame:',destUserSockets);
+            destUserSockets?.forEach((socket) => {
+                this.server.to(socket).emit('requestGame', {username: data?.username});
+            });
+        } catch (error) {
+            throw new BadRequestException('Already friend');
+        }
+    }
 }

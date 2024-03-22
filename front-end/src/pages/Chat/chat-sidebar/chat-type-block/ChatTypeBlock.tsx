@@ -93,7 +93,6 @@ const ChatTypeBlock: React.FC<any> = ({ type, selectedChat, setSelectedChat, las
   };
 
   useEffect(() => {
-    console.log('connectedUser here:', connectedUser);
     fetchData();
 
     socketData?.on("newFriend", (newFriendData: any) => {
@@ -132,7 +131,6 @@ const ChatTypeBlock: React.FC<any> = ({ type, selectedChat, setSelectedChat, las
   }, [closeSelectedChat]);
 
   useEffect(() => {
-    console.log('neeeeeeeeeeeeeeeeew Frined');
     // fetchData();
     if (newFriend) setFriendsMessages((prevValue) => [...prevValue, newFriend]);
   }, [newFriend]);
