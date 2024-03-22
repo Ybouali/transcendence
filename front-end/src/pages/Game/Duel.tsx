@@ -10,8 +10,8 @@ function Players(){
             
             if (right_player.positionY > setup.Height - ((setup.Height / 2) + 103))
                 right_player.positionY += 0;
-        else
-            right_player.positionY += (right_player.velocity + right_player.speed);
+            else
+                right_player.positionY += (right_player.velocity + right_player.speed);
     }
         else if (event.keyCode === 40) {
             if (right_player.positionY < -1 * (setup.Height - ((setup.Height / 2) + 103)))
@@ -38,7 +38,7 @@ function Players(){
     L_puddle.position.set(left_player.positionX, left_player.positionY, 0);
     R_puddle.position.set(right_player.positionX, right_player.positionY, 0);
     ball.position.set(Ball.positionX, Ball.positionY, 0);
-    ball_animation()
+    ball_animation();
     setup.renderer.render(setup.scene, setup.camera);
    
     window.addEventListener('resize', () => {
@@ -63,12 +63,12 @@ function Players(){
         cub.position.set(0, 0, 0);
         setup.scene.add(cub);
         const ball = rander_ball();
-        const R_puddle = puddles();
-        const L_puddle = puddles();
+        const R_puddle = puddles(right_player);
+        const L_puddle = puddles(left_player);
         Players();
         setup.renderer.setAnimationLoop(() => {
             rander(ball, L_puddle, R_puddle);
-            if(endGame() == true)
+            if (endGame() == true)
             {
                 isEnded(true);
                 setup.renderer.setAnimationLoop(null); 
@@ -77,6 +77,9 @@ function Players(){
        return () => {
         document.body.removeChild(setup.renderer.domElement);
         setup.scene.remove(cub);
+        setup.scene.remove(L_puddle);
+        setup.scene.remove(R_puddle);
+        setup.scene.remove(ball);
     };
 },[end])
 return (

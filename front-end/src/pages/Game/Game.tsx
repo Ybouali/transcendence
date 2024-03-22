@@ -18,8 +18,14 @@ import { Tokens, UserType } from "../../types";
 let leftPlayerScore = 0;
 let rightPlayerScore = 0;
 export const Player: Socket = io(prepareUrl(""), { autoConnect: true });
-function SendData() {
-  Player.emit("onJoinGame");
+
+
+
+function SendData(userid: string | undefined) {
+  
+  console.log("User ID ", userid)
+  Player.emit("onJoinGame", {userId: userid});
+
 }
 function onVs() {
   Player.emit("OneVSone")
@@ -31,6 +37,7 @@ function App() {
   const [isDuo, setDuo] = useState(false)
   const [BposX, setPosX] = useState(0)
   const [BposY, setPosY] = useState(0)
+
   useEffect(() => {
     function isConnect() {
       if (Player.connected) {}
@@ -63,8 +70,7 @@ function App() {
       rightPlayerScore++;
       console.log("rscore :", rightPlayerScore);
     })
-  }
-    , [])
+}, [])
 
 
   ///////////////////////////////////////////////////////////////////////////////////////////
@@ -164,6 +170,10 @@ function App() {
 
 
   }, []);
+  
+  const handlePlayTwo = () => {
+    SendData(connectedUser?.id)
+  }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
   return (
@@ -197,7 +207,7 @@ function App() {
           </div>
 
           <div className="actions-buttons players-buttons">
-            {(!playerOne || !playerTwo) && !isDuo &&(<button onClick={SendData} className="action-button button-active">START RANDOM GAME</button>)}
+            {(!playerOne || !playerTwo) && !isDuo &&(<button onClick={handlePlayTwo} className="action-button button-active">START RANDOM GAME</button>)}
             {(playerOne && playerTwo) && !isDuo && (<button onClick={onVs} className="action-button button-active">Start Game</button>)}
             {(playerOne && playerTwo) && !isDuo && (<Link to='/profile'  className="action-button button-inactive">Cancle</Link>)}
             {(!playerOne || !playerTwo) && !isDuo && (<Link to='/profile'  className="action-button button-inactive">Cancle</Link>)}

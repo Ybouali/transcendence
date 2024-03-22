@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { setup, Ball, left_player } from './objects';
+import { setup, Ball, } from './objects';
 
 export function rander_ball(){
     const circle = new THREE.CircleGeometry(Ball.radius, Ball.segment);
@@ -11,11 +11,11 @@ export function rander_ball(){
     return (ball);
 };
 
-export function puddles() {
-    const rectangle = new THREE.BoxGeometry(left_player.width, left_player.height);
+export function puddles(player: any) {
+    const rectangle = new THREE.BoxGeometry(player.width, player.height);
     const material = new THREE.MeshBasicMaterial({ color: 0x0000FF, side: THREE.DoubleSide });
     const puddle = new THREE.Mesh(rectangle, material);
-    puddle.position.set(left_player.positionX, left_player.positionY, 0);
+    puddle.position.set(player.positionX, player.positionY, 0);
     setup.scene.add(puddle);
     return (puddle)
 };

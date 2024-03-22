@@ -1,5 +1,6 @@
 import { Ball } from "./Ball";
 import { Server } from "socket.io";
+import { HistoryGameService } from '../history-game/history-game.service'
 
 import { globalVar, roomSetting } from "./object"
 
@@ -9,6 +10,8 @@ export class Game {
     lPlayer: any;
     rPlayer: any;
     Ball: any;
+    historyGameService: HistoryGameService;
+
     constructor(io: Server, client: any[], roomName: string) {
         this.server = io;
         this.roomName = roomName;
@@ -28,6 +31,7 @@ class right_player {
     positionY = 0;
     velocity = 25;
     score = 0;
+    PlayerId = '';
 
     constructor(server: Server, myId: any, otherId: any) {
         this.server = server;
@@ -54,6 +58,7 @@ class left_player {
     positionY = 0;
     velocity = 25;
     score = 0;
+    PlayerId = '';
 
     constructor(server: Server, myId: any, otherId: any) {
         this.server = server;
