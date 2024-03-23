@@ -1,7 +1,7 @@
 import { Ball, globalVar, right_player, left_player } from "./objects";
 
 export function endGame(){
-   if(left_player.score == 5 || right_player.score == 5)
+   if(left_player.score == 3 || right_player.score == 3)
        return true;
 }
 function checkCollision(){

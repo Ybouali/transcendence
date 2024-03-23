@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { HistoryGameReturnedType, LeaderBoardType, Tokens, UserType } from '../types';
+import { HistoryGameData, HistoryGameReturnedType, LeaderBoardType, Tokens, UserType } from '../types';
 
 export function prepareUrl(url: string): string {
 
@@ -41,6 +41,26 @@ export async function getNumberOfFriends(userId: string | undefined, tokens: Tok
     }
 
     return res?.number;
+}
+
+export async function storeHistoryGame(data: HistoryGameData) {
+    let at = getCookie('access_token');
+    let rt = getCookie('refresh_token');
+
+    console.log(data)
+
+    const resData = await axios.post(prepareUrl("history-game/createhistory"), data, {
+        headers: {
+            refresh_token: rt,
+            access_token: at,
+        },
+    })
+    .then(response => {
+        return response
+    })
+    .catch(err => {
+        return null;
+    })
 }
 
 export function getCookie(name: string) {
@@ -185,6 +205,8 @@ export async function getHisGamesByUserId(
     }
 
     const rHisgame: HistoryGameReturnedType[] = resData.data;
+
+    console.log(rHisgame)
 
     return rHisgame;
 }

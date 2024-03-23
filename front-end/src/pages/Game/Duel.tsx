@@ -1,32 +1,33 @@
 import * as THREE from 'three'
-import { setup, right_player, left_player, Ball} from './objects';
+import { setup, right_player, left_player, Ball, globalVar} from './objects';
 import { rander_ball, puddles } from './create_objects';
 import { useEffect, useRef, useState } from 'react';
 import { ball_animation, endGame } from './BallAlgoDuel';
+import { useNavigate } from 'react-router-dom';
 
 function Players(){
     window.addEventListener('keydown',(event)=>{
         if (event.keyCode == 38) {
             
-            if (right_player.positionY > setup.Height - ((setup.Height / 2) + 103))
+            if (right_player.positionY > setup.Height - ((setup.Height / 2) + globalVar.PuddleHeight / 2))
                 right_player.positionY += 0;
             else
                 right_player.positionY += (right_player.velocity + right_player.speed);
     }
         else if (event.keyCode === 40) {
-            if (right_player.positionY < -1 * (setup.Height - ((setup.Height / 2) + 103)))
+            if (right_player.positionY < -1 * (setup.Height - ((setup.Height / 2) + globalVar.PuddleHeight / 2)))
                 right_player.positionY += 0 ;
             else
                 right_player.positionY -= (right_player.velocity + right_player.speed);
         }
         if (event.keyCode === 87) {
-            if (left_player.positionY > setup.Height - ((setup.Height / 2) + 103))
+            if (left_player.positionY > setup.Height - ((setup.Height / 2) + globalVar.PuddleHeight / 2))
                 left_player.positionY += 0 ;
             else
                 left_player.positionY += (left_player.velocity + right_player.speed);
         }
         else if (event.keyCode === 83) {
-            if (left_player.positionY < -1 * (setup.Height - ((setup.Height / 2) + 103)))
+            if (left_player.positionY < -1 * (setup.Height - ((setup.Height / 2) + globalVar.PuddleHeight / 2)))
                 left_player.positionY += 0 ;
             else
                 left_player.positionY -= (left_player.velocity + right_player.speed);
@@ -51,8 +52,11 @@ function Players(){
 }
 
  export function Duel() {
+    right_player.score = 0;
+    left_player.score = 0;
     const ref = useRef(null);
     const [end, isEnded] = useState(false);
+    const navigate = useNavigate();
     useEffect(()=>{
         setup.renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(setup.renderer.domElement);
@@ -72,6 +76,7 @@ function Players(){
             {
                 isEnded(true);
                 setup.renderer.setAnimationLoop(null); 
+                navigate(`/play/results/guest/${right_player.score}&${left_player.score}`);
             }
         });
        return () => {

@@ -10,7 +10,6 @@ export class Game {
     lPlayer: any;
     rPlayer: any;
     Ball: any;
-    historyGameService: HistoryGameService;
 
     constructor(io: Server, client: any[], roomName: string) {
         this.server = io;

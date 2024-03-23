@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { getTokensFromCookie, prepareUrl } from "../../../../utils/utils";
 import { useNavigate } from "react-router-dom";
+import { Player } from "../../../Game/Game";
+import { useConnectedUser } from "../../../../context/ConnectedContext";
 
 
 interface ChatConversationHeaderProps {
@@ -17,6 +19,7 @@ const ChatConversationHeader: React.FC<ChatConversationHeaderProps> = ({ convers
   const dropDownButtonRef = useRef<HTMLDivElement>(null);
   const dropDownMenuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { connectedUser, setConnectedUser } = useConnectedUser();
 
   const [open, setOpen] = useState(false);
 
@@ -56,6 +59,8 @@ const ChatConversationHeader: React.FC<ChatConversationHeaderProps> = ({ convers
           if (!response.ok){
             throw new Error('An error occurred, Please try again.');
           }
+          console.log('PlayFriend: ', connectedUser?.id);
+          Player.emit("PlayFriend", {userId: connectedUser?.id});
           navigate(`/game/${selectedChat?.friend_id}`);
       } catch (error) {
         toast.error('An error occurred, Please try again.')

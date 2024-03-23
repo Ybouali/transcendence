@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards, Logger } from '@nestjs/common';
 import { AccessStrategy, RefreshStrategy } from 'src/auth/strategy';
 import { HistoryGameService } from './history-game.service';
 import { HistoryGameType } from './dto';
@@ -6,6 +6,8 @@ import { HistoryGameType } from './dto';
 @UseGuards(RefreshStrategy, AccessStrategy)
 @Controller('history-game')
 export class HistoryGameController {
+
+    private logger = new Logger(HistoryGameController.name);
 
     constructor (private historyGameService: HistoryGameService) { }
 

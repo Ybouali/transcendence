@@ -1,8 +1,14 @@
 import * as THREE from 'three'
-import { setup, right_player, left_player, Ball, fromBack} from './objects';
+import { setup, right_player, left_player, Ball, fromBack, globalVar} from './objects';
 import { rander_ball, puddles } from './create_objects';
 import { useEffect, useRef } from 'react';
 import { Player } from './Game';
+import { useNavigate } from 'react-router-dom';
+import { useConnectedUser } from '../../context/ConnectedContext';
+import { storeHistoryGame } from '../../utils/utils';
+import { HistoryGameData } from '../../types';
+
+// import testImage from '../img/test.jpeg'
 
 function ball_animation() {
     Ball.positionX = fromBack.posX;
@@ -13,6 +19,8 @@ function rander(ball: any, L_puddle: any, R_puddle: any) {
     L_puddle.position.set(left_player.positionX, left_player.positionY, 0);
     R_puddle.position.set(right_player.positionX, right_player.positionY, 0);
     ball.position.set(Ball.positionX, Ball.positionY, 0);
+    // const textureloader = new THREE.TextureLoader();
+    // setup.scene.background = textureloader.load(testImage);
     ball_animation();
     setup.renderer.render(setup.scene, setup.camera);
     window.addEventListener('resize', () => {
@@ -28,6 +36,8 @@ export function InitSetup() {
     const ref = useRef(null);
     let isRight = false;
     let isLeft = false;
+    const navigate = useNavigate();
+    const { connectedUser, setConnectedUser } = useConnectedUser();
     useEffect(() => {
         setup.renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(setup.renderer.domElement);
@@ -55,12 +65,12 @@ export function InitSetup() {
         const handleKeyDown = (event : any) => {
             if (isRight) {
                 if (event.keyCode === 38) {
-                    if (right_player.positionY > setup.Height - ((setup.Height / 2) + 103))
+                    if (right_player.positionY > setup.Height - ((setup.Height / 2) + globalVar.PuddleHeight / 2))
                         right_player.positionY += 0;
                     else
                         right_player.positionY += (right_player.velocity + right_player.speed);
                 } else if (event.keyCode === 40) {
-                    if (right_player.positionY < -1 * (setup.Height - ((setup.Height / 2) + 103)))
+                    if (right_player.positionY < -1 * (setup.Height - ((setup.Height / 2) + globalVar.PuddleHeight / 2)))
                         right_player.positionY += 0;
                     else
                         right_player.positionY -= (right_player.velocity + right_player.speed);
@@ -72,12 +82,12 @@ export function InitSetup() {
         
             if (isLeft) {
                 if (event.keyCode === 38) {
-                    if (left_player.positionY > setup.Height - ((setup.Height / 2) + 103))
+                    if (left_player.positionY > setup.Height - ((setup.Height / 2) + globalVar.PuddleHeight / 2))
                         left_player.positionY += 0;
                     else
                         left_player.positionY += (left_player.velocity + right_player.speed);
                 } else if (event.keyCode === 40) {
-                    if (left_player.positionY < -1 * (setup.Height - ((setup.Height / 2) + 103)))
+                    if (left_player.positionY < -1 * (setup.Height - ((setup.Height / 2) + globalVar.PuddleHeight / 2)))
                         left_player.positionY += 0;
                     else
                         left_player.positionY -= (left_player.velocity + right_player.speed);
@@ -88,9 +98,36 @@ export function InitSetup() {
             }
         };
         window.addEventListener('keydown', handleKeyDown);
+        Player.on("GameResult", (Data : any, data : boolean) =>{
+            console.log(Data)
+            if(data)
+                setup.renderer.setAnimationLoop(null);
+            let myScore = connectedUser?.id === Data.WinnerId ? Data.ScoreWinner : Data.ScoreLoser;
+            let otherScore = myScore === Data.ScoreWinner ? Data.ScoreLoser : Data.ScoreWinner;
+            let otherId = connectedUser?.id === Data.WinnerId ? Data.LoserId : Data.WinnerId;
+
+            
+            const dataToStore: HistoryGameData = {
+                
+                winnerId : Data.WinnerId,
+                loserId : Data.LoserId,
+                startTimeGame : new Date(Date.now()),
+                scoreLoser : Data.ScoreLoser,
+                scoreWinner : Data.ScoreWinner,
+            };
+
+
+            storeHistoryGame(dataToStore)
+            navigate(`/play/results/${otherId}/${otherScore}&${myScore}`);
+        })
         setup.renderer.setAnimationLoop(() => {
             rander(ball, L_puddle, R_puddle);
+            
+            //stop randering when game is finished
+
         });
+
+
             return () => {
                 Player.off("Puddle2");
                 Player.off("Puddle1");
@@ -102,7 +139,7 @@ export function InitSetup() {
                 setup.scene.remove(R_puddle);
                 setup.scene.remove(ball);
         };
-    }, [/*  */])
+    }, [])
     return (
         <div ref={ref}></div>
 

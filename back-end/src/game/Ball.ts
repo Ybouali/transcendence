@@ -1,5 +1,5 @@
 import { Game } from "./Game";
-import { globalVar, roomSetting, Id , ResultGame } from "./object";
+import { globalVar, roomSetting, Id , ResultGame, requestGame } from "./object";
 import { Server } from "socket.io";
 import { HistoryGameType } from '../history-game/dto'
 
@@ -106,6 +106,10 @@ export class Ball {
                 if (room == roomName)
                     return (false);
             }
+            for (const room of (requestGame.room.keys())) {
+                if (room == roomName)
+                    return (false);
+            }
             console.log("player disconnected");
             if (this.game.lPlayer.id == roomSetting.loser) {
                 this.game.lPlayer.score = 0;
@@ -120,21 +124,16 @@ export class Ball {
                 io.to(this.game.roomName).emit("Rplayer_score");
                 io.to(this.game.roomName).emit("Lplayer_score");
             }
+            this.clearMap(this.game.roomName)
             return (true);
         }
     }
-    WinnerLoser(){ // this is for loser and winner *to test*
+    WinnerLoser(){
         Id.forEach((value, key) =>{
             if(value == this.game.lPlayer.socket)
-            {
                 this.game.lPlayer.PlayerId = key;
-                console.log("leftPlayer :", key);
-            }
             if(value == this.game.rPlayer.socket)
-            {
                 this.game.rPlayer.PlayerId = key;
-                console.log("righPlayer :", key);
-            }
         })
         if(this.game.lPlayer.score > this.game.rPlayer.score){
             ResultGame.WinnerId = this.game.lPlayer.PlayerId;
@@ -148,10 +147,26 @@ export class Ball {
             ResultGame.ScoreWinner = this.game.rPlayer.score;
             ResultGame.ScoreLoser = this.game.lPlayer.score;
         }
-        console.log("loser :" , ResultGame.LoserId);
-        console.log("winner :", ResultGame.WinnerId);
-        console.log("score loser :", ResultGame.ScoreLoser);
-        console.log("score winner :", ResultGame.ScoreWinner);
+    }
+    FWinnerLoser(){
+            requestGame.mapId.forEach((value, key) =>{
+                if(value == this.game.lPlayer.socket)
+                    this.game.lPlayer.PlayerId = key;
+                if(value == this.game.rPlayer.socket)
+                    this.game.rPlayer.PlayerId = key;
+            })
+            if(this.game.lPlayer.score > this.game.rPlayer.score){
+                ResultGame.WinnerId = this.game.lPlayer.PlayerId;
+                ResultGame.LoserId = this.game.rPlayer.PlayerId;
+                ResultGame.ScoreWinner = this.game.lPlayer.score;
+                ResultGame.ScoreLoser = this.game.rPlayer.score;
+            }
+            else{
+                ResultGame.WinnerId = this.game.rPlayer.PlayerId;
+                ResultGame.LoserId = this.game.lPlayer.PlayerId;
+                ResultGame.ScoreWinner = this.game.rPlayer.score;
+                ResultGame.ScoreLoser = this.game.lPlayer.score;
+            }
     }
     updatePosition(io: Server) {
         this.positionX += this.velocityX;
@@ -172,17 +187,17 @@ export class Ball {
             }
         }
     }
+
     start(io: Server) {
         let interval = setInterval(() => {
             this.updatePosition(io)
             this.game.lPlayer.pushToOther();
             this.game.rPlayer.pushToOther();
-            io.to(this.game.roomName).emit("startGame", this.positionX, this.positionY);
+            io.to(this.game.roomName).emit("startGame2", this.positionX, this.positionY);
             if (this.game.lPlayer.score == 3 || this.game.rPlayer.score == 3
                 || (this.checkDeconnection(io, this.game.roomName) == true)) {
                 clearInterval(interval);
                 console.log("game is finished ");
-
                 const resultGame: HistoryGameType = new HistoryGameType()
 
                 resultGame.winnerId = ResultGame.WinnerId;
@@ -190,11 +205,17 @@ export class Ball {
                 resultGame.scoreLoser = ResultGame.ScoreLoser;
                 resultGame.scoreWinner = ResultGame.ScoreWinner;
                 resultGame.startTimeGame = new Date(Date.now())
-
-                this.game.historyGameService.createHistoryGame(resultGame);
-                io.to(this.game.roomName).emit("GameResult", ResultGame); // resultGame emitted here try to catch it in front 
-                this.WinnerLoser();
+                console.log(resultGame);
+                
+                if(this.game.roomName == "friendRoom")
+                    this.FWinnerLoser();
+                else
+                    this.WinnerLoser();
+                
+                io.to(this.game.roomName).emit("GameResult", ResultGame, true); // resultGame emitted here try to catch it in front
                 this.clearMap(this.game.roomName)
+                io.sockets.adapter.rooms.delete(this.game.roomName);
+                roomSetting.Rooms.delete(this.game.roomName);
                 delete (this.game)
             }
         }, 1000 / 30)

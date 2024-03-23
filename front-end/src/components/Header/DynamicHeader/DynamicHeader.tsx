@@ -12,6 +12,7 @@ import useDebounce from '../../../utils/hooks/useDebounce';
 import { SocketContext } from '../../../context/SocketProvider';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content'
+import { Player } from '../../../pages/Game/Game';
 
 const MySwal = withReactContent(Swal);
 
@@ -123,9 +124,16 @@ function DynamicHeader(props: IsLoggedIn) {
         }).then((result: any) => {
         /* Read more about isConfirmed, isDenied below */
         if (result.isConfirmed) {
-            console.log('OK')
+            navigate(`/game/${newFriendData?.userId}`)
+            Player.emit('acceptRequest', {
+              userId: connectedUser?.id,
+              otherUser: newFriendData?.userId
+            })
         } else if (result.isDenied) {
-            console.log('NO');
+          Player.emit('declineRequest', {
+            userId: connectedUser?.id,
+            otherUser: newFriendData?.userId
+          })
         }
         });
       });
@@ -250,7 +258,7 @@ function DynamicHeader(props: IsLoggedIn) {
       }
     }
 
-  if (location.pathname === '/game' || location.pathname.includes('game')) return null;
+  if (location.pathname === '/game' || location.pathname.includes('game') || location.pathname.includes('/play/results')) return null;
 
     return (
       <header className="primary-header identified" data-status={connectedUser?.Status} >
