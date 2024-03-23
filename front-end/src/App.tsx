@@ -133,7 +133,8 @@ function App() {
             <Route path="/game" element={<Game />} />
             <Route path="/game/guest" element={<Game />} />
             <Route path="/game/:id" element={<Game />} />
-            <Route path="/game/results/:id/:scores" element={<Game />} />
+            {/* <Route path="/game/results/:id/:scores" element={<Game />} /> */}
+            <Route path="/play/results/:id/:scores" element={<Players />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/:userId" element={<Profile />} />

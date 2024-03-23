@@ -15,9 +15,13 @@ const Players: React.FC = () => {
   	// GET THE CURRENT PAGE LOCATION
 	const location = useLocation();
 
-  const {id} = useParams();
+  const {id, scores} = useParams();
   const [playerOne, setPlayerOne] = useState<any>(null);
   const [playerTwo, setPlayerTwo] = useState<any>(null);
+  const [winnerOne, setWinnerOne] = useState<any>(null)
+  const [winnerTwo, setWinnerTwo] = useState<any>(null)
+  const [scoreOne, setScoreOne] = useState<any>(null)
+  const [scoreTwo, setScoreTwo] = useState<any>(null)
   const navigate = useNavigate();
 
   const [isDuo, setDuo] = useState(false)
@@ -80,21 +84,36 @@ const Players: React.FC = () => {
       };
     });
 
-    if(id){
-      gaurd();
-
-      
-      // setPlayerTwo((previousValue: any) => {
-      //   return {
-      //     fullname: "Samantha Williams",
-      //     username: "Salliams",
-      //     ranking: 10,
-      //     matches: 120,
-      //     level: 5,
-      //     image: "public/avatars/member_2.png",
-      //   };
-      // });
+    if(location.pathname.includes('/play/results/guest')){
+      setPlayerTwo((previousValue:any) => {
+        return {
+          fullname: "Guest",
+          username: "Guest",
+          ranking: '▮',
+          matches: '▮',
+          level: '▮',
+          image: "public/avatars/default.png",
+        };
+      });
+    } else {
+      if (id) {
+        console.log('id id id id');
+        gaurd();
+  
+        
+        // setPlayerTwo((previousValue: any) => {
+        //   return {
+        //     fullname: "Samantha Williams",
+        //     username: "Salliams",
+        //     ranking: 10,
+        //     matches: 120,
+        //     level: 5,
+        //     image: "public/avatars/member_2.png",
+        //   };
+        // });
+      }
     }
+    
 
     // if(location.pathname === '/play/random'){
     //   setTimeout(() => {
@@ -111,18 +130,7 @@ const Players: React.FC = () => {
     //   }, 4000);
     // }
 
-    if(location.pathname === '/play/guest'){
-      setPlayerTwo((previousValue:any) => {
-        return {
-          fullname: "Guest",
-          username: "Guest",
-          ranking: '▮',
-          matches: '▮',
-          level: '▮',
-          image: "public/avatars/default.png",
-        };
-      });
-    }
+    
 
     Player.on("vsOne", (data: boolean) => {
       setDuo(data);
@@ -131,12 +139,23 @@ const Players: React.FC = () => {
 
   }, []);
 
+
+  useEffect(() => {
+    if(scores){
+      const [score1, score2] = scores.split('&');
+      setScoreOne((previousValue : any) => Number.parseInt(score1));
+      setScoreTwo((previousValue : any) =>  Number.parseInt(score2));
+      setWinnerOne((previousValue : any) => Number.parseInt(score1) >= Number.parseInt(score2))
+      setWinnerTwo((previousValue: any) => Number.parseInt(score2) >= Number.parseInt(score1))
+    }
+  }, [])
+
   return (
     <>
       {!isDuo && <section className="section-players">
         <div className="container">
           <div className="section-players-content">
-            {playerOne && <PlayerCard player={playerOne} playerType="player-1" />}
+            {playerOne && <PlayerCard player={playerOne} score={scoreOne} winner={winnerOne} playerType="player-1" />}
             {!playerOne && <PulsedCard pulsedType="pulsed-1" />}
 
             <div className="versus">
@@ -157,14 +176,12 @@ const Players: React.FC = () => {
               </svg>
             </div>
 
-            {playerTwo && <PlayerCard player={playerTwo} playerType="player-2" />}
+            {playerTwo && <PlayerCard player={playerTwo} score={scoreTwo} winner={winnerTwo} playerType="player-2" />}
             {!playerTwo && <PulsedCard pulsedType="pulsed-2" />}
           </div>
 
           <div className="actions-buttons players-buttons">
-            {(!playerOne || !playerTwo) && (<button className="action-button button-active">START RANDOM GAME</button>)}
-            {(playerOne && playerTwo) && !isDuo && (<button onClick={onVs} className="action-button button-active">Start Game</button>)}
-            {(playerOne && playerTwo) && !isDuo && (<Link to='/profile'  className="action-button button-inactive">Cancle</Link>)}
+            {<button onClick={() => navigate('/profile')} className="action-button button-active">EXIT</button>}
           </div>
         </div>
       </section>}

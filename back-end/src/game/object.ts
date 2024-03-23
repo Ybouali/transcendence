@@ -17,9 +17,13 @@ export let ResultGame = {
     ScoreWinner : 0,
     ScoreLoser : 0
 };
+export let requestGame = {
+    queue : [],
+    room : new Map<string, Game>(),
+    mapId : new Map<string, string>([["key", "value"], ["key", "value"]])
+};
 
-    export let Id = new Map<string, string>();
-
+export let Id = new Map<string, string>();
 
 export const globalVar = {
     Width: 1600,

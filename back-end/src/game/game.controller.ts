@@ -18,7 +18,7 @@ export class GameController{
     async sendRequstGame(@Param('userId') userId: string, @GetUser('id') id: string) {
         try {
             const user = await this.gameService.getUserName(id);
-            this.eventEmitter.emit('sendRequestGame', {userId, username: user?.username});
+            this.eventEmitter.emit('sendRequestGame', {userId, username: user?.username, id: id});
             return {statusCode: 200};
         } catch (error) {
             return error.response;

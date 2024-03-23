@@ -64,7 +64,6 @@ model HistoryGame {
   winnerId      String
   loserId       String
   startTimeGame DateTime
-  endTimeGame   DateTime
   scoreWinner   Int
   scoreLoser    Int
 }

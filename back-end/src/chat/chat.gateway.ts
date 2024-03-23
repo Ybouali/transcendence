@@ -610,7 +610,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             const destUserSockets = SharedService.UsersSockets.get(data?.userId);
             console.log('sendRequestGame:',destUserSockets);
             destUserSockets?.forEach((socket) => {
-                this.server.to(socket).emit('requestGame', {username: data?.username});
+                this.server.to(socket).emit('requestGame', {username: data?.username, userId: data?.id});
             });
         } catch (error) {
             throw new BadRequestException('Already friend');

@@ -28,7 +28,6 @@ CREATE TABLE "HistoryGame" (
     "winnerId" TEXT NOT NULL,
     "loserId" TEXT NOT NULL,
     "startTimeGame" TIMESTAMP(3) NOT NULL,
-    "endTimeGame" TIMESTAMP(3) NOT NULL,
     "scoreWinner" INTEGER NOT NULL,
     "scoreLoser" INTEGER NOT NULL,
 

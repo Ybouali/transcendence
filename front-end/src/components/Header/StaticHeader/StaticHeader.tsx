@@ -83,7 +83,7 @@ function StaticHeaderHome(props: LoginType) {
             <nav id="primary-navigation" className="primary-navigation">
               <ul role="list" aria-label="Primary" className="nav-list">
                 <li>
-                  <a href="index.html">Home</a>
+                  <a href="#">Home</a>
                 </li>
                 <li>
                   <a href="#about">About</a>

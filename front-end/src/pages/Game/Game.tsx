@@ -48,13 +48,14 @@ function App() {
       setStart(data)
     })
   }, [])
+  
   useEffect(() => {
     Player.on("vsOne", (data: boolean) => {
       setDuo(data);
     })
   }, [])
  
-  Player.on("startGame", (dataX: any, dataY: any) => {
+  Player.on("startGame2", (dataX: any, dataY: any) => {
     setPosX(dataX);
     setPosY(dataY);
     fromBack.posX = BposX;

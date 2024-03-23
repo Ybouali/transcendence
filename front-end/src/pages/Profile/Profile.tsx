@@ -58,7 +58,7 @@ function Profile() {
 
     if (tokens && tokens.access_token && tokens.refresh_token) {
 
-      // setUserData(connectedUser)
+      setUserData(connectedUser)
 
       if (userId) {
 
@@ -136,9 +136,9 @@ function Profile() {
       setNumberGameWinned(nGameWinned);
     }
 
-    if (userData?.id) {
+    // if (userData?.id) {
       await getDatahistoryGames(userId, tokens)
-    }
+    // }
   }
 
   const addFriend = async () => {
@@ -186,6 +186,8 @@ function Profile() {
         
         data = await getHisGamesByUserId(null, tokens);
       }
+
+      console.log(data)
 
       if (Array.isArray(data)) {
         setDataHisGame(data);

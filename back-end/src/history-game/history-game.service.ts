@@ -48,42 +48,43 @@ export class HistoryGameService {
         return board;
     }
 
-    async createHistoryGame(dataGame: HistoryGameType) {
+    async createHistoryGame(datahis: HistoryGameType) {
 
         // Note: when this method is called u need to make sure id winner is oned to his score 
         // because this method dose not know if that score is oned to that user
 
         try {
-            
+
+
             // need to check if the users is is exist for the winner and loser 
-            const userWinner = await this.prisma.user.findFirst({ where: { id: dataGame.winnerId }})
+            const userWinner = await this.prisma.user.findFirst({ where: { id: datahis.winnerId }})
 
             if (!userWinner) {
                 throw new NotFoundException();
             }
 
-            const userLoser = await this.prisma.user.findFirst({ where: { id: dataGame.loserId }})
+            const userLoser = await this.prisma.user.findFirst({ where: { id: datahis.loserId }})
 
             if (!userLoser) {
                 throw new NotFoundException();
             }
 
             // make sure the score's are positif numbers 
-            if (dataGame.scoreWinner < 0 || dataGame.scoreLoser < 0 ) {
+            if (datahis.scoreWinner < 0 || datahis.scoreLoser < 0 ) {
                 throw new NotAcceptableException();
             }
+            
+
             // create the history game 
             const hGame = await this.prisma.historyGame.create({ 
                 data: {
-                    winnerId: dataGame.winnerId,
-                    loserId: dataGame.loserId,
-                    startTimeGame: dataGame.startTimeGame,
-                    endTimeGame: "NULL",     
-                        //  Date.now(),
-                    scoreWinner: dataGame.scoreWinner,
-                    scoreLoser: dataGame.scoreLoser,
+                    loserId: datahis.loserId,
+                    startTimeGame: datahis.startTimeGame,
+                    scoreWinner: datahis.scoreWinner,
+                    scoreLoser: datahis.scoreLoser,
+                    winnerId: datahis.winnerId,
                 }
-             })
+            })
 
             // update the level for the winner
             this.logiqueLevel(userWinner.id);
@@ -91,8 +92,9 @@ export class HistoryGameService {
             // update the level for the loser
             this.logiqueLevel(userLoser.id)
 
+
         } catch (error) {
-            this.logger.error(error.message);
+            this.logger.error(error);
             throw new InternalServerErrorException();
         }
     }
@@ -124,41 +126,43 @@ export class HistoryGameService {
             });
 
             // loop through the history games and create data to store in array and return it
-            hisGamgeFromTable.map( async (hisGame) => {
+            await Promise.all(
+                hisGamgeFromTable.map( async (hisGame) => {
 
-                let player1: Player;
-                let player2: Player;
-
-                // make sure allways the player1 is the owner one
-                if (hisGame.winnerId === userId) {
-                    player1 = {
-                        id: hisGame.winnerId,
-                        username: userOwner.fullName,
-                        score: hisGame.scoreWinner,
+                    let player1: Player;
+                    let player2: Player;
+    
+                    // make sure allways the player1 is the owner one
+                    if (hisGame.winnerId === userId) {
+                        player1 = {
+                            id: hisGame.winnerId,
+                            username: userOwner.fullName,
+                            score: hisGame.scoreWinner,
+                        }
+    
+                        player2 = await this.initPlayerInfo(hisGame.loserId, hisGame.scoreLoser);
+                    
+                    } else if (hisGame.loserId === userId) {
+                    
+                        player1 = {
+                            id: hisGame.winnerId,
+                            username: userOwner.fullName,
+                            score: hisGame.scoreLoser,
+                        }
+                    
+                        player2 = await this.initPlayerInfo(hisGame.winnerId, hisGame.scoreWinner);
+                    
                     }
-
-                    player2 = await this.initPlayerInfo(hisGame.loserId, hisGame.scoreLoser);
-                
-                } else if (hisGame.loserId === userId) {
-                
-                    player1 = {
-                        id: hisGame.winnerId,
-                        username: userOwner.fullName,
-                        score: hisGame.scoreLoser,
+    
+                    const hgame: HistoryGameReturnedType = {
+                        player1,
+                        player2,
+                        timestamp: hisGame.createdAt,
                     }
-                
-                    player2 = await this.initPlayerInfo(hisGame.winnerId, hisGame.scoreWinner);
-                
-                }
-
-                const hgame: HistoryGameReturnedType = {
-                    player1,
-                    player2,
-                    timestamp: hisGame.createdAt,
-                }
-
-                hgames.push(hgame);
-            });
+    
+                    hgames.push(hgame);
+                })
+            );
 
             return hgames;
 
@@ -257,47 +261,25 @@ export class HistoryGameService {
 
     private getPercentage(numberGames: number) {
 
-        if (numberGames > 0 && numberGames <= 50) {
-            return 50 / 1000;
-        } else if (numberGames > 50 && numberGames <= 100) {
-            return 100 / 1000;
-        } else if (numberGames > 100 && numberGames <= 150) {
-            return 150 / 1000;
-        } else if (numberGames > 150 && numberGames <= 200) {
-            return 200 / 1000;
-        } else if (numberGames > 200 && numberGames <= 250) {
-            return 250 / 1000;
-        } else if (numberGames > 250 && numberGames <= 300) {
-            return 300 / 1000;
-        } else if (numberGames > 300 && numberGames <= 350) {
-            return 350 / 1000;
-        } else if (numberGames > 350 && numberGames <= 400) {
-            return 400 / 1000;
-        } else if (numberGames > 400 && numberGames <= 450) {
-            return 450 / 1000;
-        } else if (numberGames > 450 && numberGames <= 500) {
-            return 500 / 1000;
-        } else if (numberGames > 500 && numberGames <= 550) {
-            return 550 / 1000;
-        } else if (numberGames > 550 && numberGames <= 600) {
-            return 600 / 1000;
-        } else if (numberGames > 600 && numberGames <= 650) {
-            return 650 / 1000;
-        } else if (numberGames > 650 && numberGames <= 700) {
-            return 700 / 1000;
-        } else if (numberGames > 700 && numberGames <= 750) {
-            return 750 / 1000;
-        } else if (numberGames > 750 && numberGames <= 800) {
-            return 800 / 1000;
-        } else if (numberGames > 800 && numberGames <= 850) {
-            return 850 / 1000;
-        } else if (numberGames > 850 && numberGames <= 900) {
-            return 900 / 1000;
-        } else if (numberGames > 900 && numberGames <= 950) {
-            return 950 / 1000;
+        if (numberGames > 0 && numberGames <= 10) {
+            return 10 / 100;
+        } else if (numberGames > 20 && numberGames <= 30) {
+            return 20 / 1000;
+        } else if (numberGames > 30 && numberGames <= 40) {
+            return 30 / 1000;
+        } else if (numberGames > 50 && numberGames <= 60) {
+            return 50 / 100;
+        } else if (numberGames > 60 && numberGames <= 70) {
+            return 60 / 100;
+        } else if (numberGames > 70 && numberGames <= 80) {
+            return 70 / 100;
+        } else if (numberGames > 80 && numberGames <= 90) {
+            return 80 / 100;
+        } else if (numberGames > 90 && numberGames <= 100) {
+            return 90 / 100;
         } else {
             return 1;
-        }
+        } 
     }
 
 
