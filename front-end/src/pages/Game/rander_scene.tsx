@@ -109,16 +109,17 @@ export function InitSetup() {
             
             const dataToStore: HistoryGameData = {
                 
-                winnerId : Data.WinnerId,
-                loserId : Data.LoserId,
+                winnerId : Data.LoserId,
+                loserId : Data.WinnerId,
                 startTimeGame : new Date(Date.now()),
                 scoreLoser : Data.ScoreLoser,
                 scoreWinner : Data.ScoreWinner,
             };
 
 
-            storeHistoryGame(dataToStore)
             navigate(`/play/results/${otherId}/${otherScore}&${myScore}`);
+            storeHistoryGame(dataToStore)
+            data = false;
         })
         setup.renderer.setAnimationLoop(() => {
             rander(ball, L_puddle, R_puddle);
@@ -131,6 +132,7 @@ export function InitSetup() {
             return () => {
                 Player.off("Puddle2");
                 Player.off("Puddle1");
+                Player.off("GameResult");
                 setup.renderer.setAnimationLoop(null); 
                 window.removeEventListener('keydown', handleKeyDown);
                 document.body.removeChild(setup.renderer.domElement);

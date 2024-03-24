@@ -73,20 +73,29 @@ export class HistoryGameService {
             if (datahis.scoreWinner < 0 || datahis.scoreLoser < 0 ) {
                 throw new NotAcceptableException();
             }
-            
-            // create the history game 
-            const hGame = await this.prisma.historyGame.create({ 
-                data: {
-                    loserId: datahis.loserId,
-                    startTimeGame: datahis.startTimeGame,
-                    scoreWinner: datahis.scoreWinner,
-                    scoreLoser: datahis.scoreLoser,
-                    winnerId: datahis.winnerId,
-                }
+
+            // Check if the score is already in db
+            const oldGame = await this.prisma.historyGame.findFirst({
+                where: { startTimeGame: datahis.startTimeGame }
             })
 
-            // update the level for the winner
-            await this.logiqueLevel(hGame.winnerId);
+            if (!oldGame) {
+                // create the history game 
+                const hGame = await this.prisma.historyGame.create({ 
+                    data: {
+                        loserId: datahis.loserId,
+                        startTimeGame: datahis.startTimeGame,
+                        scoreWinner: datahis.scoreWinner,
+                        scoreLoser: datahis.scoreLoser,
+                        winnerId: datahis.winnerId,
+                    }
+                })
+                
+                // update the level for the winner
+                await this.logiqueLevel(hGame.winnerId);
+            }
+            
+
 
 
         } catch (error) {
