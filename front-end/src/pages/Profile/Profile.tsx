@@ -75,6 +75,7 @@ function Profile() {
           if (otherUser) {
 
             //console.log(`hello user ${otherUser.username}`)
+            await iniOtherData(otherUser.id, tokens);
             setPersonal(false)
 
             setUserData(otherUser);
@@ -92,10 +93,6 @@ function Profile() {
           } else {
             navigate("/error-page/:404")
           }
-        }
-
-        if (userData) {
-          await iniOtherData(userData.id, tokens);
         }
         
 
