@@ -74,7 +74,6 @@ export class HistoryGameService {
                 throw new NotAcceptableException();
             }
             
-
             // create the history game 
             const hGame = await this.prisma.historyGame.create({ 
                 data: {
@@ -87,10 +86,7 @@ export class HistoryGameService {
             })
 
             // update the level for the winner
-            this.logiqueLevel(userWinner.id);
-            
-            // update the level for the loser
-            this.logiqueLevel(userLoser.id)
+            await this.logiqueLevel(hGame.winnerId);
 
 
         } catch (error) {
@@ -222,34 +218,21 @@ export class HistoryGameService {
         }
     }
 
-    // there is 20 level every level will be accessible if the user has been winned 50 game per level 
-    // so if u wanna get the 20 level u should win 1000 game 
-    // to make this more intresting the level will decrease if the player has been lose 50
-    // so if the player has been lose 1000 game his level will 0
+    
     private async logiqueLevel (userId: string) {
 
         const gamesWinned: number = await this.prisma.historyGame.count({ where: { winnerId: userId } });
 
-        const gameslosed: number = await this.prisma.historyGame.count({ where: { loserId: userId } });
+        this.logger.debug(`Games Winned: ${gamesWinned}`);
 
-        const percentageLevelWin = this.getPercentage(gamesWinned);
+        const LevelWin = this.getLevel(gamesWinned);
 
-        const percentageLevelLos = this.getPercentage(gameslosed);
+        this.logger.debug(`LEVEL: ${LevelWin}`);
 
-        const levelW = percentageLevelWin * gamesWinned;
-
-        const levelL = percentageLevelLos * gamesWinned;
-
-        let level = levelW - levelL;
-
-        if (level < 0) {
-            level *= -1;
-        }
-
-        const user = this.prisma.user.update({
+        const user = await this.prisma.user.update({
             where: { id: userId },
             data: {
-                levelGame: level
+                levelGame: LevelWin
             }
         })
 
@@ -259,27 +242,30 @@ export class HistoryGameService {
     }
 
 
-    private getPercentage(numberGames: number) {
-
-        if (numberGames > 0 && numberGames <= 10) {
-            return 10 / 100;
-        } else if (numberGames > 20 && numberGames <= 30) {
-            return 20 / 1000;
-        } else if (numberGames > 30 && numberGames <= 40) {
-            return 30 / 1000;
-        } else if (numberGames > 50 && numberGames <= 60) {
-            return 50 / 100;
-        } else if (numberGames > 60 && numberGames <= 70) {
-            return 60 / 100;
-        } else if (numberGames > 70 && numberGames <= 80) {
-            return 70 / 100;
-        } else if (numberGames > 80 && numberGames <= 90) {
-            return 80 / 100;
-        } else if (numberGames > 90 && numberGames <= 100) {
-            return 90 / 100;
-        } else {
+    private getLevel(numberGames: number) {
+        if (numberGames === 0) {
+            return 0;
+        } else if (numberGames > 0 && numberGames <= 10) {
             return 1;
-        } 
+        } else if (numberGames > 20 && numberGames <= 30) {
+            return 2;
+        } else if (numberGames > 30 && numberGames <= 40) {
+            return 3;
+        } else if (numberGames > 50 && numberGames <= 60) {
+            return 4;
+        } else if (numberGames > 60 && numberGames <= 70) {
+            return 5;
+        } else if (numberGames > 70 && numberGames <= 80) {
+            return 6;
+        } else if (numberGames > 80 && numberGames <= 90) {
+            return 7;
+        } else if (numberGames > 90 && numberGames <= 100) {
+            return 8;
+        } else if (numberGames > 100) {
+            return 9;
+        } else {
+            return 10;
+        }
     }
 
 
