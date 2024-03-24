@@ -10,13 +10,15 @@ import { CreateMessageDto } from "./dto/create-message.dto";
 // import * as bcrypt from 'bcrypt';
 import { SharedService } from "../shared/shared.service";
 import { EventEmitter2 } from "@nestjs/event-emitter";
+import { EncryptionService } from "src/encryption/encryption.service";
 
 
 @Injectable()
 export class RoomsService {
     constructor(
         private prisma: PrismaService,
-        private eventEmitter: EventEmitter2 
+        private eventEmitter: EventEmitter2,
+        private encrypt: EncryptionService, 
         ) {}
 
 
@@ -1718,53 +1720,55 @@ export class RoomsService {
         }
 
         async joinRoomHTTP(newMember: { userId: string, roomId: string, password: string }) {
-                const room = await this.findRoomById(newMember.roomId);
-                if (!room) {
-                    throw new NotFoundException('Room not found');
-                }
-                // if (room.roomType !== 'public') {
-                //     throw new BadRequestException('This room is Private.');
-                // }
-                const memberCount = await this.prisma.member.count({
-                    where: {
-                        userId: newMember.userId,
-                        chatRoomId: newMember.roomId,
-                    },
-                });
-                if (memberCount > 0){
-                    throw new BadRequestException('User is already a member of this room');
-                }
-                if (room.isProtected === false){
-                    await this.addUserToRoom(newMember.roomId, newMember.userId, !(room.roomType === 'private'));
+            const room = await this.findRoomById(newMember.roomId);
+            if (!room) {
+                throw new NotFoundException('Room not found');
+            }
+            // if (room.roomType !== 'public') {
+            //     throw new BadRequestException('This room is Private.');
+            // }
+            const memberCount = await this.prisma.member.count({
+                where: {
+                    userId: newMember.userId,
+                    chatRoomId: newMember.roomId,
+                },
+            });
+            if (memberCount > 0){
+                throw new BadRequestException('User is already a member of this room');
+            }
+            if (room.isProtected === false){
+                await this.addUserToRoom(newMember.roomId, newMember.userId, !(room.roomType === 'private'));
+            } else {
+                // const isPasswordMatch = await this.compareRoomPassword(room, newMember.password);
+                const isPasswordMatch = await this.encrypt.decrypt(room.password);
+
+                if (isPasswordMatch === newMember.password) {
+                    await this.addUserToRoom(newMember.roomId, newMember.userId, true);
                 } else {
-                    const isPasswordMatch = await this.compareRoomPassword(room, newMember.password);
-                    if (isPasswordMatch) {
-                        await this.addUserToRoom(newMember.roomId, newMember.userId, true);
-                    } else {
-                        throw new BadRequestException('Incorrect room password');
-                    }
+                    throw new BadRequestException('Incorrect room password');
                 }
+            }
 
-                let userImages: string[] = [];
+            let userImages: string[] = [];
 
-                const userData = await this.prisma.user.findUnique({
-                    where: {
-                        id: newMember.userId,
-                    },
-                    select: {
-                        username: true,
-                        avatarUrl: true,
-                    },
-                });
-    
-                if (userData) {
+            const userData = await this.prisma.user.findUnique({
+                where: {
+                    id: newMember.userId,
+                },
+                select: {
+                    username: true,
+                    avatarUrl: true,
+                },
+            });
 
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    userImages = [userData.avatarUrl];
-                }
+            if (userData) {
 
-                return room;
-        }
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                userImages = [userData.avatarUrl];
+            }
+
+            return room;
+    }
 
         async compareRoomPassword(room: ChatRoom, enteredPassword: string): Promise<any> {
             try {
@@ -1783,7 +1787,7 @@ export class RoomsService {
         async createRoomHTTP (createRoom: CreateRoomDto) {
             let newRoom;
             if (createRoom.isProtected){
-                const hashedPassword = await this.hashPassword(createRoom.password);;
+                const hashedPassword = await this.encrypt.encrypt(createRoom.password);;
 				newRoom = await this.createRoom({...createRoom, password:hashedPassword});
             } else {
                 newRoom = await this.createRoom({...createRoom});

@@ -77,7 +77,9 @@ export class HistoryGameService {
             // Check if the score is already in db
             const oldGame = await this.prisma.historyGame.findFirst({
                 where: { startTimeGame: datahis.startTimeGame }
-            })
+            });
+            console.log('datahis:', datahis);
+            console.log('oldGame =>:', oldGame);
 
             if (!oldGame) {
                 // create the history game 

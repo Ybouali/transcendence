@@ -15,9 +15,11 @@ export let ResultGame = {
     WinnerId : '',
     LoserId : '',
     ScoreWinner : 0,
-    ScoreLoser : 0
+    ScoreLoser : 0,
+    startTimeGame : new Date(Date.now())
 };
 export let requestGame = {
+    num : 1,
     queue : [],
     room : new Map<string, Game>(),
     mapId : new Map<string, string>([["key", "value"], ["key", "value"]])

@@ -29,7 +29,7 @@ export function forGame(otherUser : string, socket : Socket, userId : string){
 
 }
 export  function createRoom(io : Server){
-    const roomName = "friendRoom"; 
+    const roomName = "friendRoom" + requestGame.num; 
     const roomInfo = io.sockets.adapter.rooms;
     let game : Game;
     const Id: Set<string> = new Set(requestGame.queue);
@@ -42,5 +42,11 @@ export  function createRoom(io : Server){
     io.to(requestGame.queue[1]).emit("Puddle2", true);
     requestGame.room.set(roomName, game);
     requestGame.queue = [];
+    requestGame.num++;
+    console.log(roomName)
     startGame(io, game);
  };
+
+ export function deleteFromQueu(){
+    requestGame.queue.shift();
+ } 

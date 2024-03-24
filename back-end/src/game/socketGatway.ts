@@ -3,7 +3,7 @@ import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from
 import { Socket, Server } from "socket.io";
 import { roomSetting, Id, requestGame} from "./object";
 import { Game } from "./Game";
-import { checkRequest, forGame , createRoom} from "./requestGame";
+import { checkRequest, forGame , createRoom, deleteFromQueu} from "./requestGame";
 import { checkDectonnectin, leaveGame, checkId, checkSocket } from "./checkId";
 import { joinRoom } from "./gameManage";
 
@@ -44,7 +44,9 @@ export class socketGateway {
 
     @SubscribeMessage('declineRequest')
     onDeclineRequest(client: Socket, messsage : {userId: string, otherUser : string}) {
-        //kkkkkkkkkkk
+        console.log('in declineRequest', client);
+        this.server.to(requestGame.queue[0]).emit("noo");
+        deleteFromQueu();
     }
 
     @SubscribeMessage('PlayFriend')

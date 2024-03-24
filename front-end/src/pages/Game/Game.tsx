@@ -37,6 +37,7 @@ function App() {
   const [isDuo, setDuo] = useState(false)
   const [BposX, setPosX] = useState(0)
   const [BposY, setPosY] = useState(0)
+  const [isWaiting, setIsWaiting] = useState(false);
 
   useEffect(() => {
     function isConnect() {
@@ -122,8 +123,8 @@ function App() {
         return {
           fullname: otherUser?.fullName,
         username: otherUser?.username,
-        ranking: 20,
-        matches: 85,
+        ranking: '▮',
+        matches: '▮',
         level: otherUser?.levelGame,
         image: otherUser?.avatarUrl,
         };
@@ -137,8 +138,8 @@ function App() {
       return {
         fullname: connectedUser?.fullName,
         username: connectedUser?.username,
-        ranking: 20,
-        matches: 85,
+        ranking: '▮',
+        matches: '▮',
         level: connectedUser?.levelGame,
         image: connectedUser?.avatarUrl,
       };
@@ -169,6 +170,11 @@ function App() {
       setWinnerTwo((previousValue: any) => Number.parseInt(score2) >= Number.parseInt(score1))
     }
 
+
+    console.log('Player:', Player);
+    Player.on("noo", () => {
+      navigate('/profile');
+    })
 
   }, []);
   
@@ -208,10 +214,13 @@ function App() {
           </div>
 
           <div className="actions-buttons players-buttons">
-            {(!playerOne || !playerTwo) && !isDuo &&(<button onClick={handlePlayTwo} className="action-button button-active">START RANDOM GAME</button>)}
-            {(playerOne && playerTwo) && !isDuo && (<button onClick={onVs} className="action-button button-active">Start Game</button>)}
-            {(playerOne && playerTwo) && !isDuo && (<Link to='/profile'  className="action-button button-inactive">Cancle</Link>)}
-            {(!playerOne || !playerTwo) && !isDuo && (<Link to='/profile'  className="action-button button-inactive">Cancle</Link>)}
+            {(!playerOne || !playerTwo) && !isDuo && !isWaiting &&(<button onClick={() => {
+              setIsWaiting(true)
+              handlePlayTwo();
+            }} className="action-button button-active">START RANDOM GAME</button>)}
+            {(location.pathname === '/game/guest') && !isDuo && (<button onClick={onVs} className="action-button button-active">Start Game</button>)}
+            {(location.pathname === '/game/guest') && (playerOne && playerTwo) && !isDuo && (<Link to='/profile'  className="action-button button-inactive">Cancle</Link>)}
+            {(!playerOne || !playerTwo) && !isDuo && !isWaiting &&(<Link to='/profile'  className="action-button button-inactive">Cancle</Link>)}
           </div>
         </div>
       </section>}

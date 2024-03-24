@@ -99,26 +99,31 @@ export function InitSetup() {
         };
         window.addEventListener('keydown', handleKeyDown);
         Player.on("GameResult", (Data : any, data : boolean) =>{
-            console.log(Data)
+            console.log('lalalalalalalalalalal', Data)
             if(data)
                 setup.renderer.setAnimationLoop(null);
             let myScore = connectedUser?.id === Data.WinnerId ? Data.ScoreWinner : Data.ScoreLoser;
             let otherScore = myScore === Data.ScoreWinner ? Data.ScoreLoser : Data.ScoreWinner;
             let otherId = connectedUser?.id === Data.WinnerId ? Data.LoserId : Data.WinnerId;
-
+            
             
             const dataToStore: HistoryGameData = {
                 
                 winnerId : Data.LoserId,
                 loserId : Data.WinnerId,
-                startTimeGame : new Date(Date.now()),
+                startTimeGame : Data.startTimeGame,
                 scoreLoser : Data.ScoreLoser,
                 scoreWinner : Data.ScoreWinner,
             };
 
-
+            console.log('otherId:', otherId);
+            console.log('conneted id:', connectedUser?.id);
             navigate(`/play/results/${otherId}/${otherScore}&${myScore}`);
-            storeHistoryGame(dataToStore)
+            if (connectedUser?.id === dataToStore?.winnerId) {
+                storeHistoryGame(dataToStore)
+            }
+            
+            console.log('---------- storeHistoryGame -----------')
             data = false;
         })
         setup.renderer.setAnimationLoop(() => {

@@ -59,8 +59,8 @@ function leftPlayer(){
         if (((Ball.positionX - (Ball.radius))  <= (right_player.positionX + globalVar.PuddleWight / 2) &&
         (Ball.positionY <= (right_player.positionY + globalVar.PuddleHeight / 2))) &&
         (Ball.positionY >= right_player.positionY - (globalVar.PuddleHeight / 2))){
-            Ball.velocityX += Ball.speed;
-            Ball.velocityY += Ball.speed; 
+            // Ball.velocityX += Ball.speed;
+            // Ball.velocityY += Ball.speed; 
             if (Ball.velocityX < 0)
                 Ball.velocityX *= -1 ;
         }
