@@ -22,7 +22,7 @@ export class MessagesController {
         @GetUser('id') userId: string,
     ): Promise<ConversationDto[]> {
         const conversation = await this.messagesService.getConversation(userId);
-        console.log(conversation);
+        // console.log(conversation);
         return conversation;
     }
 

@@ -97,7 +97,7 @@ const Players: React.FC = () => {
       });
     } else {
       if (id) {
-        console.log('id id id id');
+        // console.log('id id id id');
         gaurd();
   
         

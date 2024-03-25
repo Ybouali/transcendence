@@ -23,7 +23,7 @@ export class Ball {
         else if ((this.positionY + this.radius) > (globalVar.Height / 2) - 5)
             this.velocityY *= -1;
         else if (this.positionX < this.game.rPlayer.positionX - 25) {
-            console.log("score is :", this.game.lPlayer.score);
+            // console.log("score is :", this.game.lPlayer.score);
             this.game.lPlayer.score += 1;
             io.to(this.game.roomName).emit("Lplayer_score");
             this.resetBall();
@@ -31,7 +31,7 @@ export class Ball {
         else if (this.positionX > this.game.lPlayer.positionX + globalVar.PuddleWight / 2) {
             this.game.rPlayer.score += 1;
             io.to(this.game.roomName).emit("Rplayer_score");
-            console.log("score is :", this.game.rPlayer.score);
+            // console.log("score is :", this.game.rPlayer.score);
             this.resetBall();
         }
     }
@@ -110,7 +110,7 @@ export class Ball {
                 if (room == roomName)
                     return (false);
             }
-            console.log("player disconnected");
+            // console.log("player disconnected");
             if (this.game.lPlayer.id == roomSetting.loser) {
                 this.game.lPlayer.score = 0;
                 this.game.rPlayer.score = 3;
@@ -124,7 +124,7 @@ export class Ball {
                 io.to(this.game.roomName).emit("Rplayer_score");
                 io.to(this.game.roomName).emit("Lplayer_score");
             }
-            this.clearMap(this.game.roomName)
+            // this.clearMap(this.game.roomName)
             return (true);
         }
     }
@@ -140,12 +140,14 @@ export class Ball {
             ResultGame.LoserId = this.game.rPlayer.PlayerId;
             ResultGame.ScoreWinner = this.game.lPlayer.score;
             ResultGame.ScoreLoser = this.game.rPlayer.score;
+            ResultGame.startTimeGame = new Date(Date.now())
         }
         else{
             ResultGame.WinnerId = this.game.rPlayer.PlayerId;
             ResultGame.LoserId = this.game.lPlayer.PlayerId;
             ResultGame.ScoreWinner = this.game.rPlayer.score;
             ResultGame.ScoreLoser = this.game.lPlayer.score;
+            ResultGame.startTimeGame = new Date(Date.now()) 
         }
     }
     FWinnerLoser(){
@@ -160,12 +162,14 @@ export class Ball {
                 ResultGame.LoserId = this.game.rPlayer.PlayerId;
                 ResultGame.ScoreWinner = this.game.lPlayer.score;
                 ResultGame.ScoreLoser = this.game.rPlayer.score;
+                ResultGame.startTimeGame = new Date(Date.now())
             }
             else{
                 ResultGame.WinnerId = this.game.rPlayer.PlayerId;
                 ResultGame.LoserId = this.game.lPlayer.PlayerId;
                 ResultGame.ScoreWinner = this.game.rPlayer.score;
                 ResultGame.ScoreLoser = this.game.lPlayer.score;
+                ResultGame.startTimeGame = new Date(Date.now())
             }
     }
     updatePosition(io: Server) {
@@ -194,10 +198,26 @@ export class Ball {
             this.game.lPlayer.pushToOther();
             this.game.rPlayer.pushToOther();
             io.to(this.game.roomName).emit("startGame2", this.positionX, this.positionY);
-            if (this.game.lPlayer.score == 3 || this.game.rPlayer.score == 3
-                || (this.checkDeconnection(io, this.game.roomName) == true)) {
+            if( (this.checkDeconnection(io, this.game.roomName) == true)){
                 clearInterval(interval);
-                console.log("game is finished ");
+                // console.log("game is finished ");
+                const resultGame: HistoryGameType = new HistoryGameType()
+                if(this.game.roomName.includes("riendRoom"))
+                    this.FWinnerLoser();
+                else
+                    this.WinnerLoser();
+                // console.log('resultGame in connection:', resultGame);
+                // console.log('roomName   ===========:', this.game.roomName)
+                // io.to(this.game.roomName).emit("Finish", "hello"); // resultGame emitted here try to catch it in front
+                this.clearMap(this.game.roomName)
+                io.sockets.adapter.rooms.delete(this.game.roomName);
+                roomSetting.Game.delete(this.game.roomName);
+                roomSetting.Rooms.delete(this.game.roomName);
+                delete (this.game)
+            }
+            else if (this.game.lPlayer.score == 3 || this.game.rPlayer.score == 3) {
+                clearInterval(interval);
+                // console.log("game is finished ");
                 const resultGame: HistoryGameType = new HistoryGameType()
 
                 resultGame.winnerId = ResultGame.WinnerId;
@@ -205,9 +225,9 @@ export class Ball {
                 resultGame.scoreLoser = ResultGame.ScoreLoser;
                 resultGame.scoreWinner = ResultGame.ScoreWinner;
                 resultGame.startTimeGame = new Date(Date.now())
-                console.log(resultGame);
+                // console.log(resultGame);
                 
-                if(this.game.roomName == "friendRoom")
+                if(this.game.roomName.includes("riendRoom"))
                     this.FWinnerLoser();
                 else
                     this.WinnerLoser();
@@ -215,6 +235,7 @@ export class Ball {
                 io.to(this.game.roomName).emit("GameResult", ResultGame, true); // resultGame emitted here try to catch it in front
                 this.clearMap(this.game.roomName)
                 io.sockets.adapter.rooms.delete(this.game.roomName);
+                roomSetting.Game.delete(this.game.roomName);
                 roomSetting.Rooms.delete(this.game.roomName);
                 delete (this.game)
             }

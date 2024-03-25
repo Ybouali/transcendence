@@ -4,6 +4,8 @@ import { toast } from "react-toastify";
 import { Link, useNavigate } from 'react-router-dom';
 import { UserType } from '../../../types';
 import { getTokensFromCookie, prepareUrl } from '../../../utils/utils';
+import { Player } from '../../Game/Game';
+import { useConnectedUser } from '../../../context/ConnectedContext';
 
 interface ProfileButtonActionsType {
 
@@ -18,6 +20,7 @@ interface ProfileButtonActionsType {
 function ProfileButtonActions(props: ProfileButtonActionsType) {
   
   const navigate = useNavigate();
+  const { connectedUser, setConnectedUser } = useConnectedUser();
 
   const handleBlockUser = async () => {
       try {
@@ -52,13 +55,42 @@ function ProfileButtonActions(props: ProfileButtonActionsType) {
   const handleChatWithFriend = () => {
      
     // TODO: navigate to the chat page but i think u need to set a id of the user to chat with aba abdo
+    
     navigate(`/chat/${props?.userData?.id}`);
   }
 
-  const handlePlayWithFriend = () => {
+  const handlePlayWithFriend = async () => {
      
     // TODO: navigate to the game page but i think u need to set a id of the user to play with a hajar
-    navigate("/game");
+      try {
+        const tokens: any = await getTokensFromCookie();
+
+        if (!tokens) {
+            navigate("/notauth");
+        }
+        const response = await fetch(prepareUrl(`game/playwith/${props?.userData?.id}`), {
+          method: "POST", 
+          headers: {
+            'access_token': tokens.access_token,
+            'refresh_token': tokens.refresh_token
+          },
+        });
+
+      const res = await response.json();
+
+      if (res?.statusCode !== 200) {
+        throw new Error('An error occurred, Please try again.');
+      }
+
+      if (!response.ok){
+        throw new Error('An error occurred, Please try again.');
+      }
+      // console.log('PlayFriend: ', connectedUser?.id);
+      Player.emit("PlayFriend", {userId: connectedUser?.id});
+      navigate(`/game/${props?.userData?.id}`);
+  } catch (error) {
+    toast.error('An error occurred, Please try again.')
+  }
   }
 
   //useEffect(() => {

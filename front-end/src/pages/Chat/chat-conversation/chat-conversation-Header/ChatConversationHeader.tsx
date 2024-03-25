@@ -59,7 +59,7 @@ const ChatConversationHeader: React.FC<ChatConversationHeaderProps> = ({ convers
           if (!response.ok){
             throw new Error('An error occurred, Please try again.');
           }
-          console.log('PlayFriend: ', connectedUser?.id);
+          // console.log('PlayFriend: ', connectedUser?.id);
           Player.emit("PlayFriend", {userId: connectedUser?.id});
           navigate(`/game/${selectedChat?.friend_id}`);
       } catch (error) {

@@ -45,16 +45,16 @@ export class RoomsController {
 
     @Get('all/')
     async getAllRoomsForUser(@GetUser('id') userId: string): Promise<RoomDto[]> {
-        console.log('all rooms')
+        // console.log('all rooms')
         return this.roomsService.getAllRoomsForUser(userId);
     }
 
     @Get('/:roomId')
     async getRoomInfo(@GetUser('id') userId: string, @Param('roomId') roomId: string): Promise<RoomDto[]> {
         try {
-            console.log('get info of a room.')
+            // console.log('get info of a room.')
             const res = await this.roomsService.getRoomInfo(roomId, userId);
-            console.log(res);
+            // console.log(res);
             return res;
         } catch (error) {
             throw error
@@ -66,7 +66,7 @@ export class RoomsController {
     @Post('/:roomId/kick')
     async kickMember(@GetUser('id') userId: string ,@Body() room1: { adminId: string; roomId: string; userId: string })
     {
-        console.log('fucking kick')
+        // console.log('fucking kick')
         try {
             const infoUser = await this.roomsService.getUserInfo(room1.userId);
             const eventName = await this.roomsService.kickUserfromRoomHTTP(room1.adminId, room1.roomId, room1.userId);
@@ -104,7 +104,7 @@ export class RoomsController {
     @Post('/:roomId/decline')
     async declineRequest(@GetUser('id') userId: string ,@Body() room1: { adminId: string; roomId: string; userTwo: string })
     {
-        console.log('accept request')
+        // console.log('accept request')
         try {
             const infoUser = await this.roomsService.getUserInfo(room1.userTwo);
             await this.roomsService.declineRequestRoomHTTP(room1.adminId, room1.roomId, room1.userTwo);
@@ -157,7 +157,7 @@ export class RoomsController {
         @GetUser('id') userId: string,
         @Body() updateRoom: {roomName: string, password: string, roomType: string, admins: string[]}) {
         try {
-            console.log('updare updare updare updare')
+            // console.log('updare updare updare updare')
             return await this.roomsService.updateRoomHTTP(roomId, userId, updateRoom);
         } catch (error) {
             return error.response;
@@ -169,7 +169,7 @@ export class RoomsController {
         @Param('roomId') roomId: string, @GetUser('id')userId
     ): Promise<RoomMessageDto[]> {
         const response = await this.roomsService.getMessagesInRoom(roomId, userId);
-        console.log(response);
+        // console.log(response);
         return response;
     }
 
@@ -185,7 +185,7 @@ export class RoomsController {
     {
         try {
             const infoUser = await this.roomsService.getUserInfo(room1.bannedId);
-            console.log(infoUser)
+            // console.log(infoUser)
             await  this.roomsService.banUserInRoomHTTP(room1.adminId, room1.roomId, room1.bannedId);
             this.eventEmitter.emit('roomUpdate', {
                 roomId: room1.roomId, 
@@ -231,7 +231,7 @@ export class RoomsController {
     @Post('/:roomId/setAdmin')
 	async setAdminToRoom(@Body() room: { adminId: string; roomId: string; newAdmin: string }) {
         try {
-            console.log('============================== set admin ================================');
+            // console.log('============================== set admin ================================');
             const infoUser = await this.roomsService.getUserInfo(room.newAdmin);
             await this.roomsService.addAdminToRoomHTTP(room.adminId, room.roomId, room.newAdmin);
             return {
@@ -247,8 +247,8 @@ export class RoomsController {
     @Post('/:roomId/unsetAdmin')
 	async unSetAdminToRoom(@Body() room: { adminId: string; roomId: string; unsetAdmin: string }) {
         try {
-            console.log('============================== unset admin ================================');
-            console.log(room.unsetAdmin);
+            // console.log('============================== unset admin ================================');
+            // console.log(room.unsetAdmin);
             const infoUser = await this.roomsService.getUserInfo(room.unsetAdmin);
             await this.roomsService.unsetAdminFromRoomHTTP(room.adminId, room.roomId, room.unsetAdmin);
             return {
@@ -277,7 +277,7 @@ export class RoomsController {
     @Post('/joinRoom')
     async joinRoom(@Body() data: { userId: string, roomId: string, password: string }): Promise<any> {
         try {
-            console.log('Handle join Room');
+            // console.log('Handle join Room');
             const newRoom = await this.roomsService.joinRoomHTTP(data);
             const images = await this.roomsService.getImagesOfRoom(newRoom?.id);
             if (newRoom.roomType !== 'private'){
@@ -298,7 +298,7 @@ export class RoomsController {
     @Post('/createRoom')
     async createRoom(@Body() createRoomDto: CreateRoomDto) {
         try {
-            console.log(createRoomDto)
+            // console.log(createRoomDto)
             const newRoom = await this.roomsService.createRoomHTTP(createRoomDto);
             const images = await this.roomsService.getImagesOfRoom(newRoom?.id);
             this.eventEmitter.emit('addRoom', {newRoom, ownerID: createRoomDto.ownerID, images});
@@ -312,7 +312,7 @@ export class RoomsController {
 	// @Roles(Role.Owner, Role.Admin)
 	@Post('/:roomId/mute')
 	async muteUser(@GetUser('id') userId: string, @Body() data: { userId: string, roomId: string, duration : number }) {
-        console.log('this line for muted user');            
+        // console.log('this line for muted user');            
         try {
             const infoUser = await this.roomsService.getUserInfo(data.userId);
             const role = await this.roomsService.handleMuteUser(userId, data) ? 'admins' : 'members';

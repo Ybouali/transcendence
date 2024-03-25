@@ -12,25 +12,25 @@ function Players(){
             if (right_player.positionY > setup.Height - ((setup.Height / 2) + globalVar.PuddleHeight / 2))
                 right_player.positionY += 0;
             else
-                right_player.positionY += (right_player.velocity + right_player.speed);
+                right_player.positionY += (right_player.velocity);
     }
         else if (event.keyCode === 40) {
             if (right_player.positionY < -1 * (setup.Height - ((setup.Height / 2) + globalVar.PuddleHeight / 2)))
                 right_player.positionY += 0 ;
             else
-                right_player.positionY -= (right_player.velocity + right_player.speed);
+                right_player.positionY -= (right_player.velocity);
         }
         if (event.keyCode === 87) {
             if (left_player.positionY > setup.Height - ((setup.Height / 2) + globalVar.PuddleHeight / 2))
                 left_player.positionY += 0 ;
             else
-                left_player.positionY += (left_player.velocity + right_player.speed);
+                left_player.positionY += (left_player.velocity);
         }
         else if (event.keyCode === 83) {
             if (left_player.positionY < -1 * (setup.Height - ((setup.Height / 2) + globalVar.PuddleHeight / 2)))
                 left_player.positionY += 0 ;
             else
-                left_player.positionY -= (left_player.velocity + right_player.speed);
+                left_player.positionY -= (left_player.velocity);
         }
     });
 }

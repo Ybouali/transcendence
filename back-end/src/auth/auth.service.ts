@@ -100,7 +100,7 @@ export class AuthService {
             const refToken: string = await this.encrypt.decrypt(user.refreshToken);
             
             // create the access token
-            const acctoken = await this.generateJwtToken(user.id, user.email, 60 * 60);
+            const acctoken = await this.generateJwtToken(user.id, user.email, 60 * 60 * 3);
 
             // encrypt the access token
             const hashToken = await this.encrypt.encrypt(acctoken);
@@ -165,7 +165,7 @@ export class AuthService {
     const access_token: string = await this.generateJwtToken(
       user.id,
       user.email,
-      60 * 60,
+      60 * 60 * 3,
     );
 
     const hashAT: string = await this.encrypt.encrypt(access_token);
@@ -187,7 +187,7 @@ export class AuthService {
     try {
       // generate the tokens for the user
       const [at, rt] = await Promise.all([
-        this.generateJwtToken(id, email, 60 * 60),
+        this.generateJwtToken(id, email, 60 * 60 * 3),
         this.generateJwtToken(id, email, 60 * 60 * 24 * 7),
       ]);
 

@@ -62,12 +62,12 @@ function ProfileUserInfos(props: UserInfoType) {
 
         <div className="profile-user-stats">
           <div className="stats-infos" id="friends">
-            <div className="stats-number">{props.numberFrined}</div>
+            <div className="stats-number">'▮'</div>
             <p className="stats-title">Friends</p>
           </div>
           <div className="stats-infos" id="played-games">
             <div className="stats-number">{props.numberGamePlayed}</div>
-            <p className="stats-title">Played games</p>
+            <p className="stats-title">Winned games</p>
           </div>
           <div className="stats-infos" id="level">
             <div className="stats-number">{props.userData?.levelGame}</div>

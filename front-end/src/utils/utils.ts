@@ -47,7 +47,7 @@ export async function storeHistoryGame(data: HistoryGameData) {
     let at = getCookie('access_token');
     let rt = getCookie('refresh_token');
 
-    console.log(data)
+    // console.log(data)
 
     const resData = await axios.post(prepareUrl("history-game/createhistory"), data, {
         headers: {
@@ -206,7 +206,7 @@ export async function getHisGamesByUserId(
 
     const rHisgame: HistoryGameReturnedType[] = resData.data;
 
-    console.log(rHisgame)
+    // console.log(rHisgame)
 
     return rHisgame;
 }
