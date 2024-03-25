@@ -55,7 +55,7 @@ export class HistoryGameService {
 
         try {
 
-
+            console.log('datahis:', datahis);
             // need to check if the users is is exist for the winner and loser 
             const userWinner = await this.prisma.user.findFirst({ where: { id: datahis.winnerId }})
 
@@ -78,8 +78,13 @@ export class HistoryGameService {
             const oldGame = await this.prisma.historyGame.findFirst({
                 where: { startTimeGame: datahis.startTimeGame }
             });
+<<<<<<< HEAD
             console.log('datahis:', datahis);
             console.log('oldGame =>:', oldGame);
+=======
+            // console.log('datahis:', datahis);
+            // console.log('oldGame =>:', oldGame);
+>>>>>>> yassine-back-end
 
             if (!oldGame) {
                 // create the history game 
@@ -258,21 +263,21 @@ export class HistoryGameService {
             return 0;
         } else if (numberGames > 0 && numberGames <= 10) {
             return 1;
-        } else if (numberGames > 20 && numberGames <= 30) {
+        } else if (numberGames > 10 && numberGames <= 20) {
             return 2;
-        } else if (numberGames > 30 && numberGames <= 40) {
+        } else if (numberGames > 20 && numberGames <= 30) {
             return 3;
-        } else if (numberGames > 50 && numberGames <= 60) {
+        } else if (numberGames > 30 && numberGames <= 40) {
             return 4;
-        } else if (numberGames > 60 && numberGames <= 70) {
+        } else if (numberGames > 40 && numberGames <= 50) {
             return 5;
-        } else if (numberGames > 70 && numberGames <= 80) {
+        } else if (numberGames > 50 && numberGames <= 60) {
             return 6;
-        } else if (numberGames > 80 && numberGames <= 90) {
+        } else if (numberGames > 60 && numberGames <= 70) {
             return 7;
-        } else if (numberGames > 90 && numberGames <= 100) {
+        } else if (numberGames > 70 && numberGames <= 80) {
             return 8;
-        } else if (numberGames > 100) {
+        } else if (numberGames > 80 && numberGames <= 90) {
             return 9;
         } else {
             return 10;

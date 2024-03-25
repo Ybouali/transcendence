@@ -10,13 +10,13 @@ function checkCollision(){
     else if ((Ball.positionY + Ball.radius)  > (globalVar.Height / 2) - 5)
         Ball.velocityY *= -1;
     else if (Ball.positionX < right_player.positionX - 25 ){
-        console.log("score is :", left_player.score);
+        // console.log("score is :", left_player.score);
         left_player.score += 1;
             resetBall();
     }
     else if (Ball.positionX > left_player.positionX  + globalVar.PuddleWight / 2 ){
         right_player.score += 1;
-        console.log("score is :", right_player.score);
+        // console.log("score is :", right_player.score);
             resetBall();
     }
 }

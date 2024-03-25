@@ -52,7 +52,7 @@ const useSocket = () => {
     const socket = useContext(SocketContext);
     if (!socket)
         {
-            console.log('--------------------------------------');
+            // console.log('--------------------------------------');
 
         }
         return socket;

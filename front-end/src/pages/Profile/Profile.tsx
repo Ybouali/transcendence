@@ -184,7 +184,7 @@ function Profile() {
         data = await getHisGamesByUserId(null, tokens);
       }
 
-      console.log(data)
+      // console.log(data)
 
       if (Array.isArray(data)) {
         setDataHisGame(data);

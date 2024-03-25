@@ -9,7 +9,7 @@ export function checkDectonnectin(io: Server, Socket: Socket) {
         if (room.has(Socket.id)) {
             RoomName = roomName;
             Socket.leave(roomName);
-            console.log(Socket.id, "leaved ", roomName);
+            // console.log(Socket.id, "leaved ", roomName);
             roomSetting.loser = Socket.id;
             const socketId = Array.from(room);
             for (const socket of socketId) {
@@ -17,6 +17,7 @@ export function checkDectonnectin(io: Server, Socket: Socket) {
                 if (s) {
                     console.log(s.id, "left ", roomName);
                     roomSetting.winner = s.id;
+                    io.to(s.id).emit("Finish", "hello");
                     s.leave(roomName);
                 }
             }

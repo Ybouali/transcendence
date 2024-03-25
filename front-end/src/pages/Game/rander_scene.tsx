@@ -99,7 +99,11 @@ export function InitSetup() {
         };
         window.addEventListener('keydown', handleKeyDown);
         Player.on("GameResult", (Data : any, data : boolean) =>{
+<<<<<<< HEAD
             console.log('lalalalalalalalalalal', Data)
+=======
+            // console.log('lalalalalalalalalalal', Data)
+>>>>>>> yassine-back-end
             if(data)
                 setup.renderer.setAnimationLoop(null);
             let myScore = connectedUser?.id === Data.WinnerId ? Data.ScoreWinner : Data.ScoreLoser;
@@ -116,14 +120,23 @@ export function InitSetup() {
                 scoreWinner : Data.ScoreWinner,
             };
 
+<<<<<<< HEAD
             console.log('otherId:', otherId);
             console.log('conneted id:', connectedUser?.id);
+=======
+            // console.log('otherId:', otherId);
+            // console.log('conneted id:', connectedUser?.id);
+>>>>>>> yassine-back-end
             navigate(`/play/results/${otherId}/${otherScore}&${myScore}`);
             if (connectedUser?.id === dataToStore?.winnerId) {
                 storeHistoryGame(dataToStore)
             }
             
+<<<<<<< HEAD
             console.log('---------- storeHistoryGame -----------')
+=======
+            // console.log('---------- storeHistoryGame -----------')
+>>>>>>> yassine-back-end
             data = false;
         })
         setup.renderer.setAnimationLoop(() => {

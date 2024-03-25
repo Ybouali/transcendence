@@ -29,13 +29,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     handleDisconnect(client: any) {
         const accessToken = client.handshake.query.access_token as string;
-        console.log('accessToken : handleDisconnect', accessToken);
+        // console.log('accessToken : handleDisconnect', accessToken);
         try {
         if (accessToken) {
             const decodedToken = jwt.verify(accessToken, process.env.SECRET_JWT_TOKEN);
             const userId: string = (decodedToken as any).sub;
             this.chatService.removeUserSocket(userId, client.id);
-            console.log('[x] client disconnected with this id:', userId)
+            // console.log('[x] client disconnected with this id:', userId)
         }
     } catch (error) {
         console.error('Error decoding access token:', error.message);
@@ -44,14 +44,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     handleConnection(client: any) {
         const accessToken = client.handshake.query.access_token as string;
-        console.log('accessToken : handleConnection', accessToken);
+        // console.log('accessToken : handleConnection', accessToken);
         try {
             // Decode the access token to get userId
             if (accessToken) {
                 const decodedToken = jwt.verify(accessToken, process.env.SECRET_JWT_TOKEN);
                 const userId: string = (decodedToken as any).sub;
                 this.chatService.addUserSocket(userId, client.id);
-                console.log('[+] This client is connected =>', userId);
+                // console.log('[+] This client is connected =>', userId);
             }
         } catch (error) {
             console.error('Error decoding access token:', error.message);
@@ -78,7 +78,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             // [test]
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const userId = client.handshake.headers.authorization;
-            console.log('send message', createMessageDto);
+            // console.log('send message', createMessageDto);
             // if (userId !== createMessageDto.senderId || createMessageDto.message.length > 150) return;
             if (createMessageDto.isRoom === false) {
                     const isBlocked = await this.messageService.isBlocked(createMessageDto.receiverId, createMessageDto.senderId);
@@ -296,9 +296,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     async addRoom( {newRoom, ownerID, images}
     ) {
         const recv = SharedService.UsersSockets.get(ownerID);
-        console.log('sockets: ', recv);
+        // console.log('sockets: ', recv);
         recv?.forEach((socket) => {
-            console.log('newRoom', newRoom.id)
+            // console.log('newRoom', newRoom.id)
             this.server.to(socket).emit('newRoom', {
                     id: newRoom.id,
                     roomName: newRoom.roomName,
@@ -315,7 +315,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @OnEvent('deleteRoom')
     async deleteRoom( roomId : string, membersIds: string[]
     ) {
-        console.log(membersIds);
+        // console.log(membersIds);
         membersIds.forEach((userId) => {
             const userSockets = SharedService.UsersSockets.get(userId);
     
@@ -473,7 +473,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     notifications: 0
                 });
             });
-            console.log(' <= finale => ');
+            // console.log(' <= finale => ');
         } catch (error) {
             throw new BadRequestException('Already friend');
         }
@@ -502,9 +502,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             destUserSockets?.forEach((socket) => {
                 this.server.to(socket).emit('removeFriend', { id: friendId });
             });
-            console.log(' <= finale => ');
+            // console.log(' <= finale => ');
         } catch (error) {
-            console.log(error)
+            // console.log(error)
             throw new BadRequestException('Already friend');
         }
     }
@@ -520,7 +520,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             });
             // return infoUser;
         } catch (error) {
-            console.log(error)
+            // console.log(error)
             throw new BadRequestException('Already friend');
         }
     }
@@ -530,7 +530,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     async roomUpdate({roomId, userId, eventName, adminId}): Promise<any> {
         try {
             if (eventName === 'leaveRoom') {
-                console.log('leave leavve')
+                // console.log('leave leavve')
                 const recv = userId ? SharedService.UsersSockets.get(userId) : undefined;
                 recv?.forEach((socket) => {
                     this.server.to(socket).emit('leaveRoom', {eventName: eventName,
@@ -582,7 +582,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     async muteMember({roomId, userMuted}): Promise<any> {
         try {
             const destUserSockets = SharedService.UsersSockets.get(userMuted);
-            console.log(destUserSockets);
+            // console.log(destUserSockets);
             destUserSockets?.forEach((socket) => {
                 this.server.to(socket).emit('youAreMuted', { roomId: roomId });
             });
@@ -595,7 +595,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     async unMuteMember({roomId, userId}): Promise<any> {
         try {
             const destUserSockets = SharedService.UsersSockets.get(userId);
-            console.log(destUserSockets);
+            // console.log(destUserSockets);
             destUserSockets?.forEach((socket) => {
                 this.server.to(socket).emit('youAreUnMuted', { roomId: roomId });
             });
@@ -608,7 +608,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     async sendRequestGame(data: any): Promise<any> {
         try {
             const destUserSockets = SharedService.UsersSockets.get(data?.userId);
-            console.log('sendRequestGame:',destUserSockets);
+            // console.log('sendRequestGame:',destUserSockets);
             destUserSockets?.forEach((socket) => {
                 this.server.to(socket).emit('requestGame', {username: data?.username, userId: data?.id});
             });

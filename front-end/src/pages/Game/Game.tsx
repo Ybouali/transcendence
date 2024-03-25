@@ -23,7 +23,7 @@ export const Player: Socket = io(prepareUrl(""), { autoConnect: true });
 
 function SendData(userid: string | undefined) {
   
-  console.log("User ID ", userid)
+  // console.log("User ID ", userid)
   Player.emit("onJoinGame", {userId: userid});
 
 }
@@ -38,6 +38,10 @@ function App() {
   const [BposX, setPosX] = useState(0)
   const [BposY, setPosY] = useState(0)
   const [isWaiting, setIsWaiting] = useState(false);
+<<<<<<< HEAD
+=======
+  const [finish, setFinish] = useState(false);
+>>>>>>> yassine-back-end
 
   useEffect(() => {
     function isConnect() {
@@ -62,17 +66,25 @@ function App() {
     fromBack.posX = BposX;
     fromBack.posY = BposY;
   })
-
+  
   useEffect(() => {
-    Player.on("Lplayer_score", () => {
-      leftPlayerScore++;
-      console.log("lscore", leftPlayerScore);
+    // Player.on("Lplayer_score", () => {
+    //   leftPlayerScore++;
+    //   // console.log("lscore", leftPlayerScore);
+    // })
+    // Player.on("Rplayer_score", () => {
+    //   rightPlayerScore++;
+    //   // console.log("rscore :", rightPlayerScore);
+    // })
+    Player.on("Finish", (data : string)=>{
+      // setFinish(data);
+      navigate('/profile')
     })
-    Player.on("Rplayer_score", () => {
-      rightPlayerScore++;
-      console.log("rscore :", rightPlayerScore);
-    })
+    return () => {
+      Player.off("Finish")
+    }
 }, [])
+    // console.log(finish)
 
 
   ///////////////////////////////////////////////////////////////////////////////////////////
@@ -171,7 +183,11 @@ function App() {
     }
 
 
+<<<<<<< HEAD
     console.log('Player:', Player);
+=======
+    // console.log('Player:', Player);
+>>>>>>> yassine-back-end
     Player.on("noo", () => {
       navigate('/profile');
     })
