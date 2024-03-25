@@ -78,13 +78,8 @@ export class HistoryGameService {
             const oldGame = await this.prisma.historyGame.findFirst({
                 where: { startTimeGame: datahis.startTimeGame }
             });
-<<<<<<< HEAD
             console.log('datahis:', datahis);
             console.log('oldGame =>:', oldGame);
-=======
-            // console.log('datahis:', datahis);
-            // console.log('oldGame =>:', oldGame);
->>>>>>> yassine-back-end
 
             if (!oldGame) {
                 // create the history game 
